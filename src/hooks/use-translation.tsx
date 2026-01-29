@@ -17,13 +17,17 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en');
+  // Set Spanish as default
+  const [locale, setLocaleState] = useState<Locale>('es');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     const savedLocale = localStorage.getItem('locale') as Locale;
     if (savedLocale && ['en', 'es'].includes(savedLocale)) {
       setLocaleState(savedLocale);
+    } else {
+        // If no locale is saved, set the default
+        localStorage.setItem('locale', 'es');
     }
     setIsMounted(true);
   }, []);
@@ -41,12 +45,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       let translation = getNestedValue(translations[locale], key);
   
       if (translation === undefined) {
-        // Fallback to English if translation is missing in current locale
+        // Fallback to Spanish if translation is missing in current locale
+        translation = getNestedValue(translations.es, key);
+      }
+
+      if (translation === undefined) {
+        // Fallback to English if translation is missing in Spanish too
         translation = getNestedValue(translations.en, key);
       }
       
       if (typeof translation !== 'string') {
         // if translation is still not found, return the key itself
+        console.warn(`Translation not found for key: ${key} in locale: ${locale}`);
         return key;
       }
   
@@ -62,7 +72,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
   
   if (!isMounted) {
-    return null; // Don't render children until locale is determined
+    // Render a simple loading state or null while waiting for the locale to be determined
+    return <div className="flex h-screen w-full items-center justify-center"></div>;
   }
 
   return (

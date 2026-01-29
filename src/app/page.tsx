@@ -1,55 +1,64 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
+import { useAuth, useUser, initiateAnonymousSignIn } from '@/firebase';
+import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
-  const { setLocale } = useTranslation();
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+  const { t } = useTranslation();
 
-  const handleLanguageSelect = (lang: 'en' | 'es') => {
-    setLocale(lang);
-    router.push('/inbox');
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/inbox');
+    }
+  }, [user, isUserLoading, router]);
+
+  const handleAnonymousSignIn = () => {
+    initiateAnonymousSignIn(auth);
   };
+  
+  if (isUserLoading || user) {
+    return (
+       <div className="flex h-screen flex-col items-center justify-center bg-secondary/30 text-center">
+        <Loader2 className="size-12 animate-spin text-primary" />
+        <p className="mt-4 font-handwriting text-xl text-foreground/80">
+          Cargando...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center bg-secondary/30 p-8 text-center">
       <div className="flex flex-col items-center gap-4">
         <Heart className="size-20 text-primary" fill="currentColor" />
-        <h1 className="font-headline text-6xl font-bold text-primary">
+        <h1 className="font-display text-6xl font-bold text-primary">
           HoneyNotes
         </h1>
         <p className="max-w-md font-body text-lg text-foreground/80">
-          A private, cozy space for you and your favorite person to share sweet
-          notes and create lasting memories.
-        </p>
-        <p className="mt-4 max-w-md font-body text-lg text-foreground/80">
-          Un espacio privado y acogedor para que tú y tu persona favorita
-          compartan notas dulces y creen recuerdos duraderos.
+          {t('landing.description')}
         </p>
       </div>
       <div className="mt-12">
-        <h2 className="mb-4 font-headline text-2xl">
-          Choose your language / Elige tu idioma
-        </h2>
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <Button
-            size="lg"
-            className="h-[60px] rounded-3xl bg-primary px-8 text-lg font-bold shadow-lg transition-transform hover:scale-105"
-            onClick={() => handleLanguageSelect('en')}
-          >
-            English
-          </Button>
-          <Button
-            size="lg"
-            className="h-[60px] rounded-3xl bg-primary px-8 text-lg font-bold shadow-lg transition-transform hover:scale-105"
-            onClick={() => handleLanguageSelect('es')}
-          >
-            Español
-          </Button>
-        </div>
+        <Button
+          size="lg"
+          className="h-[60px] rounded-3xl bg-primary px-8 text-lg font-bold shadow-lg transition-transform hover:scale-105"
+          onClick={handleAnonymousSignIn}
+          disabled={isUserLoading}
+        >
+          {isUserLoading ? (
+            <Loader2 className="mr-2 size-5 animate-spin" />
+          ) : (
+            t('landing.cta')
+          )}
+        </Button>
       </div>
     </main>
   );

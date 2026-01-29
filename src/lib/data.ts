@@ -1,12 +1,16 @@
 import type { Letter } from './types';
+import { Timestamp } from 'firebase/firestore';
 
 // For this MVP, we'll assume a hardcoded couple: "You" and "Your Love"
 export const currentUser = 'You';
 export const otherUser = 'Your Love';
 
+// This data is now for placeholder/fallback purposes and not actively used by the main letter views.
 export const mockLetters = (t: (key: string) => string): Letter[] => [
   {
     id: '1',
+    senderId: 'mock_user_2',
+    recipientId: 'mock_user_1',
     senderName: otherUser,
     recipientName: currentUser,
     content: t('mockLetter1.content'),
@@ -15,12 +19,14 @@ export const mockLetters = (t: (key: string) => string): Letter[] => [
       stamp: 'heart',
       font: 'Alegreya',
     },
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: Timestamp.fromDate(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)),
     status: 'sent',
     isRead: false,
   },
   {
     id: '2',
+    senderId: 'mock_user_2',
+    recipientId: 'mock_user_1',
     senderName: otherUser,
     recipientName: currentUser,
     content: t('mockLetter2.content'),
@@ -29,12 +35,14 @@ export const mockLetters = (t: (key: string) => string): Letter[] => [
       stamp: 'bee',
       font: 'Belleza',
     },
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: Timestamp.fromDate(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)),
     status: 'sent',
     isRead: false,
   },
   {
     id: '3',
+    senderId: 'mock_user_1',
+    recipientId: 'mock_user_2',
     senderName: currentUser,
     recipientName: otherUser,
     content: t('mockLetter3.content'),
@@ -43,12 +51,14 @@ export const mockLetters = (t: (key: string) => string): Letter[] => [
       stamp: 'wax-seal',
       font: 'Alegreya',
     },
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: Timestamp.fromDate(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)),
     status: 'opened',
     isRead: true,
   },
     {
     id: '4',
+    senderId: 'mock_user_2',
+    recipientId: 'mock_user_1',
     senderName: otherUser,
     recipientName: currentUser,
     content: t('mockLetter4.content'),
@@ -57,7 +67,7 @@ export const mockLetters = (t: (key: string) => string): Letter[] => [
       stamp: 'heart',
       font: 'Belleza',
     },
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: Timestamp.fromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)),
     status: 'opened',
     isRead: true,
   },

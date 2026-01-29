@@ -39,6 +39,10 @@
           "type": "string",
           "description": "Reference to the User who sent the letter. (Relationship: User 1:N Letter)"
         },
+        "recipientId": {
+          "type": "string",
+          "description": "Reference to the User who will receive the letter."
+        },
         "content": {
           "type": "string",
           "description": "Content of the letter."
@@ -72,6 +76,7 @@
       "required": [
         "id",
         "senderId",
+        "recipientId",
         "content",
         "timestamp",
         "status"

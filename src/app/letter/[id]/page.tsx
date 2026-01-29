@@ -1,34 +1,48 @@
 'use client';
 
-import { mockLetters } from '@/lib/data';
 import { LetterOpener } from './_components/LetterOpener';
 import { notFound } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect } from 'react';
 import type { Letter } from '@/lib/types';
-import { useTranslation } from '@/hooks/use-translation';
+import { useFirebase, useUser, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
-  const { t } = useTranslation();
-  const resolvedParams = use(params);
-  const [letter, setLetter] = useState<Letter | undefined>(undefined);
+  const { id } = use(params);
+  const { firestore } = useFirebase();
+  const { user } = useUser();
+
+  const letterRef = useMemoFirebase(() => {
+    if (!user || !id) return null;
+    return doc(firestore, 'users', user.uid, 'letters', id);
+  }, [firestore, user, id]);
+
+  const { data: letter, isLoading } = useDoc<Letter>(letterRef);
 
   useEffect(() => {
-    const foundLetter = mockLetters(t).find((l) => l.id === resolvedParams.id);
-    if (foundLetter) {
-      // In a real app, this would be an API call to mark as read
-      foundLetter.isRead = true;
-      setLetter(foundLetter);
+    if (letter && !letter.isRead && letterRef) {
+      updateDocumentNonBlocking(letterRef, { isRead: true });
     }
-  }, [resolvedParams.id, t]);
+  }, [letter, letterRef]);
 
-  if (!letter) {
-    // Wait for the letter to be found or just show not found if it never is
-    const isLetterFound = mockLetters(t).some(l => l.id === resolvedParams.id);
-    if (!isLetterFound) {
-      notFound();
-    }
-    return null; // or a loading component
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="size-12 animate-spin text-primary" />
+      </div>
+    );
   }
 
-  return <LetterOpener letter={letter} />;
+  if (!letter) {
+    return notFound();
+  }
+
+  // The letter object from firestore needs its timestamp converted
+  const letterWithDate = {
+    ...letter,
+    createdAt: letter.createdAt.toDate().toISOString(),
+  };
+
+  return <LetterOpener letter={letterWithDate} />;
 }

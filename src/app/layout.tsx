@@ -17,6 +17,7 @@ import {
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { LanguageProvider } from '@/hooks/use-translation';
+import { FirebaseClientProvider } from '@/firebase';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const indieFlower = Indie_Flower({ weight: '400', subsets: ['latin'], variable: '--font-indie' });
@@ -94,12 +95,14 @@ export default function RootLayout({
         <meta name="theme-color" content="#DC143C" />
       </head>
       <body className={`${inter.variable} ${indieFlower.variable} ${belleza.variable} ${dancingScript.variable} ${pacifico.variable} ${caveat.variable} ${sacramento.variable} ${greatVibes.variable} ${shadowsIntoLight.variable} ${amaticSC.variable} ${permanentMarker.variable} ${satisfy.variable} ${kalam.variable} font-sans antialiased`}>
-        <LanguageProvider>
-          <div className="relative mx-auto flex min-h-screen w-full flex-col bg-background">
-            {children}
-          </div>
-          <Toaster />
-        </LanguageProvider>
+        <FirebaseClientProvider>
+          <LanguageProvider>
+            <div className="relative mx-auto flex min-h-screen w-full flex-col bg-background">
+              {children}
+            </div>
+            <Toaster />
+          </LanguageProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );

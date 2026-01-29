@@ -13,10 +13,11 @@ import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { AIFeedbackDialog } from './AIFeedbackDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { currentUser, otherUser } from '@/lib/data';
 import { useTranslation } from '@/hooks/use-translation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useFirebase, useUser, addDocumentNonBlocking } from '@/firebase';
+import { collection, serverTimestamp } from 'firebase/firestore';
 
 const paperColors: { name: PaperColor; class: string; labelKey: string }[] = [
   { name: 'cream', class: 'bg-[#FFFDF5]', labelKey: 'letterEditor.colors.cream' },
@@ -69,16 +70,23 @@ export function LetterEditor() {
   const { toast } = useToast();
   const router = useRouter();
   const { t } = useTranslation();
+  const { firestore } = useFirebase();
+  const { user } = useUser();
+
   const [content, setContent] = useState('');
   const [paperColor, setPaperColor] = useState<PaperColor>('cream');
   const [stamp, setStamp] = useState<Stamp>('heart');
-  const [font, setFont] = useState<AppFont>('Alegreya');
+  const [font, setFont] = useState<AppFont>('Indie_Flower');
   const [borderStyle, setBorderStyle] = useState<BorderStyle>('simple');
   const [hasAskedBee, setHasAskedBee] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState('paper');
 
   const handleSend = () => {
+    if (!user) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Debes iniciar sesión para enviar una carta.' });
+        return;
+    }
     if (!content.trim()) {
       toast({
         variant: 'destructive',
@@ -89,28 +97,41 @@ export function LetterEditor() {
     }
 
     setIsSending(true);
-    const newLetter: Partial<Letter> = {
-        id: new Date().getTime().toString(),
+    
+    // For MVP, user sends letter to themselves to populate inbox.
+    const newLetter = {
+        senderId: user.uid,
+        recipientId: user.uid, // Self-addressed for MVP
         content,
         config: { paperColor, stamp, font, borderStyle },
-        senderName: currentUser,
-        recipientName: otherUser,
-        createdAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
         status: 'sent',
-        isRead: false
+        isRead: false,
+        // Mock names for UI consistency
+        senderName: t('users.yourLove'),
+        recipientName: t('users.you'),
     }
 
-    console.log('Sending letter:', newLetter);
-
-    setTimeout(() => {
-        setIsSending(false);
-        toast({
-            title: t('letterEditor.toast.sent'),
-            description: t('letterEditor.toast.sentDesc'),
+    const lettersColRef = collection(firestore, 'users', user.uid, 'letters');
+    
+    addDocumentNonBlocking(lettersColRef, newLetter)
+        .then(() => {
+            toast({
+                title: t('letterEditor.toast.sent'),
+                description: t('letterEditor.toast.sentDesc'),
+            });
+            router.push('/inbox');
+        })
+        .catch((e) => {
+             console.error("Error sending letter:", e)
+             toast({ variant: 'destructive', title: 'Error', description: 'No se pudo enviar la carta.' });
+        })
+        .finally(() => {
+            setIsSending(false);
         });
-        router.push('/inbox');
-    }, 1000);
   };
+
+  const currentUserDisplayName = t('users.you');
 
   return (
     <div className="flex h-full flex-col gap-3 p-3 pb-28 lg:flex-row lg:gap-8 lg:p-8 lg:pb-8">
@@ -160,7 +181,7 @@ export function LetterEditor() {
                 {/* Footer Signoff */}
                 <div className="mt-8 flex items-end justify-between border-t-2 border-dashed border-primary/20 pt-4 font-display">
                     <div className="text-sm text-gray-500">
-                        From: <span className="text-primary font-bold decoration-wavy underline">{currentUser}</span>
+                        From: <span className="text-primary font-bold decoration-wavy underline">{currentUserDisplayName}</span>
                     </div>
                     {/* Stamp Display */}
                     <div className="absolute bottom-6 right-6 rotate-[-10deg] opacity-90 drop-shadow-md lg:bottom-10 lg:right-10">
