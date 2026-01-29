@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react';
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { firestore } = useFirebase();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
 
   const letterRef = useMemoFirebase(() => {
     if (!id) return null;
@@ -19,7 +19,12 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     return doc(firestore, 'letters', id);
   }, [firestore, id]);
 
-  const { data: letter, isLoading } = useDoc<Letter>(letterRef);
+  const { data: letter, isLoading, error } = useDoc<Letter>(letterRef);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('Letter page debug:', { id, user: user?.uid, letter, isLoading, error });
+  }, [id, user, letter, isLoading, error]);
 
   useEffect(() => {
     if (letter && !letter.isRead && letterRef) {
@@ -27,7 +32,20 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     }
   }, [letter, letterRef]);
 
-  if (isLoading) {
+  // Show error if any
+  if (error) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center p-4">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center max-w-md">
+          <p className="font-semibold text-red-600 mb-2">Error al cargar la carta</p>
+          <p className="text-sm text-red-500">{error.message}</p>
+          <p className="text-xs text-gray-500 mt-2">ID: {id}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading || isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="size-12 animate-spin text-primary" />
@@ -36,7 +54,15 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   }
 
   if (!letter) {
-    return notFound();
+    return (
+      <div className="flex h-screen flex-col items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-xl font-semibold text-gray-600 mb-2">Carta no encontrada</p>
+          <p className="text-sm text-gray-400">ID: {id}</p>
+          <p className="text-xs text-gray-400 mt-4">Puede que no tengas permiso para verla</p>
+        </div>
+      </div>
+    );
   }
 
   // Convert Firestore Timestamp to ISO string for UI component
