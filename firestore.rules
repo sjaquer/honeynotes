@@ -27,12 +27,20 @@ service cloud.firestore {
     /**
      * Letters collection - simplified at root level
      * /letters/{letterId}
-     * 
-     * DEVELOPMENT MODE: Permitir todo para depuración
      */
     match /letters/{letterId} {
-      // Permitir todo para usuarios autenticados durante desarrollo
-      allow read, write: if isSignedIn();
+      // Anyone signed in can read a letter if they are sender OR recipient
+      allow read: if isSignedIn() 
+        && (resource.data.senderId == request.auth.uid 
+            || resource.data.recipientId == request.auth.uid);
+      
+      // Only signed-in users can create, and senderId must match their uid
+      allow create: if isSignedIn() 
+        && request.resource.data.senderId == request.auth.uid;
+      
+      // Only sender can update/delete their own letters
+      allow update, delete: if isSignedIn() 
+        && resource.data.senderId == request.auth.uid;
     }
 
     /**
