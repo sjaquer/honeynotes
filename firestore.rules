@@ -8,10 +8,14 @@
  * - /tasks/{taskId}: Global task definitions
  *
  * Key Security:
- * - Letters: sender can write, sender OR recipient can read
+ * - Letters: sender can create/delete, sender OR recipient can read, recipient can update (mark read)
  * - Users: owner can read/write, any signed-in user can read for partner linking
- * - Partner codes: authenticated users can read/write
+ * - Partner codes: owner can delete, authenticated users can read/create
  * - Tasks: public read, admin write only
+ * 
+ * Partner Unlinking Flow:
+ * - When user A deletes/regenerates their code, they can update user B's profile to clear partnerId
+ * - This is allowed because user A needs to notify user B of the unlink
  */
 rules_version = '2';
 service cloud.firestore {
@@ -33,6 +37,20 @@ service cloud.firestore {
       );
     }
 
+    // Check if this is a valid partner unlink operation
+    // User can only clear partnerId/partnerName and set partnerUnlinkedAt on their partner
+    function isValidPartnerUnlink() {
+      let incomingData = request.resource.data;
+      let existingData = resource.data;
+      
+      // The current authenticated user must be the existing partnerId of the target user
+      return isSignedIn() 
+        && existingData.partnerId == request.auth.uid
+        && incomingData.partnerId == null
+        && incomingData.partnerName == null
+        && incomingData.keys().hasOnly(['partnerId', 'partnerName', 'partnerUnlinkedAt', 'updatedAt']);
+    }
+
     /**
      * Letters collection
      * /letters/{letterId}
@@ -41,7 +59,7 @@ service cloud.firestore {
      *         createdAt, status, isRead, senderName, recipientName
      */
     match /letters/{letterId} {
-      // Anyone authenticated can create letters
+      // Anyone authenticated can create letters (must be the sender)
       allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
       
       // Only sender or recipient can read
@@ -50,7 +68,7 @@ service cloud.firestore {
       // Only recipient can update (mark as read)
       allow update: if isSignedIn() && resource.data.recipientId == request.auth.uid;
       
-      // Only sender can delete
+      // Only sender can delete their letters
       allow delete: if isSignedIn() && resource.data.senderId == request.auth.uid;
     }
 
@@ -58,13 +76,18 @@ service cloud.firestore {
      * User profiles
      * /users/{userId}
      * 
-     * Fields: id, displayName, email, photoURL?, partnerCode?, partnerId?, partnerName?, createdAt, updatedAt
+     * Fields: id, displayName, email, photoURL?, partnerCode?, partnerId?, 
+     *         partnerName?, partnerUnlinkedAt?, createdAt, updatedAt
      */
     match /users/{userId} {
       // Any signed-in user can read (needed for partner linking)
       allow read: if isSignedIn();
-      // Only owner can write
+      
+      // Owner can always write to their own profile
       allow write: if isOwner(userId);
+      
+      // Partner can unlink by clearing partnerId/partnerName (for unlink notification)
+      allow update: if isValidPartnerUnlink();
     }
 
     /**
@@ -74,7 +97,17 @@ service cloud.firestore {
      * Fields: userId, createdAt
      */
     match /partnerCodes/{code} {
-      allow read, write: if isSignedIn();
+      // Anyone signed in can read codes (for linking)
+      allow read: if isSignedIn();
+      
+      // Anyone signed in can create a code
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      
+      // Only the owner of the code can delete it
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // No updates allowed - delete and recreate instead
+      allow update: if false;
     }
 
     /**

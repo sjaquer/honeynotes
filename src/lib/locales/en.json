@@ -45,7 +45,13 @@
     "sent": "Sent",
     "empty": "Your inbox is empty.",
     "emptySent": "You haven't sent any notes yet.",
-    "waiting": "Waiting for a sweet note from your love..."
+    "waiting": "Waiting for a sweet note from your love...",
+    "letterDeleted": "Letter deleted",
+    "letterDeletedDesc": "The letter has been permanently deleted.",
+    "deleteError": "Could not delete the letter",
+    "deleteLetterTitle": "Delete this letter?",
+    "deleteLetterWarning": "This action cannot be undone. The letter \"{title}\" will be permanently deleted.",
+    "thisLetter": "this letter"
   },
   "letterOpener": {
     "from": "From: {sender}",
@@ -130,7 +136,10 @@
     "profile": {
       "title": "Profile",
       "anonymous": "Anonymous User",
-      "signOut": "Sign Out"
+      "signOut": "Sign Out",
+      "enterName": "Enter your name",
+      "nameSaved": "Name updated",
+      "errorSaving": "Error saving name"
     },
     "partner": {
       "title": "Partner Linking",
@@ -144,13 +153,45 @@
       "unlink": "Unlink",
       "codePlaceholder": "XXX-XXX",
       "copyCode": "Copy code",
-      "codeCopied": "Code copied!"
+      "codeCopied": "Code copied!",
+      "codeGenerated": "Code generated!",
+      "shareWithPartner": "Share it with your partner",
+      "codeRegenerated": "Code regenerated!",
+      "newCodeReady": "Your new code is ready. The old one is no longer valid.",
+      "codeDeleted": "Code deleted",
+      "canGenerateNew": "You can generate a new code whenever you want.",
+      "canSendLetters": "You can now send letters to your partner",
+      "unlinked": "Unlinked",
+      "noLongerConnected": "You are no longer connected",
+      "regenerateCode": "Regenerate code",
+      "deleteCode": "Delete code",
+      "deleteCodeTitle": "Delete your code?",
+      "deleteCodeWarning": "Your code will be deleted. You'll need to generate a new one to link.",
+      "deleteCodeWarningLinked": "WARNING! Deleting your code will UNLINK your partner too. Both of you will need to generate new codes and link again.",
+      "regenerateCodeTitle": "Regenerate your code?",
+      "regenerateCodeWarning": "A new code will be created. The old code will stop working.",
+      "regenerateCodeWarningLinked": "WARNING! Regenerating your code will UNLINK your partner. Both of you will need to link again.",
+      "regenerate": "Regenerate",
+      "unlinkTitle": "Unlink from your partner?",
+      "unlinkWarning": "You will no longer be connected to {partnerName}. You can link again using codes.",
+      "partnerUnlinkedTitle": "Your partner has unlinked",
+      "partnerUnlinkedMessage": "Your partner has deleted or regenerated their linking code. You are no longer connected. You can generate a new code and share it to link again."
     },
     "notifications": {
       "title": "Notifications",
       "description": "Get alerts when new notes arrive.",
-      "enable": "Enable Notifications"
+      "enable": "Enable Notifications",
+      "enabled": "Notifications enabled",
+      "willNotify": "We'll notify you when letters arrive",
+      "denied": "Permission denied",
+      "enableInBrowser": "Enable notifications in your browser",
+      "disabled": "Notifications disabled"
     }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "understood": "Understood"
   },
   "users": {
     "you": "You",

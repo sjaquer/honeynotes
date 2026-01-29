@@ -45,7 +45,13 @@
     "sent": "Enviadas",
     "empty": "Tu bandeja de entrada está vacía.",
     "emptySent": "Aún no has enviado ninguna nota.",
-    "waiting": "Esperando una dulce nota de tu amor..."
+    "waiting": "Esperando una dulce nota de tu amor...",
+    "letterDeleted": "Carta eliminada",
+    "letterDeletedDesc": "La carta ha sido eliminada permanentemente.",
+    "deleteError": "No se pudo eliminar la carta",
+    "deleteLetterTitle": "¿Eliminar esta carta?",
+    "deleteLetterWarning": "Esta acción no se puede deshacer. La carta \"{title}\" será eliminada permanentemente.",
+    "thisLetter": "esta carta"
   },
   "letterOpener": {
     "from": "De: {sender}",
@@ -130,7 +136,10 @@
     "profile": {
       "title": "Perfil",
       "anonymous": "Usuario Anónimo",
-      "signOut": "Cerrar Sesión"
+      "signOut": "Cerrar Sesión",
+      "enterName": "Ingresa tu nombre",
+      "nameSaved": "Nombre actualizado",
+      "errorSaving": "Error al guardar el nombre"
     },
     "partner": {
       "title": "Vinculación de Pareja",
@@ -144,13 +153,45 @@
       "unlink": "Desvincular",
       "codePlaceholder": "XXX-XXX",
       "copyCode": "Copiar código",
-      "codeCopied": "¡Código copiado!"
+      "codeCopied": "¡Código copiado!",
+      "codeGenerated": "¡Código generado!",
+      "shareWithPartner": "Compártelo con tu pareja",
+      "codeRegenerated": "¡Código regenerado!",
+      "newCodeReady": "Tu nuevo código está listo. El anterior ya no es válido.",
+      "codeDeleted": "Código eliminado",
+      "canGenerateNew": "Puedes generar un nuevo código cuando quieras.",
+      "canSendLetters": "Ya puedes enviar cartas a tu pareja",
+      "unlinked": "Desvinculado",
+      "noLongerConnected": "Ya no están conectados",
+      "regenerateCode": "Regenerar código",
+      "deleteCode": "Eliminar código",
+      "deleteCodeTitle": "¿Eliminar tu código?",
+      "deleteCodeWarning": "Tu código será eliminado. Tendrás que generar uno nuevo para vincular.",
+      "deleteCodeWarningLinked": "¡ATENCIÓN! Eliminar tu código DESVINCULARÁ a tu pareja también. Ambos tendrán que generar códigos nuevos y vincularse de nuevo.",
+      "regenerateCodeTitle": "¿Regenerar tu código?",
+      "regenerateCodeWarning": "Se creará un nuevo código. El código anterior dejará de funcionar.",
+      "regenerateCodeWarningLinked": "¡ATENCIÓN! Regenerar tu código DESVINCULARÁ a tu pareja. Ambos tendrán que vincularse de nuevo.",
+      "regenerate": "Regenerar",
+      "unlinkTitle": "¿Desvincular de tu pareja?",
+      "unlinkWarning": "Ya no estarás conectado con {partnerName}. Podrán vincularse de nuevo usando códigos.",
+      "partnerUnlinkedTitle": "Tu pareja se ha desvinculado",
+      "partnerUnlinkedMessage": "Tu pareja ha eliminado o regenerado su código de vinculación. Ya no están conectados. Puedes generar un nuevo código y compartirlo para vincularte de nuevo."
     },
     "notifications": {
       "title": "Notificaciones",
       "description": "Recibe alertas cuando lleguen nuevas notas.",
-      "enable": "Activar Notificaciones"
+      "enable": "Activar Notificaciones",
+      "enabled": "Notificaciones activadas",
+      "willNotify": "Te avisaremos cuando lleguen cartas",
+      "denied": "Permisos denegados",
+      "enableInBrowser": "Activa las notificaciones en tu navegador",
+      "disabled": "Notificaciones desactivadas"
     }
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "understood": "Entendido"
   },
   "users": {
     "you": "Tú",

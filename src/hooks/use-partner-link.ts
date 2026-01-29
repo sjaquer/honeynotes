@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useFirebase, useUser } from '@/firebase';
-import { doc, setDoc, getDoc, query, collection, where, getDocs, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, query, collection, where, getDocs, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { generatePartnerCode, formatPartnerCode, cleanPartnerCode, isValidPartnerCode } from '@/lib/partner-code';
 
 export interface UserProfile {
@@ -13,6 +13,7 @@ export interface UserProfile {
   partnerCode?: string;
   partnerId?: string;
   partnerName?: string;
+  partnerUnlinkedAt?: Date; // Timestamp when partner unlinked/regenerated code
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,22 +24,50 @@ export function usePartnerLink() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Generate a new partner code for current user
-  const generateMyCode = async (): Promise<string | null> => {
+  // Generate a new partner code for current user (and unlink if needed)
+  const generateMyCode = async (forceRegenerate: boolean = false): Promise<string | null> => {
     if (!user) return null;
     setIsLoading(true);
     setError(null);
 
     try {
-      const code = generatePartnerCode();
       const userRef = doc(firestore, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+
+      // Delete old code if exists
+      if (userData?.partnerCode) {
+        const oldCodeRef = doc(firestore, 'partnerCodes', userData.partnerCode);
+        await deleteDoc(oldCodeRef);
+      }
+
+      // If regenerating, unlink partner and notify them
+      if (forceRegenerate && userData?.partnerId) {
+        const partnerRef = doc(firestore, 'users', userData.partnerId);
+        await updateDoc(partnerRef, {
+          partnerId: null,
+          partnerName: null,
+          partnerUnlinkedAt: serverTimestamp(), // Signal that partner unlinked
+          updatedAt: serverTimestamp(),
+        });
+
+        // Also clear our own partner link
+        await updateDoc(userRef, {
+          partnerId: null,
+          partnerName: null,
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      // Generate new code
+      const code = generatePartnerCode();
       
       await setDoc(userRef, {
         partnerCode: code,
         updatedAt: serverTimestamp(),
       }, { merge: true });
 
-      // Also store in partnerCodes collection for lookup
+      // Store in partnerCodes collection for lookup
       const codeRef = doc(firestore, 'partnerCodes', code);
       await setDoc(codeRef, {
         userId: user.uid,
@@ -52,6 +81,66 @@ export function usePartnerLink() {
       return null;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Delete current code (and unlink if linked)
+  const deleteMyCode = async (): Promise<boolean> => {
+    if (!user) return false;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const userRef = doc(firestore, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+
+      // Delete from partnerCodes collection
+      if (userData?.partnerCode) {
+        const codeRef = doc(firestore, 'partnerCodes', userData.partnerCode);
+        await deleteDoc(codeRef);
+      }
+
+      // If linked, notify partner
+      if (userData?.partnerId) {
+        const partnerRef = doc(firestore, 'users', userData.partnerId);
+        await updateDoc(partnerRef, {
+          partnerId: null,
+          partnerName: null,
+          partnerUnlinkedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      // Clear code and partner from our profile
+      await updateDoc(userRef, {
+        partnerCode: null,
+        partnerId: null,
+        partnerName: null,
+        updatedAt: serverTimestamp(),
+      });
+
+      return true;
+    } catch (e) {
+      console.error('Error deleting partner code:', e);
+      setError('No se pudo eliminar el código');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Clear the unlinked notification flag
+  const clearUnlinkedNotification = async (): Promise<void> => {
+    if (!user) return;
+    try {
+      const userRef = doc(firestore, 'users', user.uid);
+      await updateDoc(userRef, {
+        partnerUnlinkedAt: null,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (e) {
+      console.error('Error clearing notification:', e);
     }
   };
 
@@ -154,8 +243,10 @@ export function usePartnerLink() {
 
   return {
     generateMyCode,
+    deleteMyCode,
     linkWithPartner,
     unlinkPartner,
+    clearUnlinkedNotification,
     formatPartnerCode,
     isLoading,
     error,

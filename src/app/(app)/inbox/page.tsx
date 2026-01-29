@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Search, Sparkles, Loader2, Heart, Send, Inbox } from 'lucide-react';
+import { Mail, Search, Sparkles, Loader2, Heart, Send, Inbox, Trash2, MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -12,6 +12,25 @@ import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { useFirebase, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, where } from 'firebase/firestore';
 import type { Letter, PaperColor, Stamp } from '@/lib/types';
+import { useDeleteLetter } from '@/hooks/use-delete-letter';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Paper color classes for preview
 const paperColorClasses: Record<PaperColor, string> = {
@@ -50,9 +69,14 @@ const borderClasses: Record<string, string> = {
 
 export default function InboxPage() {
   const { t, locale } = useTranslation();
+  const { toast } = useToast();
   const { firestore } = useFirebase();
   const { user, isUserLoading } = useUser();
   const [viewMode, setViewMode] = useState<'received' | 'sent'>('received');
+  const { deleteLetter, isDeleting } = useDeleteLetter();
+  
+  // Delete confirmation state
+  const [letterToDelete, setLetterToDelete] = useState<Letter | null>(null);
 
   const lettersQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -72,6 +96,18 @@ export default function InboxPage() {
     if (name === 'Your Love' || name === 'Tu Amor') return t('users.yourLove');
     return name;
   };
+
+  const handleDeleteLetter = async () => {
+    if (!letterToDelete) return;
+    
+    const success = await deleteLetter(letterToDelete.id);
+    if (success) {
+      toast({ title: t('inbox.letterDeleted'), description: t('inbox.letterDeletedDesc') });
+    } else {
+      toast({ variant: 'destructive', title: t('inbox.deleteError') });
+    }
+    setLetterToDelete(null);
+  };
   
   const unreadCount = letters?.filter((l) => !l.isRead).length ?? 0;
 
@@ -82,6 +118,29 @@ export default function InboxPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-[#F0F4F8]">
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!letterToDelete} onOpenChange={(open) => !open && setLetterToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('inbox.deleteLetterTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('inbox.deleteLetterWarning', { title: letterToDelete?.title || t('inbox.thisLetter') })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteLetter} 
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
+            >
+              {isDeleting ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
+              {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#F0F4F8]/95 p-6 backdrop-blur-sm lg:p-8">
         <div className="flex items-center justify-between">
@@ -167,6 +226,35 @@ export default function InboxPage() {
             {letters.map((letter) => (
               <li key={letter.id} className="group relative pt-4">
                  <div className="absolute left-1/2 top-0 z-20 h-6 w-16 -translate-x-1/2 rotate-[-2deg] rounded-sm bg-[#e3d5ca] opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-20 sm:h-7 sm:w-20"></div>
+                 
+                 {/* Delete button for sent letters */}
+                 {viewMode === 'sent' && (
+                   <DropdownMenu>
+                     <DropdownMenuTrigger asChild>
+                       <Button
+                         size="icon"
+                         variant="ghost"
+                         className="absolute right-1 top-5 z-30 size-7 rounded-full bg-white/90 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 sm:size-8"
+                         onClick={(e) => e.stopPropagation()}
+                       >
+                         <MoreVertical className="size-4 text-gray-500" />
+                       </Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent align="end">
+                       <DropdownMenuItem
+                         className="text-red-600 focus:text-red-600"
+                         onClick={(e) => {
+                           e.preventDefault();
+                           e.stopPropagation();
+                           setLetterToDelete(letter);
+                         }}
+                       >
+                         <Trash2 className="mr-2 size-4" />
+                         {t('common.delete')}
+                       </DropdownMenuItem>
+                     </DropdownMenuContent>
+                   </DropdownMenu>
+                 )}
                  
                 <Link
                   href={`/letter/${letter.id}`}
