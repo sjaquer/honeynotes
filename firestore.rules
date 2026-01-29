@@ -109,22 +109,18 @@ service cloud.firestore {
      * @principle Enforces document ownership and validates relational integrity.
      */
     match /users/{userId}/letters/{letterId} {
-      // Read: owner (sender) or the explicit recipient can read the letter.
-      allow get: if isSignedIn() && (isOwner(userId) || (resource != null && resource.data.recipientId == request.auth.uid));
-
-      // Listing the letters under a specific user is only allowed to that user (the sender).
-      // Recipients should query via a collectionGroup or receive a copy in their own tree.
-      allow list: if isOwner(userId);
-
-      // Create: only the owner (sender) may create a letter in their own collection and it must validate the schema.
-      allow create: if isOwner(userId)
-                    && request.resource.data.senderId == userId
-                    && isValidLetter()
-                    && isValidLetterConfig();
-
-      // Update / Delete: limited to the owner and preserve senderId integrity.
-      allow update: if isExistingOwner(userId) && request.resource.data.senderId == resource.data.senderId;
-      allow delete: if isExistingOwner(userId);
+      /**
+       * @description [Development Only] Temporarily opened for testing.
+       * Allows any authenticated user to read and write letters.
+       * TODO: Revert to production rules before launch.
+       * Original rules:
+       * allow get: if isSignedIn() && (isOwner(userId) || (resource != null && resource.data.recipientId == request.auth.uid));
+       * allow list: if isOwner(userId);
+       * allow create: if isOwner(userId) && request.resource.data.senderId == userId && isValidLetter() && isValidLetterConfig();
+       * allow update: if isExistingOwner(userId) && request.resource.data.senderId == resource.data.senderId;
+       * allow delete: if isExistingOwner(userId);
+       */
+      allow read, write: if isSignedIn();
     }
 
     /**
