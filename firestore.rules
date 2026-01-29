@@ -1,0 +1,143 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership security model.
+ * All user-generated data, such as letters, recipients, and task progress, is
+ * stored in subcollections under that user's unique document. This ensures that
+ * by default, only the authenticated owner of the data can access or modify it.
+ *
+ * Data Structure: The data is organized hierarchically to reflect ownership:
+ * - /users/{userId}: The root document for each user's profile and private data.
+ * - /users/{userId}/letters/{letterId}: Letters created by the user.
+ * - /users/{userId}/userTasks/{userTaskId}: Progress on tasks for that user.
+ * - /tasks/{taskId}: A global, top-level collection for task definitions that
+ *   are publicly readable by all authenticated users.
+ *
+ * Key Security Decisions:
+ * - User Isolation: Users are strictly isolated. They can only read and write
+ *   data within their own data tree (i.e., under their `/users/{userId}` path).
+ * - No User Listing: Listing the entire `/users` collection is explicitly
+ *   disallowed to protect user privacy.
+ * - Public Read-Only Tasks: The global `/tasks` collection is readable by any
+ *   signed-in user but is not writable by clients. This assumes tasks are
+ *   managed administratively (e.g., via the console or a trusted server).
+ * - Sender-Controlled Access: Access to a letter and its recipient list is
+ *   controlled entirely by the sender (`userId` in the path). The current
+ *   data structure does not facilitate direct access for recipients.
+ *
+ * Denormalization for Authorization: This ruleset leverages path-based security,
+ * which is a form of structural denormalization. By nesting user-specific data
+ * under `/users/{userId}`, the `userId` is always available in the path, allowing
+ * for fast and simple authorization checks without needing extra database reads
+ * (get() calls).
+ *
+ * Structural Segregation: Private user data (letters) is cleanly separated
+ * from public data (tasks) by placing them in different collections at
+ * different levels of the hierarchy. This simplifies rules and makes queries
+ * more secure and performant.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions to promote readable and reusable logic.
+
+    /**
+     * Verifies that a user is signed into the application.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Verifies that the currently authenticated user's UID matches the
+     * provided userId, typically from the document path.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Verifies ownership for an existing document. Used for update and
+     * delete operations to prevent acting on non-existent data.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Rules for a user's own profile document.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user can create their own profile document.
+     * @deny  (get) A user cannot read another user's profile.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for letters, which are owned by the user who created them.
+     * @path /users/{userId}/letters/{letterId}
+     * @allow (create) An authenticated user can create a letter in their own collection.
+     * @deny  (get) A user cannot read a letter belonging to another user.
+     * @principle Enforces document ownership and validates relational integrity.
+     */
+    match /users/{userId}/letters/{letterId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.senderId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.senderId == resource.data.senderId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for letter recipients, managed by the letter's sender.
+     * @path /users/{userId}/letters/{letterId}/recipients/{recipientId}
+     * @allow (create) The letter's sender can add a recipient to their own letter.
+     * @deny  (list) A different user cannot list the recipients of someone else's letter.
+     * @principle Inherits ownership from the parent document path.
+     */
+    match /users/{userId}/letters/{letterId}/recipients/{recipientId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.letterId == letterId;
+      allow update: if isExistingOwner(userId) && request.resource.data.letterId == resource.data.letterId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for user-specific task completion records.
+     * @path /users/{userId}/userTasks/{userTaskId}
+     * @allow (create) A user can create a task completion record for themselves.
+     * @deny  (update) A user cannot update the task completion record of another user.
+     * @principle Enforces document ownership and validates relational integrity.
+     */
+    match /users/{userId}/userTasks/{userTaskId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for the global collection of task definitions.
+     * @path /tasks/{taskId}
+     * @allow (get, list) Any authenticated user can read the list of available tasks.
+     * @deny  (create, update, delete) No client is allowed to modify the global task list.
+     * @principle Provides public read access for global data while securing writes.
+     */
+    match /tasks/{taskId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      // CRITICAL: Cannot implement owner-only writes. The 'Task' entity is missing an 'ownerId' or 'creatorId' field.
+      // This prevents verifying the author of a task. Writes are disabled for security.
+      allow create: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+    }
+  }
+}

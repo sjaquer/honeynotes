@@ -1,0 +1,273 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user within the HoneyNotes application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User's display name."
+        }
+      },
+      "required": [
+        "id",
+        "email"
+      ]
+    },
+    "Letter": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Letter",
+      "type": "object",
+      "description": "Represents a letter created within the HoneyNotes application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the letter."
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Reference to the User who sent the letter. (Relationship: User 1:N Letter)"
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the letter."
+        },
+        "paperColor": {
+          "type": "string",
+          "description": "Color of the paper used in the letter."
+        },
+        "stamp": {
+          "type": "string",
+          "description": "Stamp used in the letter."
+        },
+        "font": {
+          "type": "string",
+          "description": "Font used in the letter."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the letter was created.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the letter (sent, opened)."
+        },
+        "aiFeedback": {
+          "type": "string",
+          "description": "AI feedback on the letter content."
+        }
+      },
+      "required": [
+        "id",
+        "senderId",
+        "content",
+        "timestamp",
+        "status"
+      ]
+    },
+    "Recipient": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Recipient",
+      "type": "object",
+      "description": "Represents a recipient of a letter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the recipient."
+        },
+        "letterId": {
+          "type": "string",
+          "description": "Reference to the Letter received. (Relationship: Letter 1:N Recipient)"
+        },
+        "recipientId": {
+          "type": "string",
+          "description": "Reference to the User who received the letter. (Relationship: User 1:N Recipient)"
+        },
+        "openedTimestamp": {
+          "type": "string",
+          "description": "Timestamp of when the letter was opened.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "letterId",
+        "recipientId"
+      ]
+    },
+    "Task": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Task",
+      "type": "object",
+      "description": "Represents a weekly task.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the task."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the task."
+        },
+        "polenReward": {
+          "type": "number",
+          "description": "Polen reward for completing the task."
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "polenReward"
+      ]
+    },
+    "UserTask": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserTask",
+      "type": "object",
+      "description": "Represents a user's task completion status.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user task."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User. (Relationship: User 1:N UserTask)"
+        },
+        "taskId": {
+          "type": "string",
+          "description": "Reference to the Task. (Relationship: Task 1:N UserTask)"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Indicates if the user has completed the task."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "taskId",
+        "completed"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. The `userId` parameter is the Firebase Authentication UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, corresponding to the Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/letters/{letterId}",
+        "definition": {
+          "entityName": "Letter",
+          "schema": {
+            "$ref": "#/backend/entities/Letter"
+          },
+          "description": "Stores letters created by the user. The `userId` parameter is the Firebase Authentication UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, corresponding to the Firebase Authentication UID."
+            },
+            {
+              "name": "letterId",
+              "description": "The unique identifier for the letter."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/letters/{letterId}/recipients/{recipientId}",
+        "definition": {
+          "entityName": "Recipient",
+          "schema": {
+            "$ref": "#/backend/entities/Recipient"
+          },
+          "description": "Stores recipient information for a specific letter. The `userId` parameter is the Firebase Authentication UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, corresponding to the Firebase Authentication UID."
+            },
+            {
+              "name": "letterId",
+              "description": "The unique identifier for the letter."
+            },
+            {
+              "name": "recipientId",
+              "description": "The unique identifier for the recipient."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tasks/{taskId}",
+        "definition": {
+          "entityName": "Task",
+          "schema": {
+            "$ref": "#/backend/entities/Task"
+          },
+          "description": "Stores global task definitions.",
+          "params": [
+            {
+              "name": "taskId",
+              "description": "The unique identifier for the task."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/userTasks/{userTaskId}",
+        "definition": {
+          "entityName": "UserTask",
+          "schema": {
+            "$ref": "#/backend/entities/UserTask"
+          },
+          "description": "Stores the completion status of tasks for each user. The `userId` parameter is the Firebase Authentication UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, corresponding to the Firebase Authentication UID."
+            },
+            {
+              "name": "userTaskId",
+              "description": "The unique identifier for the user task."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to provide a secure, scalable, and easily maintainable data model for the HoneyNotes application, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters). The structure leverages path-based ownership and denormalization to avoid `get()` calls in security rules and simplify authorization logic.\n\n1.  **Users:** User data is stored in a dedicated collection `/users/{userId}`.  This is the root for user-owned data.\n2.  **Letters:** Letters are stored within the user's document using a hierarchical path `/users/{userId}/letters/{letterId}`. This clearly establishes ownership and simplifies security rules based on `request.auth.uid`. The letters collection stores the letter content, configurations, timestamps, status, and AI feedback.\n3.  **Recipients:** Recipient information is stored as a subcollection `/users/{userId}/letters/{letterId}/recipients/{recipientId}`. This structure ensures that only the sender of the letter has access to recipient information for that specific letter.\n4.  **Tasks:** Tasks are stored in a root-level collection `/tasks/{taskId}`. These tasks are global and not user-specific.\n5.  **UserTasks:** The `UserTask` documents track the completion status of tasks for each user. They are stored in `/users/{userId}/userTasks/{userTaskId}`. This allows easy querying and management of user-specific task completion.\n\n**Authorization Independence (Denormalization):**\nThe structure avoids `get()` calls in security rules by using path-based ownership.  The `letters` and `userTasks` collections are subcollections of `/users/{userId}`, ensuring that the `userId` is readily available in the path for security rules. No denormalization is needed in this design, as authorization is naturally derived from the path.\n\n**QAPs (Rules are not Filters):**\n*   The segregation of data into user-specific subcollections enables efficient and secure `list` operations. Security rules can easily filter based on the `userId` in the path, ensuring that users can only access their own data. Global `tasks` is also a root-level collection that may need further fields (e.g. 'status') to allow filtering."
+  }
+}
