@@ -1,6 +1,6 @@
 'use client';
 
-import type { Letter } from '@/lib/types';
+import type { LetterUI } from '@/lib/types';
 import { useState } from 'react';
 import { Heart, ArrowLeft, Mail } from 'lucide-react';
 import { BeeIcon } from '@/components/icons/BeeIcon';
@@ -59,7 +59,7 @@ const stampIcons = {
   'moon-emoji': <span className="text-4xl">🌙</span>,
 };
 
-export function LetterOpener({ letter }: { letter: Letter }) {
+export function LetterOpener({ letter }: { letter: LetterUI }) {
   const [isOpened, setIsOpened] = useState(false);
   const { t, locale } = useTranslation();
 
@@ -90,7 +90,7 @@ export function LetterOpener({ letter }: { letter: Letter }) {
               <div className="sticky top-0 z-20 bg-[#F0F4F8]/95 p-4 backdrop-blur-sm">
                   <Link href="/inbox" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm transition-all hover:shadow-md active:scale-95">
                       <ArrowLeft className="size-5 text-gray-600" />
-                      <span className="font-display text-sm font-semibold text-gray-700">Volver</span>
+                      <span className="text-sm font-medium text-gray-700">Volver</span>
                   </Link>
               </div>
 
@@ -107,11 +107,11 @@ export function LetterOpener({ letter }: { letter: Letter }) {
                           <div className="p-8 lg:p-12">
                               <div className="mb-8 flex items-start justify-between border-b border-dashed border-gray-300 pb-6">
                                   <div className="space-y-1">
-                                      <div className="font-display text-sm uppercase tracking-wider text-gray-500">
+                                      <div className="text-xs uppercase tracking-wider text-gray-500">
                                           {format(new Date(letter.createdAt), 'd MMMM yyyy', { locale: locale === 'es' ? es : undefined })}
                                       </div>
-                                      <div className="font-handwriting text-2xl text-gray-800">
-                                          De: <span className="font-bold text-primary">{getTranslatedName(letter.senderName)}</span>
+                                      <div className="text-xl text-gray-800">
+                                          De: <span className="font-semibold text-primary">{getTranslatedName(letter.senderName)}</span>
                                       </div>
                                   </div>
                                   
@@ -130,7 +130,7 @@ export function LetterOpener({ letter }: { letter: Letter }) {
 
                               <div className="mt-12 flex items-center justify-center gap-2 border-t border-dashed border-gray-300 pt-6">
                                   <BeeIcon className="size-6 text-accent opacity-60" />
-                                  <span className="font-handwriting text-sm text-gray-400">HoneyNotes</span>
+                                  <span className="text-sm text-gray-400">HoneyNotes</span>
                               </div>
                           </div>
                       </div>
@@ -164,10 +164,10 @@ export function LetterOpener({ letter }: { letter: Letter }) {
             </button>
 
             <div className="space-y-2">
-                <p className="font-handwriting text-2xl text-gray-600 animate-bounce">
+                <p className="text-xl text-gray-600 animate-bounce">
                     ✨ {t('letterOpener.tapToOpen')} ✨
                 </p>
-                <p className="font-display text-sm text-gray-400">
+                <p className="text-sm text-gray-400">
                     De: {getTranslatedName(letter.senderName)}
                 </p>
             </div>

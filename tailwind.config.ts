@@ -10,9 +10,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
+        // UI fonts - highly legible
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        // Display font for titles - elegant but readable
+        display: ['var(--font-belleza)', 'Georgia', 'serif'],
+        // Letter content fonts - handwriting style
         handwriting: ['var(--font-indie)', 'cursive'],
-        display: ['var(--font-belleza)', 'sans-serif'],
         dancing: ['var(--font-dancing)', 'cursive'],
         pacifico: ['var(--font-pacifico)', 'cursive'],
         caveat: ['var(--font-caveat)', 'cursive'],

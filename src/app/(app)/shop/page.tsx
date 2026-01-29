@@ -19,13 +19,13 @@ export default function ShopPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#F0F4F8]/95 p-6 backdrop-blur-sm lg:p-8">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-4xl font-bold text-primary drop-shadow-sm">{t('shopPage.title')}</h1>
+          <h1 className="text-3xl font-bold text-primary drop-shadow-sm">{t('shopPage.title')}</h1>
           <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">
-            <span className="font-display text-sm font-bold text-gray-600">120</span>
+            <span className="text-sm font-bold text-gray-600">120</span>
             <BeeIcon className="size-5 text-accent" />
           </div>
         </div>
-        <p className="font-handwriting text-xl text-gray-600">
+        <p className="text-base text-gray-600">
           {t('shopPage.description')}
         </p>
       </header>
@@ -39,8 +39,8 @@ export default function ShopPage() {
               <Crown className="size-10" />
             </div>
             <div>
-              <h2 className="font-display text-2xl font-bold">HoneyNotes Premium</h2>
-              <p className="font-handwriting text-lg opacity-90">Desbloquea todo el contenido exclusivo</p>
+              <h2 className="text-xl font-bold">HoneyNotes Premium</h2>
+              <p className="text-base opacity-90">Desbloquea todo el contenido exclusivo</p>
             </div>
           </div>
         </div>
@@ -58,8 +58,8 @@ export default function ShopPage() {
                   <item.icon className="size-8" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-display text-lg font-bold text-gray-800">{item.label}</h3>
-                  <div className="flex items-center gap-1 font-handwriting text-gray-500">
+                  <h3 className="text-base font-semibold text-gray-800">{item.label}</h3>
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
                     <span>{item.pollen}</span>
                     <BeeIcon className="size-4 text-accent" />
                   </div>
@@ -73,7 +73,7 @@ export default function ShopPage() {
         {/* Coming Soon Notice */}
         <div className="mt-8 rounded-2xl bg-white/50 p-6 text-center">
           <Sparkles className="mx-auto size-12 text-accent/50" />
-          <p className="mt-4 font-handwriting text-xl text-gray-500">
+          <p className="mt-4 text-lg text-gray-500">
             {t('shopPage.comingSoon')}
           </p>
         </div>

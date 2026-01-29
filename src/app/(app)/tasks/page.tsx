@@ -18,13 +18,13 @@ export default function TasksPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#F0F4F8]/95 p-6 backdrop-blur-sm lg:p-8">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-4xl font-bold text-primary drop-shadow-sm">{t('tasksPage.title')}</h1>
+          <h1 className="text-3xl font-bold text-primary lg:text-4xl">{t('tasksPage.title')}</h1>
           <button className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-white shadow-lg transition-all hover:scale-105 active:scale-95">
             <Plus className="size-5" />
-            <span className="font-display text-sm font-bold">Nueva</span>
+            <span className="text-sm font-semibold">Nueva</span>
           </button>
         </div>
-        <p className="font-handwriting text-xl text-gray-600">
+        <p className="text-base text-gray-600">
           Recordatorios románticos
         </p>
       </header>
@@ -38,8 +38,8 @@ export default function TasksPage() {
               <CheckCircle2 className="size-5 text-green-600" />
             </div>
             <div>
-              <p className="font-display text-2xl font-bold text-gray-800">1</p>
-              <p className="font-handwriting text-sm text-gray-500">Completadas</p>
+              <p className="text-2xl font-bold text-gray-800">1</p>
+              <p className="text-sm text-gray-500">Completadas</p>
             </div>
           </div>
           <div className="flex flex-1 items-center gap-3 rounded-2xl bg-white/80 p-4 shadow-sm">
@@ -47,8 +47,8 @@ export default function TasksPage() {
               <Clock className="size-5 text-orange-600" />
             </div>
             <div>
-              <p className="font-display text-2xl font-bold text-gray-800">2</p>
-              <p className="font-handwriting text-sm text-gray-500">Pendientes</p>
+              <p className="text-2xl font-bold text-gray-800">2</p>
+              <p className="text-sm text-gray-500">Pendientes</p>
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default function TasksPage() {
                 )}
               </button>
               <span className={cn(
-                'flex-1 font-handwriting text-lg',
+                'flex-1 text-base',
                 task.done ? 'text-gray-400 line-through' : 'text-gray-700'
               )}>
                 {task.text}
@@ -86,10 +86,10 @@ export default function TasksPage() {
         {/* Coming Soon Notice */}
         <div className="mt-8 rounded-2xl bg-white/50 p-6 text-center">
           <Calendar className="mx-auto size-12 text-primary/30" />
-          <p className="mt-4 font-handwriting text-xl text-gray-500">
+          <p className="mt-4 text-lg text-gray-500">
             {t('tasksPage.comingSoon')}
           </p>
-          <p className="mt-2 font-display text-sm text-gray-400">
+          <p className="mt-2 text-sm text-gray-400">
             {t('tasksPage.description')}
           </p>
         </div>

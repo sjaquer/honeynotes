@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Search, Sparkles, Loader2 } from 'lucide-react';
+import { Mail, Search, Sparkles, Loader2, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -10,7 +10,42 @@ import { BeeIcon } from '@/components/icons/BeeIcon';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { useFirebase, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
-import type { Letter } from '@/lib/types';
+import type { Letter, PaperColor, Stamp } from '@/lib/types';
+
+// Paper color classes for preview
+const paperColorClasses: Record<PaperColor, string> = {
+  cream: 'bg-[#FFFDF5]',
+  pink: 'bg-[#FFDFE6]',
+  crimson: 'bg-[#FADADD]',
+  honey: 'bg-[#FFF8DD]',
+  'light-pink': 'bg-pink-100',
+  lavender: 'bg-[#E6E6FA]',
+  mint: 'bg-[#E0F8E0]',
+  peach: 'bg-[#FFE5B4]',
+  sky: 'bg-[#E0F2FE]',
+  rose: 'bg-[#FFE4E1]',
+};
+
+// Stamp icons for preview
+const stampIcons: Record<Stamp, React.ReactNode> = {
+  heart: <Heart className="size-full fill-current" />,
+  bee: <BeeIcon className="size-full" />,
+  'wax-seal': <WaxSealIcon className="size-full" />,
+  'rose-emoji': <span className="text-2xl">🌹</span>,
+  'star-emoji': <span className="text-2xl">⭐</span>,
+  'kiss-emoji': <span className="text-2xl">💋</span>,
+  'sparkle-emoji': <span className="text-2xl">✨</span>,
+  'sun-emoji': <span className="text-2xl">☀️</span>,
+  'moon-emoji': <span className="text-2xl">🌙</span>,
+};
+
+// Border style classes for preview
+const borderClasses: Record<string, string> = {
+  simple: 'border-2 border-primary/20',
+  airmail: 'airmail-border',
+  dashed: 'border-2 border-dashed border-primary/30',
+  floral: 'border-floral',
+};
 
 export default function InboxPage() {
   const { t, locale } = useTranslation();
@@ -37,13 +72,13 @@ export default function InboxPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#F0F4F8]/95 p-6 backdrop-blur-sm lg:p-8">
         <div className="flex items-center justify-between">
-            <h1 className="font-display text-4xl font-bold text-primary drop-shadow-sm">{t('inbox.title')}</h1>
+            <h1 className="text-3xl font-bold text-primary lg:text-4xl">{t('inbox.title')}</h1>
             <div className="rounded-full bg-white p-2 shadow-sm">
                 <BeeIcon className="size-6 text-accent" />
             </div>
         </div>
         <div className="flex items-center justify-between">
-            <p className="font-handwriting text-xl text-gray-600">
+            <p className="text-base text-gray-600">
               {isLoading ? '...' : t('inbox.unread', { count: unreadCount })}
             </p>
              <button className="rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary">
@@ -63,9 +98,9 @@ export default function InboxPage() {
              <div className="rounded-full bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <Sparkles className="size-12 text-gray-300" />
              </div>
-            <div className="font-handwriting text-2xl text-gray-400">
+            <div className="text-xl text-gray-400">
               <p>{t('inbox.empty')}</p>
-              <p>{t('inbox.waiting')}</p>
+              <p className="text-base">{t('inbox.waiting')}</p>
             </div>
           </div>
         )}
@@ -78,22 +113,26 @@ export default function InboxPage() {
                 <Link
                   href={`/letter/${letter.id}`}
                   className={cn(
-                    'relative block overflow-hidden rounded-lg bg-[#FFFdf5] p-1.5 transition-all hover:-translate-y-1 hover:rotate-1 hover:shadow-xl active:scale-[0.98]',
-                    'shadow-[0_2px_8px_rgba(0,0,0,0.08),0_4px_16px_rgba(0,0,0,0.08)]'
+                    'relative block overflow-hidden rounded-lg p-1.5 transition-all hover:-translate-y-1 hover:rotate-1 hover:shadow-xl active:scale-[0.98]',
+                    'shadow-[0_2px_8px_rgba(0,0,0,0.08),0_4px_16px_rgba(0,0,0,0.08)]',
+                    paperColorClasses[letter.config?.paperColor] || 'bg-[#FFFDF5]'
                   )}
                 >
                   {!letter.isRead && (
-                      <div className="absolute -right-6 top-3 z-10 w-24 rotate-45 bg-primary py-0.5 text-center font-display text-[10px] font-bold tracking-wider text-white shadow-sm">
+                      <div className="absolute -right-6 top-3 z-10 w-24 rotate-45 bg-primary py-0.5 text-center text-[10px] font-bold tracking-wider text-white shadow-sm">
                           NEW
                       </div>
                   )}
 
-                  <div className="flex h-44 flex-col justify-between rounded-md border-2 border-dashed border-primary/10 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] p-5">
+                  <div className={cn(
+                    "flex h-44 flex-col justify-between rounded-md bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] p-5",
+                    borderClasses[letter.config?.borderStyle || 'simple']
+                  )}>
                     <div className="flex items-start justify-between">
-                         <div className="rounded-lg border border-gray-100 bg-white p-2 shadow-sm">
+                         <div className="rounded-lg border border-gray-100 bg-white/80 p-2 shadow-sm">
                             <Mail className={cn("size-5 text-primary/80", !letter.isRead && "animate-pulse")} />
                          </div>
-                         <div className="font-handwriting text-xs text-gray-400">
+                         <div className="text-xs text-gray-500">
                              {formatDistanceToNow(letter.createdAt.toDate(), {
                             addSuffix: true,
                             locale: locale === 'es' ? es : undefined,
@@ -102,17 +141,17 @@ export default function InboxPage() {
                     </div>
 
                     <div className="text-center">
-                        <p className="font-handwriting text-lg text-gray-800">
-                             Para: <span className="font-bold text-primary">{getTranslatedName(letter.recipientName)}</span>
+                        <p className="text-lg text-gray-800">
+                             Para: <span className="font-semibold text-primary">{getTranslatedName(letter.recipientName)}</span>
                         </p>
-                         <p className="font-handwriting text-sm text-gray-500">
+                         <p className="text-sm text-gray-500">
                              De: {getTranslatedName(letter.senderName)}
                         </p>
                     </div>
 
                     <div className="flex justify-center">
-                         <div className="text-primary/20 transition-colors group-hover:text-primary/40">
-                              <WaxSealIcon className="size-10 rotate-12" />
+                         <div className="flex size-10 items-center justify-center text-primary/60 transition-colors group-hover:text-primary/80">
+                              {stampIcons[letter.config?.stamp] || <WaxSealIcon className="size-full rotate-12" />}
                          </div>
                     </div>
                   </div>

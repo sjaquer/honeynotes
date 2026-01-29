@@ -14,6 +14,7 @@ HoneyNotes nace como una plataforma de **comunicación profunda para parejas**, 
 ## ✨ Características Principales
 
 ### 📝 Editor de Cartas
+
 - Lienzo digital con textura de papel auténtico
 - 10 colores de fondo personalizables
 - 12 tipografías cursivas y manuscritas
@@ -21,17 +22,20 @@ HoneyNotes nace como una plataforma de **comunicación profunda para parejas**, 
 - 4 estilos de borde (simple, airmail, punteado, floral)
 
 ### 🐝 La Abeja Guía (IA)
+
 - Asistente de escritura potenciado por **Google Gemini**
 - Dos personalidades: **Amistosa** (empatía) y **Racional** (claridad)
 - Análisis de sentimiento y sugerencias de mejora
 - Predictor de reacción del destinatario
 
 ### 📬 Buzón de Cartas
+
 - Animación de apertura de sobre
 - Indicadores de cartas no leídas
 - Diseño estilo correo postal clásico
 
 ### 🎮 Gamificación
+
 - **Polen**: Moneda de esfuerzo ganada al completar tareas
 - **Tienda de la Colmena**: Desbloquea estampas y colores premium
 - **Tareas Semanales**: Retos para mejorar la comunicación en pareja
@@ -39,6 +43,7 @@ HoneyNotes nace como una plataforma de **comunicación profunda para parejas**, 
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
+
 - **Next.js 15.5** con App Router y Turbopack
 - **React 19** con Server Components
 - **Tailwind CSS** + **shadcn/ui** para componentes
@@ -46,12 +51,14 @@ HoneyNotes nace como una plataforma de **comunicación profunda para parejas**, 
 - **PWA Ready** para experiencia nativa
 
 ### Backend (Firebase Ecosystem)
+
 - **Cloud Firestore**: Base de datos NoSQL en tiempo real
 - **Firebase Auth**: Autenticación con Google y email
 - **Firebase GenAI Extension**: Conexión directa con Gemini
 - **Cloud Functions**: Cron jobs para tareas semanales
 
 ### IA Generativa
+
 - **Genkit** para orquestación de flujos de IA
 - **Google Gemini 1.5 Flash** para análisis de texto
 
@@ -75,7 +82,7 @@ npm run dev
 
 ## 📁 Estructura del Proyecto
 
-```
+```text
 src/
 ├── ai/                    # Flujos de IA con Genkit
 │   └── flows/             # letter-content-feedback, generation
@@ -108,17 +115,20 @@ El diseño se basa en el concepto de **Papelería Digital de Lujo**:
 ## 📈 Roadmap
 
 ### Fase 1: MVP (Actual)
+
 - [x] Editor de texto con personalización completa
 - [x] Integración con IA (Abeja Guía)
 - [x] Diseño responsive móvil-first
 - [ ] Almacenamiento en Firebase
 
 ### Fase 2: Conectividad
+
 - [ ] Firebase Auth (Google + Email)
 - [ ] Vinculación de parejas por código
 - [ ] Notificaciones Push (FCM)
 
 ### Fase 3: Economía
+
 - [ ] Tienda de la Colmena funcional
 - [ ] Sistema de tareas semanales automatizado
 - [ ] Jalea Real (moneda premium)

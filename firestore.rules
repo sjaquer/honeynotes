@@ -64,6 +64,29 @@ service cloud.firestore {
     }
 
     /**
+     * Basic validation for letter documents on create.
+     */
+    function isValidLetter() {
+      return request.resource.data.keys().hasAll(['senderId','recipientId','content','config','status'])
+        && request.resource.data.senderId is string
+        && request.resource.data.recipientId is string
+        && request.resource.data.content is string
+        && request.resource.data.status in ['draft','sent','opened'];
+    }
+
+    /**
+     * Validate allowed values for the `config` object (paperColor, stamp, font, borderStyle).
+     */
+    function isValidLetterConfig() {
+      let cfg = request.resource.data.config;
+      return cfg is map
+        && cfg.keys().hasAny(['paperColor','stamp','font'])
+        && (cfg.paperColor is string ? cfg.paperColor in ['cream','pink','crimson','honey','light-pink','lavender','mint','peach','sky','rose'] : true)
+        && (cfg.stamp is string ? cfg.stamp in ['heart','bee','wax-seal','rose-emoji','star-emoji','kiss-emoji','sparkle-emoji','sun-emoji','moon-emoji'] : true)
+        && (cfg.font is string ? cfg.font in ['Indie_Flower','Belleza','Dancing_Script','Pacifico','Caveat','Sacramento','Great_Vibes','Shadows_Into_Light','Amatic_SC','Permanent_Marker','Satisfy','Kalam'] : true);
+    }
+
+    /**
      * @description Rules for a user's own profile document.
      * @path /users/{userId}
      * @allow (create) An authenticated user can create their own profile document.
@@ -86,9 +109,20 @@ service cloud.firestore {
      * @principle Enforces document ownership and validates relational integrity.
      */
     match /users/{userId}/letters/{letterId} {
-      allow get: if isOwner(userId);
+      // Read: owner (sender) or the explicit recipient can read the letter.
+      allow get: if isSignedIn() && (isOwner(userId) || (resource != null && resource.data.recipientId == request.auth.uid));
+
+      // Listing the letters under a specific user is only allowed to that user (the sender).
+      // Recipients should query via a collectionGroup or receive a copy in their own tree.
       allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.senderId == userId;
+
+      // Create: only the owner (sender) may create a letter in their own collection and it must validate the schema.
+      allow create: if isOwner(userId)
+                    && request.resource.data.senderId == userId
+                    && isValidLetter()
+                    && isValidLetterConfig();
+
+      // Update / Delete: limited to the owner and preserve senderId integrity.
       allow update: if isExistingOwner(userId) && request.resource.data.senderId == resource.data.senderId;
       allow delete: if isExistingOwner(userId);
     }

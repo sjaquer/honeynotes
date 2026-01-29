@@ -70,7 +70,7 @@ export function BottomNav() {
 
               {/* Label */}
               <span className={cn(
-                  "absolute -bottom-6 font-handwriting text-sm font-bold transition-all duration-300",
+                  "absolute -bottom-6 text-xs font-semibold transition-all duration-300",
                   isActive ? "opacity-100 text-primary scale-110" : "opacity-0 scale-0"
               )}>
                   {t(item.labelKey)}

@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "letters",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASC" },
+        { "fieldPath": "createdAt", "order": "DESC" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

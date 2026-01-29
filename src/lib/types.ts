@@ -6,6 +6,7 @@ export type AppFont = 'Indie_Flower' | 'Belleza' | 'Dancing_Script' | 'Pacifico'
 export type BorderStyle = 'simple' | 'airmail' | 'dashed' | 'floral';
 export type LetterStatus = 'draft' | 'sent' | 'opened';
 
+// Interface for Firestore documents
 export interface Letter {
   id: string;
   senderId: string;
@@ -25,7 +26,12 @@ export interface Letter {
     structureCheck: string;
     predictedReaction: string;
   };
-   // Kept for UI compatibility during transition
+  // Kept for UI compatibility during transition
   senderName: string;
   recipientName: string;
+}
+
+// Interface for UI components (with serialized dates)
+export interface LetterUI extends Omit<Letter, 'createdAt'> {
+  createdAt: string; // ISO string for UI rendering
 }
