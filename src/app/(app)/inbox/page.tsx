@@ -10,7 +10,7 @@ import { es } from 'date-fns/locale';
 
 export default function InboxPage() {
   const { t, locale } = useTranslation();
-  const receivedLetters = mockLetters.filter(
+  const receivedLetters = mockLetters(t).filter(
     (letter) => letter.recipientName === currentUser
   );
 
