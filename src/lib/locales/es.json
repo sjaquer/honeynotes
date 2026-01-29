@@ -1,14 +1,41 @@
 {
   "landing": {
     "title": "Miel-Notitas",
-    "description": "Un espacio privado y acogedor para que tú y tu persona favorita compartan notas dulces y creen recuerdos duraderos.",
-    "cta": "Entrar como Pareja"
+    "description": "Un espacio privado y acogedor para que tú y tu persona favorita compartan notas dulces y creen recuerdos duraderos."
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "email": "Correo Electrónico",
+    "emailPlaceholder": "tu@correo.com",
+    "password": "Contraseña",
+    "passwordPlaceholder": "••••••••",
+    "confirmPassword": "Confirmar Contraseña",
+    "confirmPasswordPlaceholder": "••••••••",
+    "displayName": "Nombre para mostrar",
+    "displayNamePlaceholder": "¿Cómo te llamas?",
+    "loginButton": "Iniciar Sesión",
+    "registerButton": "Crear Cuenta",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "registerNow": "Regístrate",
+    "loginNow": "Inicia Sesión",
+    "loading": "Cargando...",
+    "error": "Error",
+    "fillAllFields": "Por favor completa todos los campos",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "genericError": "Ocurrió un error. Intenta de nuevo.",
+    "invalidCredentials": "Correo o contraseña incorrectos",
+    "emailInUse": "Este correo ya está registrado",
+    "invalidEmail": "Correo electrónico inválido"
   },
   "nav": {
     "inbox": "Bandeja",
     "newLetter": "Nueva Nota",
     "tasks": "Tareas",
-    "shop": "Tienda"
+    "shop": "Tienda",
+    "settings": "Ajustes"
   },
   "inbox": {
     "title": "Bandeja de entrada",
@@ -30,6 +57,9 @@
   },
   "letterEditor": {
     "placeholder": "Escribe con el corazón...",
+    "titlePlaceholder": "Título de tu nota (opcional)",
+    "to": "Para",
+    "from": "De",
     "paperColor": "Color del Papel",
     "colors": {
       "cream": "Crema",
@@ -90,6 +120,33 @@
     "title": "Tienda de Polen",
     "comingSoon": "¡Próximamente!",
     "description": "Gasta tu \"Polen\" aquí para desbloquear nuevos colores de papel, sellos y otras cosas divertidas para tus notas."
+  },
+  "settingsPage": {
+    "title": "Ajustes",
+    "profile": {
+      "title": "Perfil",
+      "anonymous": "Usuario Anónimo",
+      "signOut": "Cerrar Sesión"
+    },
+    "partner": {
+      "title": "Vinculación de Pareja",
+      "description": "Comparte tu código con tu pareja para conectar sus cuentas.",
+      "yourCode": "Tu Código",
+      "generateCode": "Generar Código",
+      "enterCode": "Ingresa el código de tu pareja",
+      "link": "Vincular",
+      "linked": "¡Vinculado!",
+      "linkedWith": "Vinculado con",
+      "unlink": "Desvincular",
+      "codePlaceholder": "XXX-XXX",
+      "copyCode": "Copiar código",
+      "codeCopied": "¡Código copiado!"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "description": "Recibe alertas cuando lleguen nuevas notas.",
+      "enable": "Activar Notificaciones"
+    }
   },
   "users": {
     "you": "Tú",

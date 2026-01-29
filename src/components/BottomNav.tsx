@@ -6,6 +6,7 @@ import {
   Inbox,
   PenSquare,
   ListTodo,
+  Settings,
   Store,
   type LucideIcon,
   Heart
@@ -22,8 +23,9 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: '/inbox', labelKey: 'nav.inbox', icon: Inbox },
   { href: '/new-letter', labelKey: 'nav.newLetter', icon: PenSquare },
-  { href: '/tasks', labelKey: 'nav.tasks', icon: ListTodo },
   { href: '/shop', labelKey: 'nav.shop', icon: Store },
+  { href: '/tasks', labelKey: 'nav.tasks', icon: ListTodo },
+  { href: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
 export function BottomNav() {

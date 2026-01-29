@@ -1,14 +1,16 @@
 /**
- * Simplified HoneyNotes Firestore Security Rules
+ * HoneyNotes Firestore Security Rules
  * 
- * Data Structure (simplified):
- * - /letters/{letterId}: All letters in one collection
- * - /users/{userId}: User profiles
+ * Data Structure:
+ * - /letters/{letterId}: All letters (with title, customizable names)
+ * - /users/{userId}: User profiles with email auth
+ * - /partnerCodes/{code}: Partner invitation codes
  * - /tasks/{taskId}: Global task definitions
  *
  * Key Security:
  * - Letters: sender can write, sender OR recipient can read
- * - Users: only owner can read/write their profile
+ * - Users: owner can read/write, any signed-in user can read for partner linking
+ * - Partner codes: authenticated users can read/write
  * - Tasks: public read, admin write only
  */
 rules_version = '2';
@@ -23,24 +25,56 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    
+    function isLetterParticipant() {
+      return isSignedIn() && (
+        resource.data.senderId == request.auth.uid ||
+        resource.data.recipientId == request.auth.uid
+      );
+    }
 
     /**
-     * Letters collection - simplified at root level
+     * Letters collection
      * /letters/{letterId}
      * 
-     * DEVELOPMENT MODE: Permitir todo para depuración
+     * Fields: id, senderId, recipientId, title?, content, config, 
+     *         createdAt, status, isRead, senderName, recipientName
      */
     match /letters/{letterId} {
-      // Permitir todo para usuarios autenticados durante desarrollo
-      allow read, write: if isSignedIn();
+      // Anyone authenticated can create letters
+      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
+      
+      // Only sender or recipient can read
+      allow read: if isLetterParticipant();
+      
+      // Only recipient can update (mark as read)
+      allow update: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+      
+      // Only sender can delete
+      allow delete: if isSignedIn() && resource.data.senderId == request.auth.uid;
     }
 
     /**
      * User profiles
      * /users/{userId}
+     * 
+     * Fields: id, displayName, email, photoURL?, partnerCode?, partnerId?, partnerName?, createdAt, updatedAt
      */
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      // Any signed-in user can read (needed for partner linking)
+      allow read: if isSignedIn();
+      // Only owner can write
+      allow write: if isOwner(userId);
+    }
+
+    /**
+     * Partner invitation codes
+     * /partnerCodes/{code}
+     * 
+     * Fields: userId, createdAt
+     */
+    match /partnerCodes/{code} {
+      allow read, write: if isSignedIn();
     }
 
     /**

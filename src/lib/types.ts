@@ -11,6 +11,8 @@ export interface Letter {
   id: string;
   senderId: string;
   recipientId: string;
+  // Letter metadata
+  title?: string; // Optional title for the letter
   content: string;
   config: {
     paperColor: PaperColor;
@@ -26,7 +28,7 @@ export interface Letter {
     structureCheck: string;
     predictedReaction: string;
   };
-  // Kept for UI compatibility during transition
+  // Display names (customizable by sender)
   senderName: string;
   recipientName: string;
 }

@@ -1,14 +1,41 @@
 {
   "landing": {
     "title": "HoneyNotes",
-    "description": "A private, cozy space for you and your favorite person to share sweet notes and create lasting memories.",
-    "cta": "Enter as Couple"
+    "description": "A private, cozy space for you and your favorite person to share sweet notes and create lasting memories."
+  },
+  "auth": {
+    "login": "Log In",
+    "register": "Sign Up",
+    "email": "Email",
+    "emailPlaceholder": "you@email.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "••••••••",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "What's your name?",
+    "loginButton": "Log In",
+    "registerButton": "Create Account",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "registerNow": "Sign up",
+    "loginNow": "Log in",
+    "loading": "Loading...",
+    "error": "Error",
+    "fillAllFields": "Please fill in all fields",
+    "passwordMismatch": "Passwords don't match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "genericError": "An error occurred. Please try again.",
+    "invalidCredentials": "Invalid email or password",
+    "emailInUse": "This email is already registered",
+    "invalidEmail": "Invalid email address"
   },
   "nav": {
     "inbox": "Inbox",
     "newLetter": "New Letter",
     "tasks": "Tasks",
-    "shop": "Shop"
+    "shop": "Shop",
+    "settings": "Settings"
   },
   "inbox": {
     "title": "Inbox",
@@ -30,6 +57,9 @@
   },
   "letterEditor": {
     "placeholder": "Write your heart out...",
+    "titlePlaceholder": "Letter title (optional)",
+    "to": "To",
+    "from": "From",
     "paperColor": "Paper Color",
     "colors": {
       "cream": "Cream",
@@ -90,6 +120,33 @@
     "title": "Polen Shop",
     "comingSoon": "Coming Soon!",
     "description": "Spend your \"Polen\" here to unlock new paper colors, stamps, and other fun goodies for your letters."
+  },
+  "settingsPage": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "anonymous": "Anonymous User",
+      "signOut": "Sign Out"
+    },
+    "partner": {
+      "title": "Partner Linking",
+      "description": "Share your code with your partner to connect your accounts.",
+      "yourCode": "Your Code",
+      "generateCode": "Generate Code",
+      "enterCode": "Enter your partner's code",
+      "link": "Link",
+      "linked": "Linked!",
+      "linkedWith": "Linked with",
+      "unlink": "Unlink",
+      "codePlaceholder": "XXX-XXX",
+      "copyCode": "Copy code",
+      "codeCopied": "Code copied!"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Get alerts when new notes arrive.",
+      "enable": "Enable Notifications"
+    }
   },
   "users": {
     "you": "You",

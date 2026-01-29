@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { PaperColor, Stamp, AppFont, Letter, BorderStyle } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { Heart, Type, Sticker, FileText, Send, Lock, Frame } from 'lucide-react';
+import { Heart, Type, Sticker, FileText, Send, Lock, Frame, Edit3 } from 'lucide-react';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { AIFeedbackDialog } from './AIFeedbackDialog';
@@ -16,8 +17,9 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useFirebase, useUser, addDocumentNonBlocking } from '@/firebase';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { useFirebase, useUser, useMemoFirebase, useDoc, addDocumentNonBlocking } from '@/firebase';
+import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import type { UserProfile } from '@/hooks/use-partner-link';
 
 const paperColors: { name: PaperColor; class: string; labelKey: string }[] = [
   { name: 'cream', class: 'bg-[#FFFDF5]', labelKey: 'letterEditor.colors.cream' },
@@ -73,7 +75,18 @@ export function LetterEditor() {
   const { firestore } = useFirebase();
   const { user } = useUser();
 
+  // Get user profile to check if they have a partner
+  const userRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  
+  const { data: userProfile } = useDoc<UserProfile>(userRef);
+
   const [content, setContent] = useState('');
+  const [letterTitle, setLetterTitle] = useState('');
+  const [senderName, setSenderName] = useState('');
+  const [recipientName, setRecipientName] = useState('');
   const [paperColor, setPaperColor] = useState<PaperColor>('cream');
   const [stamp, setStamp] = useState<Stamp>('heart');
   const [font, setFont] = useState<AppFont>('Indie_Flower');
@@ -81,6 +94,19 @@ export function LetterEditor() {
   const [hasAskedBee, setHasAskedBee] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState('paper');
+
+  // Check if user has a linked partner
+  const hasPartner = Boolean(userProfile?.partnerId);
+  
+  // Set default names when user profile loads
+  useEffect(() => {
+    if (user && !senderName) {
+      setSenderName(user.displayName || userProfile?.displayName || t('users.you'));
+    }
+    if (userProfile && !recipientName) {
+      setRecipientName(userProfile.partnerName || t('users.yourLove'));
+    }
+  }, [user, userProfile, senderName, recipientName, t]);
 
   const handleSend = () => {
     if (!user) {
@@ -98,18 +124,20 @@ export function LetterEditor() {
 
     setIsSending(true);
     
-    // For MVP, user sends letter to themselves to populate inbox.
+    // If user has partner, send to partner. Otherwise self-addressed for testing.
+    const recipientId = userProfile?.partnerId || user.uid;
+
     const newLetter = {
         senderId: user.uid,
-        recipientId: user.uid, // Self-addressed for MVP
+        recipientId: recipientId,
+        title: letterTitle.trim() || undefined,
         content,
         config: { paperColor, stamp, font, borderStyle },
         createdAt: serverTimestamp(),
         status: 'sent',
         isRead: false,
-        // Mock names for UI consistency
-        senderName: t('users.yourLove'),
-        recipientName: t('users.you'),
+        senderName: senderName || t('users.you'),
+        recipientName: recipientName || t('users.yourLove'),
     }
 
     // Save to root /letters collection (simpler, more scalable)
@@ -154,12 +182,35 @@ export function LetterEditor() {
         )}>
              {/* Inner Paper Area */}
             <div className={cn(
-                "flex flex-1 flex-col p-8 lg:p-12 relative bg-white/50 backdrop-blur-[2px]",
+                "flex flex-1 flex-col p-6 lg:p-10 relative bg-white/50 backdrop-blur-[2px]",
                  paperColors.find(p => p.name === paperColor)?.class
             )}>
-                {/* Date Header */}
-                <div className="mb-6 font-display text-lg text-primary/80">
-                    <span>{format(new Date(), 'dd MMM yyyy', { locale: es })}</span>
+                {/* Letter Header: Title & To */}
+                <div className="mb-4 space-y-2">
+                    {/* Title (optional) */}
+                    <Input
+                        value={letterTitle}
+                        onChange={(e) => setLetterTitle(e.target.value)}
+                        placeholder={t('letterEditor.titlePlaceholder')}
+                        className={cn(
+                            'border-0 bg-transparent px-0 text-2xl lg:text-3xl font-bold text-primary placeholder:text-primary/40 !ring-0 !ring-offset-0 focus:!ring-0',
+                            fonts.find(f => f.name === font)?.class || 'font-handwriting'
+                        )}
+                    />
+                    {/* To: Recipient Name */}
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>{t('letterEditor.to')}:</span>
+                        <Input
+                            value={recipientName}
+                            onChange={(e) => setRecipientName(e.target.value)}
+                            placeholder={t('users.yourLove')}
+                            className="h-7 w-auto min-w-[100px] max-w-[200px] border-0 border-b border-dashed border-primary/30 bg-transparent px-1 py-0 text-sm font-semibold text-primary placeholder:text-primary/40 !ring-0 focus:border-primary"
+                        />
+                    </div>
+                    {/* Date */}
+                    <div className="font-display text-xs text-gray-400">
+                        {format(new Date(), 'dd MMM yyyy', { locale: es })}
+                    </div>
                 </div>
 
                 {/* Text Area */}
@@ -173,16 +224,22 @@ export function LetterEditor() {
                     )}
                     spellCheck={false}
                     style={{ 
-                        minHeight: '400px',
-                        maxHeight: '70vh',
+                        minHeight: '300px',
+                        maxHeight: '60vh',
                         overflow: 'auto'
                     }}
                 />
 
                 {/* Footer Signoff */}
-                <div className="mt-8 flex items-end justify-between border-t-2 border-dashed border-primary/20 pt-4 font-display">
-                    <div className="text-sm text-gray-500">
-                        From: <span className="text-primary font-bold decoration-wavy underline">{currentUserDisplayName}</span>
+                <div className="mt-6 flex items-end justify-between border-t-2 border-dashed border-primary/20 pt-4 font-display">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>{t('letterEditor.from')}:</span>
+                        <Input
+                            value={senderName}
+                            onChange={(e) => setSenderName(e.target.value)}
+                            placeholder={t('users.you')}
+                            className="h-7 w-auto min-w-[80px] max-w-[180px] border-0 border-b border-dashed border-primary/30 bg-transparent px-1 py-0 text-sm font-bold text-primary decoration-wavy placeholder:text-primary/40 !ring-0 focus:border-primary"
+                        />
                     </div>
                     {/* Stamp Display */}
                     <div className="absolute bottom-6 right-6 rotate-[-10deg] opacity-90 drop-shadow-md lg:bottom-10 lg:right-10">
