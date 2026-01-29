@@ -10,9 +10,23 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Alegreya', 'serif'],
-        headline: ['Belleza', 'sans-serif'],
-        code: ['monospace'],
+        sans: ['var(--font-inter)', 'sans-serif'],
+        handwriting: ['var(--font-indie)', 'cursive'],
+        display: ['var(--font-belleza)', 'sans-serif'],
+        dancing: ['var(--font-dancing)', 'cursive'],
+        pacifico: ['var(--font-pacifico)', 'cursive'],
+        caveat: ['var(--font-caveat)', 'cursive'],
+        sacramento: ['var(--font-sacramento)', 'cursive'],
+        greatvibes: ['var(--font-greatvibes)', 'cursive'],
+        shadows: ['var(--font-shadows)', 'cursive'],
+        amatic: ['var(--font-amatic)', 'cursive'],
+        permanent: ['var(--font-permanent)', 'cursive'],
+        satisfy: ['var(--font-satisfy)', 'cursive'],
+        kalam: ['var(--font-kalam)', 'cursive'],
+      },
+      boxShadow: {
+        'crimson-soft': '0 10px 30px -5px rgba(220, 20, 60, 0.2)',
+        'crimson-deep': '0 25px 50px -12px rgba(220, 20, 60, 0.35)',
       },
       colors: {
         background: 'hsl(var(--background))',

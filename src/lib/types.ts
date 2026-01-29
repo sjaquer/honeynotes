@@ -1,6 +1,7 @@
-export type PaperColor = 'cream' | 'pink' | 'crimson' | 'honey' | 'light-pink';
-export type Stamp = 'heart' | 'bee' | 'wax-seal';
-export type AppFont = 'Alegreya' | 'Belleza';
+export type PaperColor = 'cream' | 'pink' | 'crimson' | 'honey' | 'light-pink' | 'lavender' | 'mint' | 'peach' | 'sky' | 'rose';
+export type Stamp = 'heart' | 'bee' | 'wax-seal' | 'rose-emoji' | 'star-emoji' | 'kiss-emoji' | 'sparkle-emoji' | 'sun-emoji' | 'moon-emoji';
+export type AppFont = 'Indie_Flower' | 'Belleza' | 'Dancing_Script' | 'Pacifico' | 'Caveat' | 'Sacramento' | 'Great_Vibes' | 'Shadows_Into_Light' | 'Amatic_SC' | 'Permanent_Marker' | 'Satisfy' | 'Kalam';
+export type BorderStyle = 'simple' | 'airmail' | 'dashed' | 'floral';
 export type LetterStatus = 'draft' | 'sent' | 'opened';
 
 export interface Letter {
@@ -12,6 +13,7 @@ export interface Letter {
     paperColor: PaperColor;
     stamp: Stamp;
     font: AppFont;
+    borderStyle?: BorderStyle;
   };
   createdAt: string;
   status: LetterStatus;

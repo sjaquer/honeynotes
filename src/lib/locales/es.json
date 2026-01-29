@@ -20,7 +20,9 @@
     "from": "De: {sender}",
     "sentOn": "Enviado el {date}",
     "opening": "Abriendo...",
-    "open": "Abrir Nota"
+    "open": "Abrir Nota",
+    "tapToOpen": "Toca para abrir",
+    "reading": "Leyendo tu carta"
   },
   "newLetterPage": {
     "title": "Nueva Nota",

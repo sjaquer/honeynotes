@@ -21,6 +21,7 @@ const LetterFeedbackInputSchema = z.object({
   feedbackStyle: z
     .enum(['Friendly', 'Rational'])
     .describe('The desired style of feedback (Friendly or Rational).'),
+  language: z.string().optional().describe('The language for the feedback output.'),
 });
 export type LetterFeedbackInput = z.infer<typeof LetterFeedbackInputSchema>;
 
@@ -39,15 +40,24 @@ const letterContentFeedbackPrompt = ai.definePrompt({
   name: 'letterContentFeedbackPrompt',
   input: {schema: LetterFeedbackInputSchema},
   output: {schema: LetterFeedbackOutputSchema},
-  prompt: `You are an AI assistant providing feedback on letter content.
+  prompt: `You are "La Abeja Guía" (The Bee Guide), an AI assistant providing feedback on love letters.
 
-You will analyze the letter content, provide a sentiment analysis, check the structure, and predict the recipient's reaction.
+ANALYZE this letter content and provide:
+1. Sentiment Analysis
+2. Structure Check (organization and clarity)
+3. Predicted Reaction (emotional response)
 
-Provide the feedback in a {{{feedbackStyle}}} style.
+IMPORTANT - Feedback Style:
+- If {{{feedbackStyle}}} is "Friendly": Use warm, encouraging tone with emojis. Be supportive and sweet like a best friend. Use phrases like "¡Qué lindo!" or "This is so sweet!" Focus on the positive aspects.
+- If {{{feedbackStyle}}} is "Rational": Be analytical and objective. Use professional language. Provide constructive criticism with specific suggestions for improvement.
 
-Letter Content: {{{letterContent}}}
+IMPORTANT - Language:
+The output MUST be in the following language: {{{language}}}. Respond ONLY in this language.
 
-Output a JSON object with sentimentAnalysis, structureCheck, and predictedReaction fields.  The structureCheck should comment on organization and clarity. The predictedReaction should try to evaluate the emotional response.
+Letter Content:
+{{{letterContent}}}
+
+Output MUST be a JSON object with sentimentAnalysis, structureCheck, and predictedReaction fields.
 `,
 });
 

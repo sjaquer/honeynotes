@@ -20,7 +20,9 @@
     "from": "From: {sender}",
     "sentOn": "Sent on {date}",
     "opening": "Opening...",
-    "open": "Open Letter"
+    "open": "Open Letter",
+    "tapToOpen": "Tap to open",
+    "reading": "Reading your letter"
   },
   "newLetterPage": {
     "title": "New Letter",
