@@ -112,7 +112,8 @@ export function LetterEditor() {
         recipientName: t('users.you'),
     }
 
-    const lettersColRef = collection(firestore, 'users', user.uid, 'letters');
+    // Save to root /letters collection (simpler, more scalable)
+    const lettersColRef = collection(firestore, 'letters');
     
     addDocumentNonBlocking(lettersColRef, newLetter)
         .then(() => {
