@@ -14,9 +14,10 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   const { user } = useUser();
 
   const letterRef = useMemoFirebase(() => {
-    if (!user || !id) return null;
-    return doc(firestore, 'users', user.uid, 'letters', id);
-  }, [firestore, user, id]);
+    if (!id) return null;
+    // Read from root /letters collection (no user dependency needed)
+    return doc(firestore, 'letters', id);
+  }, [firestore, id]);
 
   const { data: letter, isLoading } = useDoc<Letter>(letterRef);
 

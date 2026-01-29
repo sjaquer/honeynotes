@@ -9,7 +9,7 @@ import { es } from 'date-fns/locale';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { useFirebase, useUser, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, where } from 'firebase/firestore';
 import type { Letter, PaperColor, Stamp } from '@/lib/types';
 
 // Paper color classes for preview
@@ -50,14 +50,19 @@ const borderClasses: Record<string, string> = {
 export default function InboxPage() {
   const { t, locale } = useTranslation();
   const { firestore } = useFirebase();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
 
   const lettersQuery = useMemoFirebase(() => {
     if (!user) return null;
-    return query(collection(firestore, 'users', user.uid, 'letters'), orderBy('createdAt', 'desc'));
+    // Query from root /letters collection, filter by recipientId
+    return query(
+      collection(firestore, 'letters'),
+      where('recipientId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
   }, [firestore, user]);
 
-  const { data: letters, isLoading } = useCollection<Letter>(lettersQuery);
+  const { data: letters, isLoading, error } = useCollection<Letter>(lettersQuery);
 
   const getTranslatedName = (name: string) => {
     if (name === 'You' || name === 'Tú') return t('users.you');
@@ -66,6 +71,11 @@ export default function InboxPage() {
   };
   
   const unreadCount = letters?.filter((l) => !l.isRead).length ?? 0;
+
+  // Debug: log errors to console
+  if (error) {
+    console.error('Inbox error:', error);
+  }
 
   return (
     <div className="flex flex-1 flex-col bg-[#F0F4F8]">
@@ -88,12 +98,30 @@ export default function InboxPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-        {isLoading && (
+        {/* Show error if any */}
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-center">
+            <p className="font-semibold text-red-600">Error al cargar cartas</p>
+            <p className="text-sm text-red-500">{error.message}</p>
+          </div>
+        )}
+        {/* Show message if user not logged in */}
+        {!user && !isUserLoading && (
+          <div className="flex h-full flex-col items-center justify-center space-y-4 text-center">
+            <div className="rounded-full bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <Mail className="size-12 text-gray-300" />
+            </div>
+            <div className="text-xl text-gray-400">
+              <p>Inicia sesión para ver tus cartas</p>
+            </div>
+          </div>
+        )}
+        {(isLoading || isUserLoading) && (
           <div className="flex h-full flex-col items-center justify-center">
             <Loader2 className="size-12 animate-spin text-primary" />
           </div>
         )}
-        {!isLoading && letters?.length === 0 && (
+        {!isLoading && !isUserLoading && !error && user && letters?.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center space-y-4 text-center">
              <div className="rounded-full bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <Sparkles className="size-12 text-gray-300" />
@@ -104,7 +132,7 @@ export default function InboxPage() {
             </div>
           </div>
         )}
-        {!isLoading && letters && letters.length > 0 && (
+        {!isLoading && !isUserLoading && !error && user && letters && letters.length > 0 && (
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {letters.map((letter) => (
               <li key={letter.id} className="group relative pt-4">
