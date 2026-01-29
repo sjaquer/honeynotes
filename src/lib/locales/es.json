@@ -40,7 +40,11 @@
   "inbox": {
     "title": "Bandeja de entrada",
     "unread": "Tienes {count} nota(s) sin leer.",
+    "sentCount": "Has enviado {count} nota(s).",
+    "received": "Recibidas",
+    "sent": "Enviadas",
     "empty": "Tu bandeja de entrada está vacía.",
+    "emptySent": "Aún no has enviado ninguna nota.",
     "waiting": "Esperando una dulce nota de tu amor..."
   },
   "letterOpener": {

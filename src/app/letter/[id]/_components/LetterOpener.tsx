@@ -87,50 +87,69 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
   if (isOpened) {
       return (
           <div className="flex min-h-screen flex-col bg-[#F0F4F8] animate-in fade-in duration-500">
-              <div className="sticky top-0 z-20 bg-[#F0F4F8]/95 p-4 backdrop-blur-sm">
-                  <Link href="/inbox" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm transition-all hover:shadow-md active:scale-95">
-                      <ArrowLeft className="size-5 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-700">Volver</span>
+              <div className="sticky top-0 z-20 bg-[#F0F4F8]/95 p-3 backdrop-blur-sm sm:p-4">
+                  <Link href="/inbox" className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm transition-all hover:shadow-md active:scale-95 sm:px-4 sm:py-2">
+                      <ArrowLeft className="size-4 text-gray-600 sm:size-5" />
+                      <span className="text-xs font-medium text-gray-700 sm:text-sm">Volver</span>
                   </Link>
               </div>
 
-              <div className="flex-1 p-4 pb-32 lg:p-8">
+              <div className="flex-1 p-3 pb-24 sm:p-4 lg:p-8 lg:pb-32">
                   <div className="mx-auto max-w-2xl">
                       <div className={cn(
-                          "relative overflow-hidden rounded-lg shadow-2xl",
+                          "relative overflow-hidden rounded-xl shadow-2xl sm:rounded-lg",
                           borderClasses[letter.config.borderStyle || 'simple'],
                           paperColorClasses[letter.config.paperColor]
                       )}>
-                          <div className="absolute left-0 right-0 top-0 h-3 bg-gradient-to-r from-primary/30 via-transparent to-primary/30"></div>
-                          <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-r from-primary/30 via-transparent to-primary/30"></div>
+                          <div className="absolute left-0 right-0 top-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
+                          <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
 
-                          <div className="p-8 lg:p-12">
-                              <div className="mb-8 flex items-start justify-between border-b border-dashed border-gray-300 pb-6">
-                                  <div className="space-y-1">
-                                      <div className="text-xs uppercase tracking-wider text-gray-500">
-                                          {format(new Date(letter.createdAt), 'd MMMM yyyy', { locale: locale === 'es' ? es : undefined })}
+                          <div className="p-5 sm:p-8 lg:p-12">
+                              {/* Header with stamp, date, and names */}
+                              <div className="mb-6 border-b border-dashed border-gray-300 pb-4 sm:mb-8 sm:pb-6">
+                                  <div className="flex items-start justify-between gap-3">
+                                      <div className="flex-1 space-y-1">
+                                          <div className="text-[10px] uppercase tracking-wider text-gray-500 sm:text-xs">
+                                              {format(new Date(letter.createdAt), 'd MMMM yyyy', { locale: locale === 'es' ? es : undefined })}
+                                          </div>
+                                          <div className="text-base text-gray-800 sm:text-lg lg:text-xl">
+                                              De: <span className="font-semibold text-primary">{getTranslatedName(letter.senderName)}</span>
+                                          </div>
+                                          <div className="text-sm text-gray-600 sm:text-base">
+                                              Para: <span className="font-medium">{getTranslatedName(letter.recipientName)}</span>
+                                          </div>
                                       </div>
-                                      <div className="text-xl text-gray-800">
-                                          De: <span className="font-semibold text-primary">{getTranslatedName(letter.senderName)}</span>
+                                      
+                                      <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-full bg-white/80 text-primary shadow-inner sm:size-16">
+                                          {stampIcons[letter.config.stamp]}
                                       </div>
                                   </div>
-                                  
-                                  <div className="flex size-16 items-center justify-center rounded-full bg-white/80 text-primary shadow-inner">
-                                      {stampIcons[letter.config.stamp]}
-                                  </div>
+
+                                  {/* Title if exists */}
+                                  {letter.title && (
+                                      <div className="mt-4 sm:mt-6">
+                                          <h1 className={cn(
+                                              "text-center text-2xl font-bold text-primary sm:text-3xl lg:text-4xl",
+                                              getFontClass()
+                                          )}>
+                                              {letter.title}
+                                          </h1>
+                                      </div>
+                                  )}
                               </div>
 
+                              {/* Letter content */}
                               <div className={cn(
-                                  "min-h-[40vh] whitespace-pre-wrap text-gray-800 transition-all",
+                                  "min-h-[30vh] whitespace-pre-wrap text-gray-800 transition-all sm:min-h-[40vh]",
                                   getAdaptiveFontSize(),
                                   getFontClass()
                               )}>
                                   {letter.content}
                               </div>
 
-                              <div className="mt-12 flex items-center justify-center gap-2 border-t border-dashed border-gray-300 pt-6">
-                                  <BeeIcon className="size-6 text-accent opacity-60" />
-                                  <span className="text-sm text-gray-400">HoneyNotes</span>
+                              <div className="mt-8 flex items-center justify-center gap-2 border-t border-dashed border-gray-300 pt-4 sm:mt-12 sm:pt-6">
+                                  <BeeIcon className="size-5 text-accent opacity-60 sm:size-6" />
+                                  <span className="text-xs text-gray-400 sm:text-sm">HoneyNotes</span>
                               </div>
                           </div>
                       </div>
@@ -142,21 +161,34 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#E8E8F6] to-[#F0F4F8] p-4">
-        <div className="text-center">
+        <div className="w-full max-w-sm text-center sm:max-w-md">
             <button
                 onClick={() => setIsOpened(true)}
-                className="group relative mx-auto mb-8 block transition-transform hover:scale-105 active:scale-95"
+                className="group relative mx-auto mb-6 block w-full transition-transform hover:scale-105 active:scale-95 sm:mb-8"
             >
-                <div className="relative flex h-56 w-80 items-center justify-center overflow-hidden rounded-sm bg-[#FFFEF5] shadow-[0_10px_40px_rgba(0,0,0,0.15)] transition-all group-hover:shadow-[0_15px_50px_rgba(220,20,60,0.2)]">
-                    <Mail className="size-24 text-primary/20" />
-                    
-                    <div className="absolute right-6 top-6 rounded-full bg-primary p-3 shadow-lg">
-                        <div className="size-8 text-white">
+                <div className={cn(
+                  "relative flex min-h-[200px] w-full flex-col items-center justify-center overflow-hidden rounded-lg p-4 shadow-[0_10px_40px_rgba(0,0,0,0.15)] transition-all group-hover:shadow-[0_15px_50px_rgba(220,20,60,0.2)] sm:min-h-[220px] sm:rounded-sm sm:p-6",
+                  paperColorClasses[letter.config.paperColor] || 'bg-[#FFFEF5]'
+                )}>
+                    {/* Stamp in corner */}
+                    <div className="absolute right-3 top-3 rounded-full bg-primary p-2 shadow-lg sm:right-6 sm:top-6 sm:p-3">
+                        <div className="size-6 text-white sm:size-8">
                             {stampIcons[letter.config.stamp]}
                         </div>
                     </div>
 
-                    <div className="absolute bottom-4 left-4 right-4">
+                    {/* Title if exists */}
+                    {letter.title && (
+                      <p className="mb-2 line-clamp-2 px-8 font-display text-lg font-bold text-primary sm:text-xl">
+                        {letter.title}
+                      </p>
+                    )}
+
+                    {/* Mail icon */}
+                    <Mail className="size-16 text-primary/20 sm:size-24" />
+
+                    {/* Preview lines */}
+                    <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
                         <div className="h-1 w-full rounded bg-gray-200"></div>
                         <div className="mt-1 h-1 w-3/4 rounded bg-gray-200"></div>
                     </div>
@@ -164,12 +196,17 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
             </button>
 
             <div className="space-y-2">
-                <p className="text-xl text-gray-600 animate-bounce">
+                <p className="text-lg text-gray-600 animate-bounce sm:text-xl">
                     ✨ {t('letterOpener.tapToOpen')} ✨
                 </p>
-                <p className="text-sm text-gray-400">
-                    De: {getTranslatedName(letter.senderName)}
-                </p>
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-500 sm:text-base">
+                      De: <span className="font-semibold text-primary">{getTranslatedName(letter.senderName)}</span>
+                  </p>
+                  <p className="text-xs text-gray-400 sm:text-sm">
+                      Para: {getTranslatedName(letter.recipientName)}
+                  </p>
+                </div>
             </div>
         </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
-import { Mail, Search, Sparkles, Loader2, Heart } from 'lucide-react';
+import { useState } from 'react';
+import { Mail, Search, Sparkles, Loader2, Heart, Send, Inbox } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -51,16 +52,18 @@ export default function InboxPage() {
   const { t, locale } = useTranslation();
   const { firestore } = useFirebase();
   const { user, isUserLoading } = useUser();
+  const [viewMode, setViewMode] = useState<'received' | 'sent'>('received');
 
   const lettersQuery = useMemoFirebase(() => {
     if (!user) return null;
-    // Query from root /letters collection, filter by recipientId
+    // Query from root /letters collection, filter by recipientId or senderId based on view mode
+    const filterField = viewMode === 'received' ? 'recipientId' : 'senderId';
     return query(
       collection(firestore, 'letters'),
-      where('recipientId', '==', user.uid),
+      where(filterField, '==', user.uid),
       orderBy('createdAt', 'desc')
     );
-  }, [firestore, user]);
+  }, [firestore, user, viewMode]);
 
   const { data: letters, isLoading, error } = useCollection<Letter>(lettersQuery);
 
@@ -89,11 +92,38 @@ export default function InboxPage() {
         </div>
         <div className="flex items-center justify-between">
             <p className="text-base text-gray-600">
-              {isLoading ? '...' : t('inbox.unread', { count: unreadCount })}
+              {isLoading ? '...' : viewMode === 'received' ? t('inbox.unread', { count: unreadCount }) : t('inbox.sentCount', { count: letters?.length ?? 0 })}
             </p>
              <button className="rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary">
                  <Search className="size-5" />
              </button>
+        </div>
+        {/* Toggle between received and sent */}
+        <div className="mt-4 flex rounded-2xl bg-white p-1 shadow-sm">
+          <button
+            onClick={() => setViewMode('received')}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all',
+              viewMode === 'received'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            )}
+          >
+            <Inbox className="size-4" />
+            {t('inbox.received')}
+          </button>
+          <button
+            onClick={() => setViewMode('sent')}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all',
+              viewMode === 'sent'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            )}
+          >
+            <Send className="size-4" />
+            {t('inbox.sent')}
+          </button>
         </div>
       </header>
 
@@ -124,63 +154,70 @@ export default function InboxPage() {
         {!isLoading && !isUserLoading && !error && user && letters?.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center space-y-4 text-center">
              <div className="rounded-full bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <Sparkles className="size-12 text-gray-300" />
+                {viewMode === 'received' ? <Sparkles className="size-12 text-gray-300" /> : <Send className="size-12 text-gray-300" />}
              </div>
             <div className="text-xl text-gray-400">
-              <p>{t('inbox.empty')}</p>
-              <p className="text-base">{t('inbox.waiting')}</p>
+              <p>{viewMode === 'received' ? t('inbox.empty') : t('inbox.emptySent')}</p>
+              {viewMode === 'received' && <p className="text-base">{t('inbox.waiting')}</p>}
             </div>
           </div>
         )}
         {!isLoading && !isUserLoading && !error && user && letters && letters.length > 0 && (
-          <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {letters.map((letter) => (
               <li key={letter.id} className="group relative pt-4">
-                 <div className="absolute left-1/2 top-0 z-20 h-7 w-20 -translate-x-1/2 rotate-[-2deg] rounded-sm bg-[#e3d5ca] opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-20"></div>
+                 <div className="absolute left-1/2 top-0 z-20 h-6 w-16 -translate-x-1/2 rotate-[-2deg] rounded-sm bg-[#e3d5ca] opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-20 sm:h-7 sm:w-20"></div>
                  
                 <Link
                   href={`/letter/${letter.id}`}
                   className={cn(
-                    'relative block overflow-hidden rounded-lg p-1.5 transition-all hover:-translate-y-1 hover:rotate-1 hover:shadow-xl active:scale-[0.98]',
+                    'relative block overflow-hidden rounded-xl p-1 transition-all hover:-translate-y-1 hover:rotate-1 hover:shadow-xl active:scale-[0.98] sm:rounded-lg sm:p-1.5',
                     'shadow-[0_2px_8px_rgba(0,0,0,0.08),0_4px_16px_rgba(0,0,0,0.08)]',
                     paperColorClasses[letter.config?.paperColor] || 'bg-[#FFFDF5]'
                   )}
                 >
-                  {!letter.isRead && (
-                      <div className="absolute -right-6 top-3 z-10 w-24 rotate-45 bg-primary py-0.5 text-center text-[10px] font-bold tracking-wider text-white shadow-sm">
+                  {!letter.isRead && viewMode === 'received' && (
+                      <div className="absolute -right-5 top-2 z-10 w-20 rotate-45 bg-primary py-0.5 text-center text-[9px] font-bold tracking-wider text-white shadow-sm sm:-right-6 sm:top-3 sm:w-24 sm:text-[10px]">
                           NEW
                       </div>
                   )}
 
                   <div className={cn(
-                    "flex h-44 flex-col justify-between rounded-md bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] p-5",
+                    "flex min-h-[180px] flex-col justify-between rounded-lg bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] p-4 sm:min-h-[200px] sm:rounded-md sm:p-5",
                     borderClasses[letter.config?.borderStyle || 'simple']
                   )}>
+                    {/* Header: Stamp and Date */}
                     <div className="flex items-start justify-between">
-                         <div className="rounded-lg border border-gray-100 bg-white/80 p-2 shadow-sm">
-                            <Mail className={cn("size-5 text-primary/80", !letter.isRead && "animate-pulse")} />
-                         </div>
-                         <div className="text-xs text-gray-500">
-                             {formatDistanceToNow(letter.createdAt.toDate(), {
-                            addSuffix: true,
-                            locale: locale === 'es' ? es : undefined,
-                          })}
-                         </div>
+                      <div className="flex size-10 items-center justify-center rounded-full bg-white/80 text-primary/70 shadow-sm transition-colors group-hover:text-primary sm:size-12">
+                        {stampIcons[letter.config?.stamp] || <WaxSealIcon className="size-full rotate-12" />}
+                      </div>
+                      <div className="text-[10px] text-gray-500 sm:text-xs">
+                        {formatDistanceToNow(letter.createdAt.toDate(), {
+                          addSuffix: true,
+                          locale: locale === 'es' ? es : undefined,
+                        })}
+                      </div>
                     </div>
 
-                    <div className="text-center">
-                        <p className="text-lg text-gray-800">
-                             Para: <span className="font-semibold text-primary">{getTranslatedName(letter.recipientName)}</span>
+                    {/* Title (if exists) */}
+                    {letter.title && (
+                      <div className="mt-2 text-center">
+                        <p className="line-clamp-2 font-display text-base font-bold text-primary sm:text-lg">
+                          {letter.title}
                         </p>
-                         <p className="text-sm text-gray-500">
-                             De: {getTranslatedName(letter.senderName)}
-                        </p>
-                    </div>
+                      </div>
+                    )}
 
-                    <div className="flex justify-center">
-                         <div className="flex size-10 items-center justify-center text-primary/60 transition-colors group-hover:text-primary/80">
-                              {stampIcons[letter.config?.stamp] || <WaxSealIcon className="size-full rotate-12" />}
-                         </div>
+                    {/* Names: To/From */}
+                    <div className="mt-auto pt-3 text-center">
+                      <p className="text-sm text-gray-800 sm:text-base">
+                        {viewMode === 'received' ? 'De' : 'Para'}: <span className="font-semibold text-primary">
+                          {viewMode === 'received' ? getTranslatedName(letter.senderName) : getTranslatedName(letter.recipientName)}
+                        </span>
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500 sm:text-sm">
+                        {viewMode === 'received' ? 'Para' : 'De'}: {viewMode === 'received' ? getTranslatedName(letter.recipientName) : getTranslatedName(letter.senderName)}
+                      </p>
                     </div>
                   </div>
                 </Link>

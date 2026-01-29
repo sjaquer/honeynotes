@@ -146,49 +146,49 @@ export default function SettingsPage() {
             <h3 className="text-lg font-semibold text-gray-800">{t('settingsPage.partner.title')}</h3>
           </div>
 
-          {profile?.partnerId ? (
-            // Already linked
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 rounded-xl bg-green-50 p-4">
-                <Link2 className="size-5 text-green-600" />
-                <div>
-                  <p className="font-medium text-green-800">{t('settingsPage.partner.linkedWith')} {profile.partnerName}!</p>
-                  <p className="text-sm text-green-600">{t('settingsPage.partner.description')}</p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full text-red-600 border-red-200 hover:bg-red-50"
-                onClick={handleUnlink}
-                disabled={isLoading}
-              >
-                <Unlink className="mr-2 size-4" />
-                {t('settingsPage.partner.unlink')}
-              </Button>
-            </div>
-          ) : (
-            // Not linked
-            <div className="space-y-4">
-              {/* Generate code */}
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">{t('settingsPage.partner.yourCode')}:</p>
-                {myCode ? (
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 rounded-xl bg-primary/5 p-3 text-center font-mono text-2xl font-bold tracking-widest text-primary">
-                      {formatPartnerCode(myCode)}
-                    </div>
-                    <Button size="icon" variant="outline" onClick={handleCopyCode} title={t('settingsPage.partner.copyCode')}>
-                      {copied ? <Check className="size-4 text-green-600" /> : <Copy className="size-4" />}
-                    </Button>
+          {/* Always show your code section */}
+          <div className="space-y-4">
+            {/* Your code - always visible */}
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">{t('settingsPage.partner.yourCode')}:</p>
+              {myCode ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 rounded-xl bg-primary/5 p-3 text-center font-mono text-2xl font-bold tracking-widest text-primary">
+                    {formatPartnerCode(myCode)}
                   </div>
-                ) : (
-                  <Button onClick={handleGenerateCode} disabled={isLoading} className="w-full">
-                    {t('settingsPage.partner.generateCode')}
+                  <Button size="icon" variant="outline" onClick={handleCopyCode} title={t('settingsPage.partner.copyCode')}>
+                    {copied ? <Check className="size-4 text-green-600" /> : <Copy className="size-4" />}
                   </Button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <Button onClick={handleGenerateCode} disabled={isLoading} className="w-full">
+                  {t('settingsPage.partner.generateCode')}
+                </Button>
+              )}
+            </div>
 
-              {/* Enter partner's code */}
+            {profile?.partnerId ? (
+              // Already linked - show status and unlink button
+              <>
+                <div className="flex items-center gap-3 rounded-xl bg-green-50 p-4">
+                  <Link2 className="size-5 text-green-600" />
+                  <div>
+                    <p className="font-medium text-green-800">{t('settingsPage.partner.linkedWith')} {profile.partnerName}!</p>
+                    <p className="text-sm text-green-600">{t('settingsPage.partner.description')}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={handleUnlink}
+                  disabled={isLoading}
+                >
+                  <Unlink className="mr-2 size-4" />
+                  {t('settingsPage.partner.unlink')}
+                </Button>
+              </>
+            ) : (
+              // Not linked - show input for partner's code
               <div className="space-y-2 pt-4 border-t">
                 <p className="text-sm text-gray-600">{t('settingsPage.partner.enterCode')}</p>
                 <div className="flex gap-2">
@@ -206,8 +206,8 @@ export default function SettingsPage() {
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Notifications Card */}

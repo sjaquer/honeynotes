@@ -365,10 +365,10 @@ export function LetterEditor() {
             </div>
         </Tabs>
 
-        {/* Send Button */}
+        {/* Send Button - AI is optional, button always enabled */}
         <Button
             onClick={handleSend}
-            disabled={!hasAskedBee || isSending}
+            disabled={isSending}
             className="group h-14 w-full overflow-hidden rounded-2xl border-b-4 border-r-4 border-red-900 bg-primary text-lg font-bold text-white shadow-xl transition-all hover:translate-y-1 hover:border-b-0 hover:border-r-0 hover:shadow-none disabled:opacity-50 lg:h-16 lg:rounded-[2rem] lg:text-xl"
         >
             <span className="flex items-center gap-2">

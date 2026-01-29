@@ -40,7 +40,11 @@
   "inbox": {
     "title": "Inbox",
     "unread": "You have {count} unread note(s).",
+    "sentCount": "You've sent {count} note(s).",
+    "received": "Received",
+    "sent": "Sent",
     "empty": "Your inbox is empty.",
+    "emptySent": "You haven't sent any notes yet.",
     "waiting": "Waiting for a sweet note from your love..."
   },
   "letterOpener": {
