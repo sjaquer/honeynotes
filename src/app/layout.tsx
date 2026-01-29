@@ -33,8 +33,51 @@ const satisfy = Satisfy({ weight: '400', subsets: ['latin'], variable: '--font-s
 const kalam = Kalam({ weight: ['300', '400', '700'], subsets: ['latin'], variable: '--font-kalam' });
 
 export const metadata: Metadata = {
-  title: 'HoneyNotes',
-  description: 'A sweet way to connect.',
+  title: {
+    default: 'HoneyNotes - Cartas Digitales para Parejas',
+    template: '%s | HoneyNotes',
+  },
+  description: 'Un refugio digital para parejas. Escribe cartas personalizadas con asistencia de IA, comparte emociones profundas y fortalece tu relación con comunicación asertiva y empática.',
+  keywords: ['cartas digitales', 'parejas', 'comunicación', 'amor', 'relaciones', 'escritura', 'IA', 'notas románticas', 'honeynotes'],
+  authors: [{ name: 'HoneyNotes Team' }],
+  creator: 'HoneyNotes',
+  publisher: 'HoneyNotes',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'es_ES',
+    alternateLocale: 'en_US',
+    url: 'https://honeynotes.app',
+    siteName: 'HoneyNotes',
+    title: 'HoneyNotes - Cartas Digitales para Parejas',
+    description: 'Escribe cartas personalizadas con asistencia de IA. Un espacio privado y acogedor para compartir notas dulces y crear recuerdos duraderos.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'HoneyNotes - Cartas Digitales para Parejas',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'HoneyNotes - Cartas Digitales para Parejas',
+    description: 'Un refugio digital para parejas. Escribe cartas personalizadas con asistencia de IA.',
+    images: ['/og-image.png'],
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'HoneyNotes',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
@@ -43,7 +86,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="theme-color" content="#DC143C" />
+      </head>
       <body className={`${inter.variable} ${indieFlower.variable} ${belleza.variable} ${dancingScript.variable} ${pacifico.variable} ${caveat.variable} ${sacramento.variable} ${greatVibes.variable} ${shadowsIntoLight.variable} ${amaticSC.variable} ${permanentMarker.variable} ${satisfy.variable} ${kalam.variable} font-sans antialiased`}>
         <LanguageProvider>
           <div className="relative mx-auto flex min-h-screen w-full flex-col bg-background">
