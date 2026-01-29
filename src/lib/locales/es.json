@@ -1,0 +1,108 @@
+{
+  "landing": {
+    "title": "Miel-Notitas",
+    "description": "Un espacio privado y acogedor para que tú y tu persona favorita compartan notas dulces y creen recuerdos duraderos.",
+    "cta": "Entrar como Pareja"
+  },
+  "nav": {
+    "inbox": "Bandeja",
+    "newLetter": "Nueva Nota",
+    "tasks": "Tareas",
+    "shop": "Tienda"
+  },
+  "inbox": {
+    "title": "Bandeja de entrada",
+    "unread": "Tienes {count} nota(s) sin leer.",
+    "empty": "Tu bandeja de entrada está vacía.",
+    "waiting": "Esperando una dulce nota de tu amor..."
+  },
+  "letterOpener": {
+    "from": "De: {sender}",
+    "sentOn": "Enviado el {date}",
+    "opening": "Abriendo...",
+    "open": "Abrir Nota"
+  },
+  "newLetterPage": {
+    "title": "Nueva Nota",
+    "description": "Escribe una dulce nota para tu amor."
+  },
+  "letterEditor": {
+    "placeholder": "Escribe con el corazón...",
+    "paperColor": "Color del Papel",
+    "colors": {
+      "cream": "Crema",
+      "rose": "Rosa",
+      "crimson": "Carmesí",
+      "honey": "Miel",
+      "pastel": "Pastel"
+    },
+    "stamp": "Sello",
+    "stamps": {
+      "heart": "Corazón",
+      "bee": "Abeja",
+      "seal": "Sello de Cera"
+    },
+    "font": "Estilo de Fuente",
+    "fonts": {
+      "serif": "Alegreya (Serif)",
+      "sansSerif": "Belleza (Sans-serif)"
+    },
+    "send": "Enviar tu Nota",
+    "sending": "Enviando...",
+    "askBeeGuideReminder": "Debes pedirle consejo a la \"Abeja Guía\" antes de enviar.",
+    "toast": {
+      "emptyLetter": "Nota Vacía",
+      "emptyLetterDesc": "¡No puedes enviar una nota vacía!",
+      "sent": "¡Nota Enviada!",
+      "sentDesc": "Tu dulce nota está en camino."
+    }
+  },
+  "aiFeedback": {
+    "button": "Pregúntale a la Abeja Guía",
+    "title": "La Abeja Guía",
+    "error": {
+      "empty": "Por favor, escribe algo en tu nota primero.",
+      "generic": "La Abeja Guía está ocupada zumbando... Por favor, inténtalo de nuevo en un momento."
+    },
+    "ohNo": "¡Oh, no!",
+    "prompt": "Recibe consejos útiles sobre tu nota antes de enviarla. Elige un estilo de retroalimentación a continuación.",
+    "selectStyle": "Selecciona un estilo de consejo",
+    "style": {
+      "friendly": "Amistoso",
+      "rational": "Racional"
+    },
+    "feedbackReady": "Aquí tienes algunos consejos:",
+    "sentiment": "Análisis de Sentimiento",
+    "structure": "Revisión de Estructura",
+    "reaction": "Reacción Predicha",
+    "close": "¡Entendido, gracias!",
+    "getFeedback": "Obtener Consejo",
+    "thinking": "Pensando..."
+  },
+  "tasksPage": {
+    "title": "Tareas Semanales",
+    "comingSoon": "¡Próximamente!",
+    "description": "Un lugar para completar tareas semanales con tu pareja y ganar \"Polen\" para gastar en la tienda."
+  },
+  "shopPage": {
+    "title": "Tienda de Polen",
+    "comingSoon": "¡Próximamente!",
+    "description": "Gasta tu \"Polen\" aquí para desbloquear nuevos colores de papel, sellos y otras cosas divertidas para tus notas."
+  },
+  "users": {
+    "you": "Tú",
+    "yourLove": "Tu Amor"
+  },
+  "mockLetter1": {
+    "content": "Mi vida,\n\nSolo una pequeña nota para decirte que estoy pensando en ti. ¿Recuerdas esa vez que intentamos hacer un pastel y terminamos cubriendo toda la cocina de harina? Estaba pensando en eso y no pude parar de sonreír. Cada momento contigo es una aventura, incluso los más desordenados.\n\nNo puedo esperar a verte esta noche.\n\nCon todo mi amor,\nTu Amor"
+  },
+  "mockLetter2": {
+    "content": "Hola, tú,\n\nHoy vi una abejita muy linda en el jardín y me hizo pensar en mi miel. ¡Esa eres tú!\n\nGracias por ser la parte más dulce de mi vida. Me siento muy afortunado de tenerte.\n\nSiempre tuyo,\nTu Amor"
+  },
+  "mockLetter3": {
+    "content": "Para mi único amor,\n\nGracias por las hermosas notas. Siempre alegran mi día. Escribo esta para sellar mi amor por ti, hoy y siempre. Significas el mundo para mí.\n\nCon todo mi corazón,\nYo"
+  },
+  "mockLetter4": {
+    "content": "Mi Amor,\n\nEsta nota carmesí es por mi amor ardiente por ti. Espero que esta nota te encuentre bien. Estaba recordando nuestra primera cita. ¡Qué nerviosos y emocionados estábamos ambos! Parece que fue ayer, y sin embargo, mira todo lo que hemos avanzado.\n\nTe amo más cada día.\n\nPor siempre y para siempre,\nTu Amor"
+  }
+}

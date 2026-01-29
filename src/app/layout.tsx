@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import { LanguageProvider } from '@/hooks/use-translation';
 
 export const metadata: Metadata = {
   title: 'HoneyNotes',
@@ -23,10 +24,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <div className="relative mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-background shadow-2xl shadow-stone-300">
-          {children}
-        </div>
-        <Toaster />
+        <LanguageProvider>
+          <div className="relative mx-auto flex min-h-screen w-full flex-col bg-background">
+            {children}
+          </div>
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -21,24 +21,26 @@ import { AIFeedbackDialog } from './AIFeedbackDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { currentUser, otherUser } from '@/lib/data';
+import { useTranslation } from '@/hooks/use-translation';
 
-const paperColors: { name: PaperColor; class: string; label: string }[] = [
-  { name: 'cream', class: 'bg-[#FFFDF5]', label: 'Cream' },
-  { name: 'pink', class: 'bg-[#FFDFE6]', label: 'Rose' },
-  { name: 'crimson', class: 'bg-[#FADADD]', label: 'Crimson' },
-  { name: 'honey', class: 'bg-[#FFF8DD]', label: 'Honey' },
-  { name: 'light-pink', class: 'bg-pink-100', label: 'Pastel' },
+const paperColors: { name: PaperColor; class: string; labelKey: string }[] = [
+  { name: 'cream', class: 'bg-[#FFFDF5]', labelKey: 'letterEditor.colors.cream' },
+  { name: 'pink', class: 'bg-[#FFDFE6]', labelKey: 'letterEditor.colors.rose' },
+  { name: 'crimson', class: 'bg-[#FADADD]', labelKey: 'letterEditor.colors.crimson' },
+  { name: 'honey', class: 'bg-[#FFF8DD]', labelKey: 'letterEditor.colors.honey' },
+  { name: 'light-pink', class: 'bg-pink-100', labelKey: 'letterEditor.colors.pastel' },
 ];
 
-const stamps: { name: Stamp; icon: React.ReactNode; label: string }[] = [
-  { name: 'heart', icon: <Heart className="size-8" />, label: 'Heart' },
-  { name: 'bee', icon: <BeeIcon className="size-8" />, label: 'Bee' },
-  { name: 'wax-seal', icon: <WaxSealIcon className="size-8" />, label: 'Seal' },
+const stamps: { name: Stamp; icon: React.ReactNode; labelKey: string }[] = [
+  { name: 'heart', icon: <Heart className="size-8" />, labelKey: 'letterEditor.stamps.heart' },
+  { name: 'bee', icon: <BeeIcon className="size-8" />, labelKey: 'letterEditor.stamps.bee' },
+  { name: 'wax-seal', icon: <WaxSealIcon className="size-8" />, labelKey: 'letterEditor.stamps.seal' },
 ];
 
 export function LetterEditor() {
   const { toast } = useToast();
   const router = useRouter();
+  const { t } = useTranslation();
   const [content, setContent] = useState('');
   const [paperColor, setPaperColor] = useState<PaperColor>('cream');
   const [stamp, setStamp] = useState<Stamp>('heart');
@@ -50,8 +52,8 @@ export function LetterEditor() {
     if (!content.trim()) {
       toast({
         variant: 'destructive',
-        title: 'Empty Letter',
-        description: 'You can\'t send an empty letter!',
+        title: t('letterEditor.toast.emptyLetter'),
+        description: t('letterEditor.toast.emptyLetterDesc'),
       });
       return;
     }
@@ -75,8 +77,8 @@ export function LetterEditor() {
     setTimeout(() => {
         setIsSending(false);
         toast({
-            title: 'Letter Sent!',
-            description: 'Your sweet note is on its way.',
+            title: t('letterEditor.toast.sent'),
+            description: t('letterEditor.toast.sentDesc'),
         });
         router.push('/inbox');
     }, 1000);
@@ -89,7 +91,7 @@ export function LetterEditor() {
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Write your heart out..."
+            placeholder={t('letterEditor.placeholder')}
             className={cn(
               'min-h-[300px] resize-none border-0 bg-transparent p-2 text-lg !ring-0 !ring-offset-0 focus:!ring-0 focus-visible:!ring-0 focus-visible:!ring-offset-0',
               font === 'Belleza' ? 'font-headline' : 'font-body'
@@ -99,7 +101,7 @@ export function LetterEditor() {
       </Card>
       <div className="mt-6 space-y-6">
         <div>
-          <Label className="mb-2 block font-headline text-lg">Paper Color</Label>
+          <Label className="mb-2 block font-headline text-lg">{t('letterEditor.paperColor')}</Label>
           <div className="flex justify-around rounded-2xl bg-muted/50 p-2">
             {paperColors.map((color) => (
               <button
@@ -112,13 +114,13 @@ export function LetterEditor() {
                     ? 'border-primary ring-2 ring-primary ring-offset-2'
                     : 'border-transparent'
                 )}
-                aria-label={`Set paper color to ${color.label}`}
+                aria-label={t(color.labelKey)}
               />
             ))}
           </div>
         </div>
         <div>
-          <Label className="mb-2 block font-headline text-lg">Stamp</Label>
+          <Label className="mb-2 block font-headline text-lg">{t('letterEditor.stamp')}</Label>
           <div className="flex justify-around rounded-2xl bg-muted/50 p-2">
             {stamps.map((s) => (
               <button
@@ -130,7 +132,7 @@ export function LetterEditor() {
                     ? 'bg-primary/20 ring-2 ring-primary ring-offset-2'
                     : 'bg-transparent'
                 )}
-                aria-label={`Select ${s.label} stamp`}
+                aria-label={t(s.labelKey)}
               >
                 {s.icon}
               </button>
@@ -139,7 +141,7 @@ export function LetterEditor() {
         </div>
         <div>
           <Label htmlFor="font-select" className="mb-2 block font-headline text-lg">
-            Font Style
+            {t('letterEditor.font')}
           </Label>
           <Select onValueChange={(v: AppFont) => setFont(v)} defaultValue={font}>
             <SelectTrigger id="font-select" className="h-12 rounded-2xl">
@@ -147,10 +149,10 @@ export function LetterEditor() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Alegreya" className="font-body">
-                Alegreya (Serif)
+                {t('letterEditor.fonts.serif')}
               </SelectItem>
               <SelectItem value="Belleza" className="font-headline">
-                Belleza (Sans-serif)
+                {t('letterEditor.fonts.sansSerif')}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -165,11 +167,11 @@ export function LetterEditor() {
             disabled={!hasAskedBee || isSending}
             className="h-[60px] w-full rounded-3xl text-lg font-bold"
           >
-            {isSending ? 'Sending...' : 'Send Your Letter'}
+            {isSending ? t('letterEditor.sending') : t('letterEditor.send')}
           </Button>
           {!hasAskedBee && (
             <p className="text-center text-xs text-foreground/60">
-              You must &quot;Ask the Bee Guide&quot; for feedback before sending.
+              {t('letterEditor.askBeeGuideReminder')}
             </p>
           )}
         </div>

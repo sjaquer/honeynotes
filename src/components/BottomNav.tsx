@@ -10,22 +10,24 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/use-translation';
 
 type NavItem = {
   href: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
 };
 
 const navItems: NavItem[] = [
-  { href: '/inbox', label: 'Inbox', icon: Inbox },
-  { href: '/new-letter', label: 'New Letter', icon: PenSquare },
-  { href: '/tasks', label: 'Tasks', icon: ListTodo },
-  { href: '/shop', label: 'Shop', icon: Store },
+  { href: '/inbox', labelKey: 'nav.inbox', icon: Inbox },
+  { href: '/new-letter', labelKey: 'nav.newLetter', icon: PenSquare },
+  { href: '/tasks', labelKey: 'nav.tasks', icon: ListTodo },
+  { href: '/shop', labelKey: 'nav.shop', icon: Store },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <footer className="sticky bottom-0 z-10 mt-auto w-full border-t bg-background/95 backdrop-blur-sm">
@@ -42,7 +44,7 @@ export function BottomNav() {
               )}
             >
               <item.icon className="size-6" />
-              <span>{item.label}</span>
+              <span>{t(item.labelKey)}</span>
             </Link>
           );
         })}

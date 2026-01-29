@@ -8,6 +8,9 @@ import { BeeIcon } from '@/components/icons/BeeIcon';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useTranslation } from '@/hooks/use-translation';
+import { es } from 'date-fns/locale';
+
 
 const paperColorClasses = {
   cream: 'bg-[#FFFDF5]',
@@ -31,6 +34,7 @@ const stampIcons = {
 export function LetterOpener({ letter }: { letter: Letter }) {
   const [isOpening, setIsOpening] = useState(false);
   const [isOpened, setIsOpened] = useState(false);
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     if (isOpening) {
@@ -38,6 +42,12 @@ export function LetterOpener({ letter }: { letter: Letter }) {
       return () => clearTimeout(timer);
     }
   }, [isOpening]);
+
+  const getTranslatedName = (name: string) => {
+    if (name === 'You') return t('users.you');
+    if (name === 'Your Love') return t('users.yourLove');
+    return name;
+  };
 
   if (!isOpened) {
     return (
@@ -59,7 +69,7 @@ export function LetterOpener({ letter }: { letter: Letter }) {
           disabled={isOpening}
           className="mt-12 h-[60px] rounded-3xl bg-primary px-8 text-lg font-bold shadow-lg"
         >
-          {isOpening ? 'Opening...' : 'Open Letter'}
+          {isOpening ? t('letterOpener.opening') : t('letterOpener.open')}
         </Button>
       </div>
     );
@@ -75,9 +85,9 @@ export function LetterOpener({ letter }: { letter: Letter }) {
     >
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <p className="text-lg">From: {letter.senderName}</p>
+          <p className="text-lg">{t('letterOpener.from', { sender: getTranslatedName(letter.senderName) })}</p>
           <p className="text-xs text-foreground/60">
-            Sent on {format(new Date(letter.createdAt), 'MMMM d, yyyy')}
+            {t('letterOpener.sentOn', { date: format(new Date(letter.createdAt), 'MMMM d, yyyy', { locale: locale === 'es' ? es : undefined }) })}
           </p>
         </div>
         <div className="size-10 text-primary">

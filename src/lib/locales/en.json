@@ -1,0 +1,108 @@
+{
+  "landing": {
+    "title": "HoneyNotes",
+    "description": "A private, cozy space for you and your favorite person to share sweet notes and create lasting memories.",
+    "cta": "Enter as Couple"
+  },
+  "nav": {
+    "inbox": "Inbox",
+    "newLetter": "New Letter",
+    "tasks": "Tasks",
+    "shop": "Shop"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "unread": "You have {count} unread note(s).",
+    "empty": "Your inbox is empty.",
+    "waiting": "Waiting for a sweet note from your love..."
+  },
+  "letterOpener": {
+    "from": "From: {sender}",
+    "sentOn": "Sent on {date}",
+    "opening": "Opening...",
+    "open": "Open Letter"
+  },
+  "newLetterPage": {
+    "title": "New Letter",
+    "description": "Write a sweet note for your love."
+  },
+  "letterEditor": {
+    "placeholder": "Write your heart out...",
+    "paperColor": "Paper Color",
+    "colors": {
+      "cream": "Cream",
+      "rose": "Rose",
+      "crimson": "Crimson",
+      "honey": "Honey",
+      "pastel": "Pastel"
+    },
+    "stamp": "Stamp",
+    "stamps": {
+      "heart": "Heart",
+      "bee": "Bee",
+      "seal": "Seal"
+    },
+    "font": "Font Style",
+    "fonts": {
+      "serif": "Alegreya (Serif)",
+      "sansSerif": "Belleza (Sans-serif)"
+    },
+    "send": "Send Your Letter",
+    "sending": "Sending...",
+    "askBeeGuideReminder": "You must \"Ask the Bee Guide\" for feedback before sending.",
+    "toast": {
+      "emptyLetter": "Empty Letter",
+      "emptyLetterDesc": "You can't send an empty letter!",
+      "sent": "Letter Sent!",
+      "sentDesc": "Your sweet note is on its way."
+    }
+  },
+  "aiFeedback": {
+    "button": "Ask the Bee Guide",
+    "title": "The Bee Guide",
+    "error": {
+      "empty": "Please write something in your letter first.",
+      "generic": "The Bee Guide is busy buzzing... Please try again in a moment."
+    },
+    "ohNo": "Oh no!",
+    "prompt": "Get some helpful feedback on your letter before you send it. Choose a feedback style below.",
+    "selectStyle": "Select a feedback style",
+    "style": {
+      "friendly": "Friendly",
+      "rational": "Rational"
+    },
+    "feedbackReady": "Here's some feedback:",
+    "sentiment": "Sentiment Analysis",
+    "structure": "Structure Check",
+    "reaction": "Predicted Reaction",
+    "close": "Got it, thanks!",
+    "getFeedback": "Get Feedback",
+    "thinking": "Thinking..."
+  },
+  "tasksPage": {
+    "title": "Weekly Tasks",
+    "comingSoon": "Coming Soon!",
+    "description": "A place to complete weekly tasks with your partner and earn \"Polen\" to spend in the shop."
+  },
+  "shopPage": {
+    "title": "Polen Shop",
+    "comingSoon": "Coming Soon!",
+    "description": "Spend your \"Polen\" here to unlock new paper colors, stamps, and other fun goodies for your letters."
+  },
+  "users": {
+    "you": "You",
+    "yourLove": "Your Love"
+  },
+  "mockLetter1": {
+    "content": "My Dearest,\n\nJust a little note to say I'm thinking of you. Remember that time we tried to bake a cake and ended up covering the whole kitchen in flour? I was just thinking about it and couldn't stop smiling. Every moment with you is an adventure, even the messy ones.\n\nCan't wait to see you tonight.\n\nAll my love,\nYour Love"
+  },
+  "mockLetter2": {
+    "content": "Hey You,\n\nI saw the cutest little bee in the garden today and it made me think of my honey. That's you!\n\nThank you for being the sweetest part of my life. I feel so lucky to have you.\n\nYours forever,\nYour Love"
+  },
+  "mockLetter3": {
+    "content": "To my one and only,\n\nThank you for the beautiful notes. They always make my day brighter. I'm writing this one to seal my love for you, today and always. You mean the world to me.\n\nWith all my heart,\nMe"
+  },
+  "mockLetter4": {
+    "content": "My Love,\n\nThis crimson note is for my burning love for you. I hope this note finds you well. I was just reminiscing about our first date. How nervous and excited we both were! It feels like just yesterday, and yet look at how far we've come.\n\nI love you more each day.\n\nForever and always,\nYour Love"
+  }
+}
