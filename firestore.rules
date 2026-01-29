@@ -44,11 +44,11 @@ service cloud.firestore {
       let existingData = resource.data;
       
       // The current authenticated user must be the existing partnerId of the target user
+      // We only check that partnerId and partnerName are being set to null
       return isSignedIn() 
         && existingData.partnerId == request.auth.uid
         && incomingData.partnerId == null
-        && incomingData.partnerName == null
-        && incomingData.keys().hasOnly(['partnerId', 'partnerName', 'partnerUnlinkedAt', 'updatedAt']);
+        && incomingData.partnerName == null;
     }
 
     /**

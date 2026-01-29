@@ -221,6 +221,7 @@ export function usePartnerLink() {
         await updateDoc(partnerRef, {
           partnerId: null,
           partnerName: null,
+          partnerUnlinkedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
       }
