@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Settings, Link2, Unlink, Copy, Check, LogOut, User, Heart, Bell, BellOff, RefreshCw, Trash2, Edit2, Save, X, AlertTriangle } from 'lucide-react';
+import { Settings, Link2, Unlink, Copy, Check, LogOut, User, Heart, Bell, BellOff, RefreshCw, Trash2, Edit2, Save, X, AlertTriangle, Gift, Ticket, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useFirebase, useUser, useAuth, useDoc, useMemoFirebase } from '@/firebase';
@@ -12,6 +12,7 @@ import { doc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/fi
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { usePromoCodes } from '@/hooks/use-promo-codes';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,11 +32,13 @@ export default function SettingsPage() {
   const { user } = useUser();
   
   const { generateMyCode, deleteMyCode, linkWithPartner, unlinkPartner, clearUnlinkedNotification, formatPartnerCode, isLoading, error } = usePartnerLink();
+  const { redeemCode, isRedeeming } = usePromoCodes();
   
   const [partnerCodeInput, setPartnerCodeInput] = useState('');
   const [myCode, setMyCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [promoCodeInput, setPromoCodeInput] = useState('');
   
   // Edit profile states
   const [isEditingName, setIsEditingName] = useState(false);
@@ -198,6 +201,20 @@ export default function SettingsPage() {
     } else {
       setNotificationsEnabled(false);
       toast({ title: t('settingsPage.notifications.disabled') });
+    }
+  };
+
+  const handleRedeemPromoCode = async () => {
+    const result = await redeemCode(promoCodeInput);
+    
+    if (result.success) {
+      toast({ 
+        title: '🎉 ¡Código canjeado!', 
+        description: `Has recibido ${result.rewards?.polen ? `${result.rewards.polen} 🌼 Polen` : ''}${result.rewards?.polen && result.rewards?.jaleaReal ? ' y ' : ''}${result.rewards?.jaleaReal ? `${result.rewards.jaleaReal} 👑 Jalea Real` : ''}` 
+      });
+      setPromoCodeInput('');
+    } else {
+      toast({ variant: 'destructive', title: 'Error', description: result.message });
     }
   };
 
@@ -428,6 +445,43 @@ export default function SettingsPage() {
                 {error && <p className="text-sm text-red-500">{error}</p>}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Promo Codes Card */}
+        <div className="rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="rounded-xl bg-purple-100 p-2">
+              <Ticket className="size-5 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">Códigos Promocionales</h3>
+              <p className="text-sm text-gray-500">Canjea códigos para obtener recompensas</p>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Input
+              placeholder="Ingresa tu código..."
+              value={promoCodeInput}
+              onChange={(e) => setPromoCodeInput(e.target.value)}
+              className="flex-1 bg-white"
+              disabled={isRedeeming}
+            />
+            <Button 
+              onClick={handleRedeemPromoCode} 
+              disabled={isRedeeming || !promoCodeInput.trim()}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {isRedeeming ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <>
+                  <Gift className="mr-2 size-4" />
+                  Canjear
+                </>
+              )}
+            </Button>
           </div>
         </div>
 

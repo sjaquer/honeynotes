@@ -6,12 +6,18 @@
  * - /users/{userId}: User profiles with email auth
  * - /partnerCodes/{code}: Partner invitation codes
  * - /tasks/{taskId}: Global task definitions
+ * - /userEconomy/{userId}: User's currency and inventory
+ * - /userTasks/{userId}: User's weekly task progress
+ * - /promoCodes/{codeId}: Promotional codes for rewards
  *
  * Key Security:
  * - Letters: sender can create/delete, sender OR recipient can read, recipient can update (mark read)
  * - Users: owner can read/write, any signed-in user can read for partner linking
  * - Partner codes: owner can delete, authenticated users can read/create
  * - Tasks: public read, admin write only
+ * - Economy: owner can read/write their own data
+ * - User Tasks: owner can read/write their own progress
+ * - Promo Codes: read/update for auth users, create/delete admin only
  * 
  * Partner Unlinking Flow:
  * - When user A deletes/regenerates their code, they can update user B's profile to clear partnerId
@@ -117,6 +123,48 @@ service cloud.firestore {
     match /tasks/{taskId} {
       allow read: if isSignedIn();
       allow write: if false; // Admin only via console
+    }
+
+    /**
+     * User Economy - Currency and Inventory
+     * /userEconomy/{userId}
+     * 
+     * Fields: polen, jaleaReal, inventory, lastAdWatch, adsWatchedToday, 
+     *         totalPolenEarned, totalJaleaRealEarned, totalLettersSent, totalLettersRead, updatedAt
+     */
+    match /userEconomy/{userId} {
+      // Only owner can read and write their economy data
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    /**
+     * User Weekly Tasks Progress
+     * /userTasks/{userId}
+     * 
+     * Fields: weekStart, tasks (array of { taskId, progress, completed, claimed })
+     */
+    match /userTasks/{userId} {
+      // Only owner can read and write their task progress
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    /**
+     * Promotional Codes
+     * /promoCodes/{codeId}
+     * 
+     * Fields: polen, jaleaReal, maxUses, usedCount, usedBy[], expiresAt, createdAt, isActive
+     */
+    match /promoCodes/{codeId} {
+      // Anyone authenticated can read promo codes (to redeem them)
+      allow read: if isSignedIn();
+      
+      // Users can update to add themselves to usedBy and increment usedCount
+      allow update: if isSignedIn();
+      
+      // Only admin can create/delete (via Firebase Console)
+      allow create, delete: if false;
     }
   }
 }

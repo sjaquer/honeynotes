@@ -11,7 +11,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
 
-const paperColorClasses = {
+const paperColorClasses: Record<string, string> = {
   cream: 'bg-[#FFFDF5]',
   pink: 'bg-[#FFDFE6]',
   crimson: 'bg-[#FADADD]',
@@ -22,11 +22,19 @@ const paperColorClasses = {
   peach: 'bg-[#FFE5B4]',
   sky: 'bg-[#E0F2FE]',
   rose: 'bg-[#FFE4E1]',
+  // Premium colors
+  sunset: 'bg-gradient-to-br from-orange-100 to-pink-100',
+  ocean: 'bg-gradient-to-br from-blue-100 to-teal-100',
+  aurora: 'bg-gradient-to-br from-purple-100 to-green-100',
+  'rose-gold': 'bg-gradient-to-br from-rose-100 to-amber-50',
+  champagne: 'bg-[#F7E7CE]',
+  moonlight: 'bg-gradient-to-br from-slate-100 to-indigo-100',
+  'cherry-blossom': 'bg-gradient-to-br from-pink-100 to-rose-50',
 };
 
-const fontClasses = {
+const fontClasses: Record<string, string> = {
   Indie_Flower: 'font-handwriting',
-  Alegreya: 'font-sans', // Assuming Alegreya is default
+  Alegreya: 'font-sans',
   Belleza: 'font-display',
   Dancing_Script: 'font-dancing',
   Pacifico: 'font-pacifico',
@@ -38,25 +46,56 @@ const fontClasses = {
   Permanent_Marker: 'font-permanent',
   Satisfy: 'font-satisfy',
   Kalam: 'font-kalam',
+  Patrick_Hand: 'font-sans',
+  Architects_Daughter: 'font-sans',
+  Cookie: 'font-sans',
+  Courgette: 'font-sans',
+  Lobster: 'font-sans',
+  Allura: 'font-sans',
+  Tangerine: 'font-sans',
+  Alex_Brush: 'font-sans',
+  Mr_Dafoe: 'font-sans',
 };
 
-const borderClasses = {
+const borderClasses: Record<string, string> = {
   simple: 'border-simple',
   airmail: 'airmail-border',
   dashed: 'border-dashed-style',
   floral: 'border-floral',
+  hearts: 'border-hearts',
+  stars: 'border-stars',
+  waves: 'border-waves',
+  ribbon: 'border-ribbon',
+  vintage: 'border-vintage',
+  ornate: 'border-ornate',
+  gold: 'border-gold',
+  lace: 'border-lace',
 };
 
-const stampIcons = {
+const stampIcons: Record<string, React.ReactNode> = {
   heart: <Heart className="size-full fill-current" />,
   bee: <BeeIcon className="size-full fill-current" />,
   'wax-seal': <WaxSealIcon className="size-full fill-current" />,
   'rose-emoji': <span className="text-4xl">🌹</span>,
   'star-emoji': <span className="text-4xl">⭐</span>,
+  'butterfly-emoji': <span className="text-4xl">🦋</span>,
+  'flower-emoji': <span className="text-4xl">🌺</span>,
+  'rainbow-emoji': <span className="text-4xl">🌈</span>,
   'kiss-emoji': <span className="text-4xl">💋</span>,
   'sparkle-emoji': <span className="text-4xl">✨</span>,
   'sun-emoji': <span className="text-4xl">☀️</span>,
+  'fire-emoji': <span className="text-4xl">🔥</span>,
+  'cupid-emoji': <span className="text-4xl">💘</span>,
+  'infinity-emoji': <span className="text-4xl">♾️</span>,
+  'ring-emoji': <span className="text-4xl">💍</span>,
   'moon-emoji': <span className="text-4xl">🌙</span>,
+  'crown-emoji': <span className="text-4xl">👑</span>,
+  'diamond-emoji': <span className="text-4xl">💎</span>,
+  'angel-emoji': <span className="text-4xl">👼</span>,
+  'dove-emoji': <span className="text-4xl">🕊️</span>,
+  'teddy-emoji': <span className="text-4xl">🧸</span>,
+  'lovebirds-emoji': <span className="text-4xl">🐦</span>,
+  'shooting-star-emoji': <span className="text-4xl">🌠</span>,
 };
 
 export function LetterOpener({ letter }: { letter: LetterUI }) {

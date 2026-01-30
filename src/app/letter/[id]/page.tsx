@@ -2,16 +2,19 @@
 
 import { LetterOpener } from './_components/LetterOpener';
 import { notFound } from 'next/navigation';
-import { use, useEffect } from 'react';
+import { use, useEffect, useRef } from 'react';
 import type { Letter, LetterUI } from '@/lib/types';
 import { useFirebase, useUser, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import { useEconomy } from '@/hooks/use-economy';
 
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { firestore } = useFirebase();
   const { user, isUserLoading } = useUser();
+  const { trackLetterRead } = useEconomy();
+  const hasTrackedRead = useRef(false);
 
   const letterRef = useMemoFirebase(() => {
     if (!id) return null;
@@ -27,10 +30,17 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   }, [id, user, letter, isLoading, error]);
 
   useEffect(() => {
-    if (letter && !letter.isRead && letterRef) {
+    if (letter && !letter.isRead && letterRef && user) {
       updateDocumentNonBlocking(letterRef, { isRead: true });
+      
+      // Only track if recipient is reading (not sender viewing their own letter)
+      // and only track once per session
+      if (letter.recipientId === user.uid && !hasTrackedRead.current) {
+        hasTrackedRead.current = true;
+        trackLetterRead();
+      }
     }
-  }, [letter, letterRef]);
+  }, [letter, letterRef, user, trackLetterRead]);
 
   // Show error if any
   if (error) {
