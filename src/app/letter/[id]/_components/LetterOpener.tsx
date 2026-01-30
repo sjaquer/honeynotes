@@ -3,7 +3,6 @@
 import type { LetterUI } from '@/lib/types';
 import { useState } from 'react';
 import { Heart, ArrowLeft, Mail } from 'lucide-react';
-import { BeeIcon } from '@/components/icons/BeeIcon';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -46,15 +45,15 @@ const fontClasses: Record<string, string> = {
   Permanent_Marker: 'font-permanent',
   Satisfy: 'font-satisfy',
   Kalam: 'font-kalam',
-  Patrick_Hand: 'font-sans',
-  Architects_Daughter: 'font-sans',
-  Cookie: 'font-sans',
-  Courgette: 'font-sans',
-  Lobster: 'font-sans',
-  Allura: 'font-sans',
-  Tangerine: 'font-sans',
-  Alex_Brush: 'font-sans',
-  Mr_Dafoe: 'font-sans',
+  Patrick_Hand: 'font-patrick',
+  Architects_Daughter: 'font-architects',
+  Cookie: 'font-cookie',
+  Courgette: 'font-courgette',
+  Lobster: 'font-lobster',
+  Allura: 'font-allura',
+  Tangerine: 'font-tangerine',
+  Alex_Brush: 'font-alexbrush',
+  Mr_Dafoe: 'font-mrdafoe',
 };
 
 const borderClasses: Record<string, string> = {
@@ -74,7 +73,7 @@ const borderClasses: Record<string, string> = {
 
 const stampIcons: Record<string, React.ReactNode> = {
   heart: <Heart className="size-full fill-current" />,
-  bee: <BeeIcon className="size-full fill-current" />,
+  bee: <span className="text-4xl">🐝</span>,
   'wax-seal': <WaxSealIcon className="size-full fill-current" />,
   'rose-emoji': <span className="text-4xl">🌹</span>,
   'star-emoji': <span className="text-4xl">⭐</span>,
@@ -187,7 +186,7 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
                               </div>
 
                               <div className="mt-8 flex items-center justify-center gap-2 border-t border-dashed border-gray-300 pt-4 sm:mt-12 sm:pt-6">
-                                  <BeeIcon className="size-5 text-accent opacity-60 sm:size-6" />
+                                  <span className="text-xl">🐝</span>
                                   <span className="text-xs text-gray-400 sm:text-sm">HoneyNotes</span>
                               </div>
                           </div>

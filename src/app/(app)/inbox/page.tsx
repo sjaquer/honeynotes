@@ -44,19 +44,41 @@ const paperColorClasses: Record<PaperColor, string> = {
   peach: 'bg-[#FFE5B4]',
   sky: 'bg-[#E0F2FE]',
   rose: 'bg-[#FFE4E1]',
+  // Premium colors
+  sunset: 'bg-gradient-to-br from-orange-100 to-pink-100',
+  ocean: 'bg-gradient-to-br from-blue-100 to-teal-100',
+  aurora: 'bg-gradient-to-br from-purple-100 to-green-100',
+  'rose-gold': 'bg-gradient-to-br from-rose-100 to-amber-50',
+  champagne: 'bg-[#F7E7CE]',
+  moonlight: 'bg-gradient-to-br from-slate-100 to-indigo-100',
+  'cherry-blossom': 'bg-gradient-to-br from-pink-100 to-rose-50',
 };
 
 // Stamp icons for preview
 const stampIcons: Record<Stamp, React.ReactNode> = {
   heart: <Heart className="size-full fill-current" />,
-  bee: <BeeIcon className="size-full" />,
+  bee: <span className="text-2xl">🐝</span>,
   'wax-seal': <WaxSealIcon className="size-full" />,
   'rose-emoji': <span className="text-2xl">🌹</span>,
   'star-emoji': <span className="text-2xl">⭐</span>,
+  'butterfly-emoji': <span className="text-2xl">🦋</span>,
+  'flower-emoji': <span className="text-2xl">🌺</span>,
+  'rainbow-emoji': <span className="text-2xl">🌈</span>,
   'kiss-emoji': <span className="text-2xl">💋</span>,
   'sparkle-emoji': <span className="text-2xl">✨</span>,
   'sun-emoji': <span className="text-2xl">☀️</span>,
+  'fire-emoji': <span className="text-2xl">🔥</span>,
+  'cupid-emoji': <span className="text-2xl">💘</span>,
+  'infinity-emoji': <span className="text-2xl">♾️</span>,
+  'ring-emoji': <span className="text-2xl">💍</span>,
   'moon-emoji': <span className="text-2xl">🌙</span>,
+  'crown-emoji': <span className="text-2xl">👑</span>,
+  'diamond-emoji': <span className="text-2xl">💎</span>,
+  'angel-emoji': <span className="text-2xl">👼</span>,
+  'dove-emoji': <span className="text-2xl">🕊️</span>,
+  'teddy-emoji': <span className="text-2xl">🧸</span>,
+  'lovebirds-emoji': <span className="text-2xl">🐦</span>,
+  'shooting-star-emoji': <span className="text-2xl">🌠</span>,
 };
 
 // Border style classes for preview
@@ -65,6 +87,14 @@ const borderClasses: Record<string, string> = {
   airmail: 'airmail-border',
   dashed: 'border-2 border-dashed border-primary/30',
   floral: 'border-floral',
+  hearts: 'border-hearts',
+  stars: 'border-stars',
+  waves: 'border-waves',
+  ribbon: 'border-ribbon',
+  vintage: 'border-vintage',
+  ornate: 'border-ornate',
+  gold: 'border-gold',
+  lace: 'border-lace',
 };
 
 export default function InboxPage() {
@@ -146,7 +176,7 @@ export default function InboxPage() {
         <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-primary lg:text-4xl">{t('inbox.title')}</h1>
             <div className="rounded-full bg-white p-2 shadow-sm">
-                <BeeIcon className="size-6 text-accent" />
+                <BeeIcon size="lg" />
             </div>
         </div>
         <div className="flex items-center justify-between">

@@ -12,7 +12,16 @@ import {
   Amatic_SC,
   Permanent_Marker,
   Satisfy,
-  Kalam
+  Kalam,
+  Patrick_Hand,
+  Architects_Daughter,
+  Cookie,
+  Courgette,
+  Lobster,
+  Allura,
+  Tangerine,
+  Alex_Brush,
+  Mr_Dafoe,
 } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
@@ -32,6 +41,16 @@ const amaticSC = Amatic_SC({ weight: ['400', '700'], subsets: ['latin'], variabl
 const permanentMarker = Permanent_Marker({ weight: '400', subsets: ['latin'], variable: '--font-permanent' });
 const satisfy = Satisfy({ weight: '400', subsets: ['latin'], variable: '--font-satisfy' });
 const kalam = Kalam({ weight: ['300', '400', '700'], subsets: ['latin'], variable: '--font-kalam' });
+// Additional fonts
+const patrickHand = Patrick_Hand({ weight: '400', subsets: ['latin'], variable: '--font-patrick' });
+const architectsDaughter = Architects_Daughter({ weight: '400', subsets: ['latin'], variable: '--font-architects' });
+const cookie = Cookie({ weight: '400', subsets: ['latin'], variable: '--font-cookie' });
+const courgette = Courgette({ weight: '400', subsets: ['latin'], variable: '--font-courgette' });
+const lobster = Lobster({ weight: '400', subsets: ['latin'], variable: '--font-lobster' });
+const allura = Allura({ weight: '400', subsets: ['latin'], variable: '--font-allura' });
+const tangerine = Tangerine({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-tangerine' });
+const alexBrush = Alex_Brush({ weight: '400', subsets: ['latin'], variable: '--font-alexbrush' });
+const mrDafoe = Mr_Dafoe({ weight: '400', subsets: ['latin'], variable: '--font-mrdafoe' });
 
 export const metadata: Metadata = {
   title: {
@@ -94,7 +113,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="theme-color" content="#DC143C" />
       </head>
-      <body className={`${inter.variable} ${indieFlower.variable} ${belleza.variable} ${dancingScript.variable} ${pacifico.variable} ${caveat.variable} ${sacramento.variable} ${greatVibes.variable} ${shadowsIntoLight.variable} ${amaticSC.variable} ${permanentMarker.variable} ${satisfy.variable} ${kalam.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${indieFlower.variable} ${belleza.variable} ${dancingScript.variable} ${pacifico.variable} ${caveat.variable} ${sacramento.variable} ${greatVibes.variable} ${shadowsIntoLight.variable} ${amaticSC.variable} ${permanentMarker.variable} ${satisfy.variable} ${kalam.variable} ${patrickHand.variable} ${architectsDaughter.variable} ${cookie.variable} ${courgette.variable} ${lobster.variable} ${allura.variable} ${tangerine.variable} ${alexBrush.variable} ${mrDafoe.variable} font-sans antialiased`}>
         <FirebaseClientProvider>
           <LanguageProvider>
             <div className="relative mx-auto flex min-h-screen w-full flex-col bg-background">

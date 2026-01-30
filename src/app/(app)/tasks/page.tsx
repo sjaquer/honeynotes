@@ -2,7 +2,7 @@
 
 import { ListTodo, Plus, CheckCircle2, Circle, Star, Calendar, Clock, Gift, Loader2, RefreshCw, Trophy } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
-import { BeeIcon } from '@/components/icons/BeeIcon';
+// BeeIcon is now an emoji component
 import { cn } from '@/lib/utils';
 import { useWeeklyTasks } from '@/hooks/use-weekly-tasks';
 import { useEconomy } from '@/hooks/use-economy';
@@ -102,11 +102,11 @@ export default function TasksPage() {
             />
           </div>
           
-          {stats.unclaimed > 0 && (
+          {(stats.unclaimed ?? 0) > 0 && (
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/20 p-2">
               <Gift className="size-4" />
               <span className="text-sm font-medium">
-                ¡Tienes {stats.unclaimed} recompensa{stats.unclaimed > 1 ? 's' : ''} por reclamar!
+                ¡Tienes {stats.unclaimed} recompensa{(stats.unclaimed ?? 0) > 1 ? 's' : ''} por reclamar!
               </span>
             </div>
           )}
@@ -219,7 +219,7 @@ export default function TasksPage() {
         {/* Info Note */}
         <div className="rounded-2xl bg-amber-50 p-4">
           <div className="flex items-start gap-3">
-            <BeeIcon className="size-6 text-amber-500" />
+            <span className="text-2xl">🐝</span>
             <div>
               <h4 className="font-semibold text-amber-800">¿Cómo funcionan las tareas?</h4>
               <p className="mt-1 text-sm text-amber-700">

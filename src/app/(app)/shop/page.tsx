@@ -228,11 +228,13 @@ export default function ShopPage() {
               <span className="text-2xl">{itemToPurchase?.icon}</span>
               ¿Comprar "{itemToPurchase?.name}"?
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemToPurchase?.description}
-              <div className="mt-3 flex items-center gap-2 rounded-lg bg-gray-100 p-3">
-                <span className="font-bold">{itemToPurchase?.price}</span>
-                <span>{itemToPurchase?.currency === 'polen' ? '🌼 Polen' : '👑 Jalea Real'}</span>
+            <AlertDialogDescription asChild>
+              <div>
+                <p>{itemToPurchase?.description}</p>
+                <div className="mt-3 flex items-center gap-2 rounded-lg bg-gray-100 p-3">
+                  <span className="font-bold">{itemToPurchase?.price}</span>
+                  <span>{itemToPurchase?.currency === 'polen' ? '🌼 Polen' : '👑 Jalea Real'}</span>
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -50,7 +50,7 @@ const paperColors: { name: PaperColor; class: string; labelKey: string }[] = [
 const stamps: { name: Stamp; icon: React.ReactNode; labelKey: string }[] = [
   // Free stamps
   { name: 'heart', icon: <Heart className="size-6 fill-current" />, labelKey: 'Corazón' },
-  { name: 'bee', icon: <BeeIcon className="size-6" />, labelKey: 'Abejita' },
+  { name: 'bee', icon: <span className="text-2xl">🐝</span>, labelKey: 'Abejita' },
   { name: 'wax-seal', icon: <WaxSealIcon className="size-6" />, labelKey: 'Sello' },
   // Polen stamps
   { name: 'rose-emoji', icon: <span className="text-2xl">🌹</span>, labelKey: 'Rosa' },
@@ -84,24 +84,24 @@ const fonts: { name: AppFont; class: string; label: string }[] = [
   { name: 'Caveat', class: 'font-caveat', label: 'Caveat' },
   { name: 'Amatic_SC', class: 'font-amatic text-[1.4em]', label: 'Amatic SC' },
   { name: 'Shadows_Into_Light', class: 'font-shadows', label: 'Shadows' },
-  { name: 'Patrick_Hand', class: 'font-sans', label: 'Patrick Hand' },
-  { name: 'Architects_Daughter', class: 'font-sans', label: 'Architects' },
+  { name: 'Patrick_Hand', class: 'font-patrick', label: 'Patrick Hand' },
+  { name: 'Architects_Daughter', class: 'font-architects', label: 'Architects' },
   // Polen fonts - Tier 2
   { name: 'Dancing_Script', class: 'font-dancing', label: 'Dancing Script' },
   { name: 'Pacifico', class: 'font-pacifico', label: 'Pacífico' },
   { name: 'Permanent_Marker', class: 'font-permanent', label: 'Permanent' },
   { name: 'Sacramento', class: 'font-sacramento', label: 'Sacramento' },
   { name: 'Satisfy', class: 'font-satisfy', label: 'Satisfy' },
-  { name: 'Cookie', class: 'font-sans', label: 'Cookie' },
-  { name: 'Courgette', class: 'font-sans', label: 'Courgette' },
-  { name: 'Lobster', class: 'font-sans', label: 'Lobster' },
+  { name: 'Cookie', class: 'font-cookie', label: 'Cookie' },
+  { name: 'Courgette', class: 'font-courgette', label: 'Courgette' },
+  { name: 'Lobster', class: 'font-lobster', label: 'Lobster' },
   // Premium fonts
   { name: 'Great_Vibes', class: 'font-greatvibes', label: 'Great Vibes' },
   { name: 'Kalam', class: 'font-kalam', label: 'Kalam' },
-  { name: 'Allura', class: 'font-sans', label: 'Allura' },
-  { name: 'Tangerine', class: 'font-sans', label: 'Tangerine' },
-  { name: 'Alex_Brush', class: 'font-sans', label: 'Alex Brush' },
-  { name: 'Mr_Dafoe', class: 'font-sans', label: 'Mr Dafoe' },
+  { name: 'Allura', class: 'font-allura', label: 'Allura' },
+  { name: 'Tangerine', class: 'font-tangerine text-[1.3em]', label: 'Tangerine' },
+  { name: 'Alex_Brush', class: 'font-alexbrush', label: 'Alex Brush' },
+  { name: 'Mr_Dafoe', class: 'font-mrdafoe', label: 'Mr Dafoe' },
 ];
 
 const borderStyles: { name: BorderStyle; label: string; preview: string }[] = [
