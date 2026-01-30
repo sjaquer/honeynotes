@@ -18,11 +18,12 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useFirebase, useUser, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, serverTimestamp, doc, addDoc } from 'firebase/firestore';
+import { useFirebase, useUser } from '@/firebase';
+import { collection, doc, addDoc, getDoc } from 'firebase/firestore';
 import type { UserProfile } from '@/hooks/use-partner-link';
 import { useEconomy } from '@/hooks/use-economy';
 import { SHOP_ITEMS } from '@/lib/shop-data';
+import { createLetterDocument, sanitizeLetterConfig } from '@/lib/letter-validation';
 import Link from 'next/link';
 
 // Key for localStorage draft
@@ -145,6 +146,7 @@ export function LetterEditor() {
   const { firestore } = useFirebase();
   const { user } = useUser();
   const { trackLetterSent, economy, ownsItem } = useEconomy();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Helper functions to check ownership
   const ownsPaperColor = (colorId: PaperColor) => {
@@ -172,13 +174,36 @@ export function LetterEditor() {
     return item?.isPremium || false;
   };
 
-  // Get user profile to check if they have a partner
-  const userRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return doc(firestore, 'users', user.uid);
+  // Fetch user profile once (no live subscription to save reads)
+  useEffect(() => {
+    if (!user) {
+      setUserProfile(null);
+      return;
+    }
+
+    let active = true;
+    (async () => {
+      try {
+        const ref = doc(firestore, 'users', user.uid);
+        const snap = await getDoc(ref);
+        if (!active) return;
+        if (snap.exists()) {
+          const data = snap.data() as UserProfile;
+          const { id: _ignored, ...rest } = data;
+          setUserProfile({ id: snap.id, ...rest });
+        } else {
+          setUserProfile(null);
+        }
+      } catch (e) {
+        console.error('Error fetching user profile:', e);
+        if (active) setUserProfile(null);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, [firestore, user]);
-  
-  const { data: userProfile } = useDoc<UserProfile>(userRef);
 
   const [content, setContent] = useState('');
   const [letterTitle, setLetterTitle] = useState('');
@@ -301,23 +326,18 @@ export function LetterEditor() {
     // If user has partner, send to partner. Otherwise self-addressed for testing.
     const recipientId = userProfile?.partnerId || user.uid;
 
-    const newLetter = {
-        senderId: user.uid,
-        recipientId: recipientId,
-        title: letterTitle.trim() || null,
-        content: content.trim(),
-        config: { 
-          paperColor: paperColor || 'cream', 
-          stamp: stamp || 'heart', 
-          font: font || 'Indie_Flower', 
-          borderStyle: borderStyle || 'simple' 
-        },
-        createdAt: serverTimestamp(),
-        status: 'sent',
-        isRead: false,
-        senderName: senderName || 'Tú',
-        recipientName: recipientName || 'Tu Amor',
-    };
+    // Use validated/sanitized letter data
+    const newLetter = createLetterDocument(
+      user.uid,
+      recipientId,
+      content,
+      { paperColor, stamp, font, borderStyle },
+      {
+        title: letterTitle,
+        senderName: senderName || user.displayName || 'Tú',
+        recipientName: recipientName || userProfile?.partnerName || 'Tu Amor',
+      }
+    );
 
     // Save to root /letters collection
     const lettersColRef = collection(firestore, 'letters');

@@ -1,19 +1,48 @@
 import { Timestamp } from "firebase/firestore";
 
+// =====================
+// LETTER CUSTOMIZATION TYPES
+// All possible values that can be used in letters
+// =====================
+
+/**
+ * Paper colors available for letters
+ * - Free: cream, pink, honey
+ * - Polen (purchasable): lavender, mint, light-pink, crimson, peach, sky, rose
+ * - Premium (Jalea Real): sunset, ocean, aurora, rose-gold, champagne, moonlight, cherry-blossom
+ */
 export type PaperColor = 
   | 'cream' | 'pink' | 'crimson' | 'honey' | 'light-pink' | 'lavender' | 'mint' | 'peach' | 'sky' | 'rose'
   | 'sunset' | 'ocean' | 'aurora' | 'rose-gold' | 'champagne' | 'moonlight' | 'cherry-blossom';
 
+/**
+ * Stamps available for letters
+ * - Free: heart, bee, wax-seal
+ * - Polen: rose-emoji, star-emoji, butterfly-emoji, flower-emoji, rainbow-emoji, kiss-emoji, sparkle-emoji, sun-emoji, fire-emoji, cupid-emoji, infinity-emoji, ring-emoji
+ * - Premium: moon-emoji, crown-emoji, diamond-emoji, angel-emoji, dove-emoji, teddy-emoji, lovebirds-emoji, shooting-star-emoji
+ */
 export type Stamp = 
   | 'heart' | 'bee' | 'wax-seal' | 'rose-emoji' | 'star-emoji' | 'kiss-emoji' | 'sparkle-emoji' | 'sun-emoji' | 'moon-emoji'
   | 'butterfly-emoji' | 'flower-emoji' | 'rainbow-emoji' | 'fire-emoji' | 'cupid-emoji' | 'infinity-emoji' | 'ring-emoji'
   | 'crown-emoji' | 'diamond-emoji' | 'angel-emoji' | 'dove-emoji' | 'teddy-emoji' | 'lovebirds-emoji' | 'shooting-star-emoji';
 
+/**
+ * Fonts available for letters
+ * - Free: Indie_Flower, Belleza
+ * - Polen: Caveat, Amatic_SC, Shadows_Into_Light, Patrick_Hand, Architects_Daughter, Dancing_Script, Pacifico, Permanent_Marker, Sacramento, Satisfy, Cookie, Courgette, Lobster
+ * - Premium: Great_Vibes, Kalam, Allura, Tangerine, Alex_Brush, Mr_Dafoe
+ */
 export type AppFont = 
   | 'Indie_Flower' | 'Belleza' | 'Dancing_Script' | 'Pacifico' | 'Caveat' | 'Sacramento' | 'Great_Vibes' 
   | 'Shadows_Into_Light' | 'Amatic_SC' | 'Permanent_Marker' | 'Satisfy' | 'Kalam'
   | 'Patrick_Hand' | 'Architects_Daughter' | 'Cookie' | 'Courgette' | 'Lobster' | 'Allura' | 'Tangerine' | 'Alex_Brush' | 'Mr_Dafoe';
 
+/**
+ * Border styles available for letters
+ * - Free: simple
+ * - Polen: dashed, airmail, hearts, stars, waves, ribbon
+ * - Premium (animated): floral, vintage, ornate, gold, lace
+ */
 export type BorderStyle = 
   | 'simple' | 'airmail' | 'dashed' | 'floral'
   | 'hearts' | 'stars' | 'waves' | 'ribbon' | 'vintage' | 'ornate' | 'gold' | 'lace';
@@ -132,13 +161,13 @@ export interface Letter {
   senderId: string;
   recipientId: string;
   // Letter metadata
-  title?: string; // Optional title for the letter
+  title?: string | null; // Optional title for the letter
   content: string;
   config: {
     paperColor: PaperColor;
     stamp: Stamp;
     font: AppFont;
-    borderStyle?: BorderStyle;
+    borderStyle: BorderStyle;
   };
   createdAt: Timestamp;
   status: LetterStatus;
