@@ -34,9 +34,9 @@ export function BottomNav() {
 
   return (
     <div className="fixed bottom-6 left-1/2 z-50 w-[95%] max-w-sm -translate-x-1/2">
-      <nav className="relative flex h-20 items-center justify-around rounded-[2.5rem] bg-[#FFFdf5] px-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-2 border-gray-100">
+      <nav className="relative flex h-20 items-center justify-around rounded-[2rem] bg-[#FFFdf5]/95 backdrop-blur-sm px-2 shadow-crimson-card border border-primary/10">
          {/* Decorative Tape */}
-         <div className="absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 rotate-1 bg-[#ffb7b2] opacity-80 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-30"></div>
+         <div className="absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 rotate-1 bg-primary/70 rounded-sm opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-30"></div>
 
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -45,8 +45,8 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'group relative flex flex-1 flex-col items-center justify-center gap-1 p-2 transition-all',
-                isActive ? '-translate-y-4' : 'hover:-translate-y-1'
+                'group relative flex flex-1 flex-col items-center justify-center gap-1 p-2 transition-all duration-200',
+                isActive ? '-translate-y-4' : 'hover:-translate-y-1 active:scale-[0.95]'
               )}
             >
               {/* Active Circle Background */}
@@ -54,7 +54,7 @@ export function BottomNav() {
                 className={cn(
                   "absolute flex size-14 items-center justify-center rounded-full transition-all duration-300",
                   isActive 
-                    ? "bg-primary shadow-lg scale-100 rotate-[-3deg]" 
+                    ? "bg-primary shadow-crimson-deep scale-100 rotate-[-3deg]" 
                     : "bg-transparent scale-0"
                 )}
               >
@@ -64,8 +64,8 @@ export function BottomNav() {
 
               {/* Icon */}
               <div className={cn(
-                  "relative z-10 transition-colors duration-300",
-                  isActive ? "text-white" : "text-gray-400 group-hover:text-primary"
+                  "relative z-10 transition-all duration-300",
+                  isActive ? "text-white" : "text-gray-400 group-hover:text-primary group-active:scale-90"
               )}>
                   <item.icon className={cn("size-7", isActive && "stroke-[2.5px]")} />
               </div>
