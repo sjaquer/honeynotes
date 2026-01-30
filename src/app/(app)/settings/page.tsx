@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Settings, Link2, Unlink, Copy, Check, LogOut, User, Heart, Bell, BellOff, RefreshCw, Trash2, Edit2, Save, X, AlertTriangle, Gift, Ticket, Loader2 } from 'lucide-react';
+import { Settings, Link2, Unlink, Copy, Check, LogOut, User, Heart, Bell, BellOff, RefreshCw, Trash2, Edit2, Save, X, AlertTriangle, Gift, Ticket, Loader2, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useFirebase, useUser, useAuth, useDoc, useMemoFirebase } from '@/firebase';
@@ -13,6 +13,7 @@ import { BeeIcon } from '@/components/icons/BeeIcon';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { usePromoCodes } from '@/hooks/use-promo-codes';
+import { PartnerOnboarding } from '@/components/PartnerOnboarding';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,7 @@ export default function SettingsPage() {
   const [showRegenerateCodeDialog, setShowRegenerateCodeDialog] = useState(false);
   const [showUnlinkDialog, setShowUnlinkDialog] = useState(false);
   const [showPartnerUnlinkedAlert, setShowPartnerUnlinkedAlert] = useState(false);
+  const [showPartnerTutorial, setShowPartnerTutorial] = useState(false);
 
   // Get user profile from Firestore
   const userRef = useMemoFirebase(() => {
@@ -354,9 +356,20 @@ export default function SettingsPage() {
 
         {/* Partner Linking Card */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-2">
-            <Heart className="size-5 text-primary" />
-            <h3 className="text-lg font-semibold text-gray-800">{t('settingsPage.partner.title')}</h3>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Heart className="size-5 text-primary" />
+              <h3 className="text-lg font-semibold text-gray-800">{t('settingsPage.partner.title')}</h3>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-muted-foreground hover:text-primary gap-1"
+              onClick={() => setShowPartnerTutorial(true)}
+            >
+              <HelpCircle className="size-4" />
+              ¿Cómo funciona?
+            </Button>
           </div>
 
           {/* Always show your code section */}
@@ -525,6 +538,12 @@ export default function SettingsPage() {
           {t('settingsPage.profile.signOut')}
         </Button>
       </div>
+
+      {/* Partner Onboarding Tutorial */}
+      <PartnerOnboarding 
+        isOpen={showPartnerTutorial} 
+        onClose={() => setShowPartnerTutorial(false)} 
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { BottomNav } from '@/components/BottomNav';
+import { PartnerOnboarding, usePartnerOnboarding } from '@/components/PartnerOnboarding';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -13,6 +14,7 @@ export default function AppLayout({
 }>) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const { showOnboarding, completeOnboarding, skipOnboarding } = usePartnerOnboarding();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -36,6 +38,14 @@ export default function AppLayout({
     <div className="flex min-h-screen flex-col bg-[#F0F4F8]">
       <main className="flex-1 pb-28">{children}</main>
       <BottomNav />
+      
+      {/* Partner Connection Onboarding */}
+      <PartnerOnboarding 
+        isOpen={showOnboarding}
+        onComplete={completeOnboarding}
+        onSkip={skipOnboarding}
+        onClose={() => skipOnboarding()}
+      />
     </div>
   );
 }
