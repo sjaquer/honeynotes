@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Settings, Link2, Unlink, Copy, Check, LogOut, User, Heart, Bell, BellOff, RefreshCw, Trash2, Edit2, Save, X, AlertTriangle, Gift, Ticket, Loader2, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { useFirebase, useUser, useAuth, useDoc, useMemoFirebase } from '@/fireba
 import { initiateSignOut } from '@/firebase/non-blocking-login';
 import { usePartnerLink, type UserProfile } from '@/hooks/use-partner-link';
 import { useTranslation } from '@/hooks/use-translation';
-import { doc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -60,11 +60,16 @@ export default function SettingsPage() {
   }, [firestore, user]);
 
   const { data: profile } = useDoc<UserProfile>(userRef);
+  
+  // Ref to track if profile has been created
+  const profileCreatedRef = useRef(false);
 
-  // Create/update user profile on first load
+  // Create/update user profile on first load - only once
   useEffect(() => {
-    if (user && !profile) {
+    if (user && !profile && !profileCreatedRef.current) {
+      profileCreatedRef.current = true;
       const userDocRef = doc(firestore, 'users', user.uid);
+      // Non-blocking write
       setDoc(userDocRef, {
         id: user.uid,
         displayName: user.displayName || 'Usuario',
@@ -72,7 +77,7 @@ export default function SettingsPage() {
         photoURL: user.photoURL,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      }, { merge: true });
+      }, { merge: true }).catch(e => console.error('Error creating profile:', e));
     }
   }, [user, profile, firestore]);
 
@@ -84,20 +89,12 @@ export default function SettingsPage() {
     }
   }, [profile]);
 
-  // Listen for partner unlink notification in real-time
+  // Check for partner unlink notification when profile changes (no extra listener needed)
   useEffect(() => {
-    if (!user) return;
-    
-    const userRef = doc(firestore, 'users', user.uid);
-    const unsubscribe = onSnapshot(userRef, (snapshot) => {
-      const data = snapshot.data();
-      if (data?.partnerUnlinkedAt && !data?.partnerId) {
-        setShowPartnerUnlinkedAlert(true);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [user, firestore]);
+    if (profile?.partnerUnlinkedAt && !profile?.partnerId) {
+      setShowPartnerUnlinkedAlert(true);
+    }
+  }, [profile]);
 
   const handleGenerateCode = async () => {
     const code = await generateMyCode();

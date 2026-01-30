@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import type { UserTaskProgress, UserWeeklyTasks, WeeklyTask } from '@/lib/types';
@@ -14,12 +14,27 @@ export function useWeeklyTasks() {
   const [userTasks, setUserTasks] = useState<UserWeeklyTasks | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Refs to prevent duplicate loads
+  const hasLoadedRef = useRef(false);
+  const lastUserIdRef = useRef<string | null>(null);
 
-  // Load or reset weekly tasks
+  // Load or reset weekly tasks - only once per user
   useEffect(() => {
+    // Reset if user changes
+    if (user?.uid !== lastUserIdRef.current) {
+      hasLoadedRef.current = false;
+      lastUserIdRef.current = user?.uid || null;
+    }
+    
     if (!user) {
       setUserTasks(null);
       setIsLoading(false);
+      return;
+    }
+
+    // Prevent duplicate loads
+    if (hasLoadedRef.current) {
       return;
     }
 
@@ -35,27 +50,31 @@ export function useWeeklyTasks() {
           
           // Check if it's a new week
           if (data.weekStartDate !== currentWeek) {
-            // Reset tasks for new week
+            // Reset tasks for new week - non-blocking
             const newTasks = createInitialTasks();
-            await setDoc(tasksRef, {
+            setUserTasks({ weekStartDate: currentWeek, tasks: newTasks, lastUpdated: data.lastUpdated });
+            
+            setDoc(tasksRef, {
               weekStartDate: currentWeek,
               tasks: newTasks,
               lastUpdated: serverTimestamp(),
-            });
-            setUserTasks({ weekStartDate: currentWeek, tasks: newTasks, lastUpdated: data.lastUpdated });
+            }).catch(e => console.error('Error resetting tasks:', e));
           } else {
             setUserTasks(data);
           }
         } else {
-          // Create initial tasks
+          // Create initial tasks - non-blocking
           const newTasks = createInitialTasks();
-          await setDoc(tasksRef, {
+          setUserTasks({ weekStartDate: currentWeek, tasks: newTasks, lastUpdated: {} as any });
+          
+          setDoc(tasksRef, {
             weekStartDate: currentWeek,
             tasks: newTasks,
             lastUpdated: serverTimestamp(),
-          });
-          setUserTasks({ weekStartDate: currentWeek, tasks: newTasks, lastUpdated: {} as any });
+          }).catch(e => console.error('Error creating tasks:', e));
         }
+        
+        hasLoadedRef.current = true;
       } catch (e) {
         console.error('Error loading tasks:', e);
         setError('Error al cargar las tareas');

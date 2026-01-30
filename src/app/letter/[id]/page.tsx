@@ -15,6 +15,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   const { user, isUserLoading } = useUser();
   const { trackLetterRead } = useEconomy();
   const hasTrackedRead = useRef(false);
+  const hasMarkedRead = useRef(false);
 
   const letterRef = useMemoFirebase(() => {
     if (!id) return null;
@@ -24,23 +25,19 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
 
   const { data: letter, isLoading, error } = useDoc<Letter>(letterRef);
 
-  // Debug logs
+  // Mark as read - only once
   useEffect(() => {
-    console.log('Letter page debug:', { id, user: user?.uid, letter, isLoading, error });
-  }, [id, user, letter, isLoading, error]);
-
-  useEffect(() => {
-    if (letter && !letter.isRead && letterRef && user) {
+    if (letter && !letter.isRead && letterRef && user && !hasMarkedRead.current) {
+      hasMarkedRead.current = true;
       updateDocumentNonBlocking(letterRef, { isRead: true });
       
       // Only track if recipient is reading (not sender viewing their own letter)
-      // and only track once per session
       if (letter.recipientId === user.uid && !hasTrackedRead.current) {
         hasTrackedRead.current = true;
         trackLetterRead();
       }
     }
-  }, [letter, letterRef, user, trackLetterRead]);
+  }, [letter, letterRef, user]); // Removed trackLetterRead from deps to prevent loop
 
   // Show error if any
   if (error) {

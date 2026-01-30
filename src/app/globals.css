@@ -231,4 +231,100 @@
     background-image: radial-gradient(circle, #F0F0F0 1px, transparent 1px);
     background-size: 6px 6px;
   }
+
+  /* ========================================
+   * PREMIUM ANIMATED BORDERS
+   * ======================================== */
+  
+  /* Floral Border Animation - Gentle pulsing glow */
+  .border-floral.animated {
+    animation: floral-glow 3s ease-in-out infinite;
+  }
+  
+  @keyframes floral-glow {
+    0%, 100% {
+      box-shadow: inset 0 0 0 8px rgba(220, 20, 60, 0.05),
+                  0 0 10px rgba(220, 20, 60, 0.1);
+    }
+    50% {
+      box-shadow: inset 0 0 0 8px rgba(220, 20, 60, 0.1),
+                  0 0 20px rgba(220, 20, 60, 0.2);
+    }
+  }
+
+  /* Vintage Border Animation - Subtle sepia shift */
+  .border-vintage.animated {
+    animation: vintage-shimmer 4s ease-in-out infinite;
+  }
+  
+  @keyframes vintage-shimmer {
+    0%, 100% {
+      border-color: #8B7355;
+      box-shadow: inset 0 0 0 4px rgba(139, 115, 85, 0.1),
+                  0 0 0 1px #8B7355;
+    }
+    50% {
+      border-color: #A08060;
+      box-shadow: inset 0 0 0 4px rgba(160, 128, 96, 0.15),
+                  0 0 8px rgba(139, 115, 85, 0.2);
+    }
+  }
+
+  /* Ornate Border Animation - Color shift */
+  .border-ornate.animated {
+    animation: ornate-pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes ornate-pulse {
+    0%, 100% {
+      border-color: #9333EA;
+      filter: hue-rotate(0deg);
+    }
+    50% {
+      border-color: #A855F7;
+      filter: hue-rotate(15deg);
+    }
+  }
+
+  /* Gold Border Animation - Shimmer effect */
+  .border-gold.animated {
+    animation: gold-shimmer 2.5s ease-in-out infinite;
+    position: relative;
+  }
+  
+  @keyframes gold-shimmer {
+    0%, 100% {
+      box-shadow: 
+        inset 0 0 0 1px #FFF8DC,
+        inset 0 0 0 3px rgba(255, 215, 0, 0.3),
+        0 0 8px rgba(255, 215, 0, 0.4);
+    }
+    50% {
+      box-shadow: 
+        inset 0 0 0 1px #FFFACD,
+        inset 0 0 0 3px rgba(255, 215, 0, 0.5),
+        0 0 15px rgba(255, 215, 0, 0.6),
+        0 0 30px rgba(255, 215, 0, 0.3);
+    }
+  }
+
+  /* Lace Border Animation - Delicate sparkle */
+  .border-lace.animated {
+    animation: lace-sparkle 3.5s ease-in-out infinite;
+  }
+  
+  @keyframes lace-sparkle {
+    0%, 100% {
+      box-shadow: 
+        inset 0 0 0 2px rgba(220, 220, 220, 0.5),
+        inset 0 0 0 6px rgba(255, 255, 255, 0.8),
+        0 0 0 1px #E8E8E8;
+    }
+    50% {
+      box-shadow: 
+        inset 0 0 0 2px rgba(255, 182, 193, 0.4),
+        inset 0 0 0 6px rgba(255, 255, 255, 0.9),
+        0 0 12px rgba(255, 192, 203, 0.3);
+    }
+  }
 }

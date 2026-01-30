@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { PaperColor, Stamp, AppFont, Letter, BorderStyle } from '@/lib/types';
+import { ANIMATED_BORDERS } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -17,8 +18,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useFirebase, useUser, useMemoFirebase, useDoc, addDocumentNonBlocking } from '@/firebase';
-import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import { useFirebase, useUser, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, serverTimestamp, doc, addDoc } from 'firebase/firestore';
 import type { UserProfile } from '@/hooks/use-partner-link';
 import { useEconomy } from '@/hooks/use-economy';
 import { SHOP_ITEMS } from '@/lib/shop-data';
@@ -192,6 +193,9 @@ export function LetterEditor() {
   const [activeTab, setActiveTab] = useState('paper');
   const [draftLoaded, setDraftLoaded] = useState(false);
 
+  // Check if border is animated (premium)
+  const isAnimatedBorder = ANIMATED_BORDERS.includes(borderStyle);
+
   // Load draft from localStorage on mount
   useEffect(() => {
     if (draftLoaded) return;
@@ -278,7 +282,7 @@ export function LetterEditor() {
     }
   }, [user, userProfile, senderName, recipientName, t]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!user) {
         toast({ variant: 'destructive', title: 'Error', description: 'Debes iniciar sesión para enviar una carta.' });
         return;
@@ -300,48 +304,69 @@ export function LetterEditor() {
     const newLetter = {
         senderId: user.uid,
         recipientId: recipientId,
-        title: letterTitle.trim() || undefined,
-        content,
-        config: { paperColor, stamp, font, borderStyle },
+        title: letterTitle.trim() || null,
+        content: content.trim(),
+        config: { 
+          paperColor: paperColor || 'cream', 
+          stamp: stamp || 'heart', 
+          font: font || 'Indie_Flower', 
+          borderStyle: borderStyle || 'simple' 
+        },
         createdAt: serverTimestamp(),
         status: 'sent',
         isRead: false,
-        senderName: senderName || t('users.you'),
-        recipientName: recipientName || t('users.yourLove'),
-    }
+        senderName: senderName || 'Tú',
+        recipientName: recipientName || 'Tu Amor',
+    };
 
-    // Save to root /letters collection (simpler, more scalable)
+    // Save to root /letters collection
     const lettersColRef = collection(firestore, 'letters');
     
-    addDocumentNonBlocking(lettersColRef, newLetter)
-        .then(() => {
-            // Clear draft after successful send
-            clearDraft();
-            
-            // Track letter sent for weekly tasks and economy
-            trackLetterSent({ paperColor, stamp });
-            
-            toast({
-                title: t('letterEditor.toast.sent'),
-                description: t('letterEditor.toast.sentDesc'),
-            });
-            router.push('/inbox');
-        })
-        .catch((e) => {
-             console.error("Error sending letter:", e)
-             toast({ variant: 'destructive', title: 'Error', description: 'No se pudo enviar la carta.' });
-        })
-        .finally(() => {
-            setIsSending(false);
-        });
+    try {
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 15000)
+      );
+      
+      await Promise.race([
+        addDoc(lettersColRef, newLetter),
+        timeoutPromise
+      ]);
+      
+      // Clear draft after successful send
+      clearDraft();
+      
+      // Track letter sent in background (don't wait)
+      trackLetterSent({ paperColor, stamp });
+      
+      toast({
+        title: t('letterEditor.toast.sent'),
+        description: t('letterEditor.toast.sentDesc'),
+      });
+      
+      router.push('/inbox');
+    } catch (e: any) {
+      console.error("Error sending letter:", e);
+      
+      let errorMessage = 'No se pudo enviar la carta.';
+      if (e?.message === 'Timeout') {
+        errorMessage = 'La conexión tardó demasiado. Verifica tu internet.';
+      } else if (e?.code === 'permission-denied') {
+        errorMessage = 'No tienes permisos para enviar cartas.';
+      }
+      
+      toast({ variant: 'destructive', title: 'Error', description: errorMessage });
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const currentUserDisplayName = t('users.you');
 
   return (
-    <div className="flex h-full flex-col gap-3 p-3 pb-28 lg:flex-row lg:gap-8 lg:p-8 lg:pb-8">
+    <div className="flex h-full flex-col gap-2 p-3 pb-28 lg:flex-row lg:gap-8 lg:p-8 lg:pb-8">
       {/* LEFT: Canvas */}
-      <div className="relative flex max-h-[45vh] min-h-[40vh] flex-1 flex-col rounded-2xl bg-[#F0F4F8] p-1 shadow-inner lg:max-h-none lg:min-h-[50vh] lg:rounded-3xl">
+      <div className="relative flex h-[40vh] shrink-0 flex-col rounded-2xl bg-[#F0F4F8] p-1 shadow-inner lg:h-auto lg:flex-1 lg:rounded-3xl">
         {/* AI Bee - Floating Button over Canvas */}
         <div className="absolute right-3 top-3 z-30 lg:right-6 lg:top-6">
           <AIFeedbackDialog
@@ -354,7 +379,8 @@ export function LetterEditor() {
         <div className={cn(
            "flex flex-1 flex-col rounded-[20px] transition-colors relative overflow-hidden",
            borderStyles.find(b => b.name === borderStyle)?.preview,
-           paperColors.find(p => p.name === paperColor)?.class
+           paperColors.find(p => p.name === paperColor)?.class,
+           isAnimatedBorder && "animated"
         )}>
              {/* Inner Paper Area */}
             <div className={cn(
@@ -400,8 +426,7 @@ export function LetterEditor() {
                     )}
                     spellCheck={false}
                     style={{ 
-                        minHeight: '300px',
-                        maxHeight: '60vh',
+                        minHeight: '150px',
                         overflow: 'auto'
                     }}
                 />
@@ -429,10 +454,10 @@ export function LetterEditor() {
       </div>
 
       {/* RIGHT: Customization Panel */}
-      <div className="flex flex-col gap-3 lg:w-[320px]">
+      <div className="flex flex-1 flex-col gap-2 overflow-hidden lg:w-[320px] lg:flex-none">
         {/* Tools Tabs */}
-        <Tabs defaultValue="paper" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid h-14 w-full grid-cols-4 rounded-2xl bg-muted/50 p-1">
+        <Tabs defaultValue="paper" className="flex flex-1 flex-col overflow-hidden w-full" onValueChange={setActiveTab}>
+            <TabsList className="grid h-14 w-full shrink-0 grid-cols-4 rounded-2xl bg-muted/50 p-1">
                 <TabsTrigger value="paper" className="rounded-xl data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
                     <FileText className="size-5" />
                 </TabsTrigger>
@@ -447,7 +472,7 @@ export function LetterEditor() {
                 </TabsTrigger>
             </TabsList>
 
-            <div className="mt-3 max-h-[35vh] overflow-y-auto rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-3 lg:max-h-none">
+            <div className="mt-2 flex-1 overflow-y-auto rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-3">
                 <TabsContent value="paper" className="mt-0 grid grid-cols-2 gap-2">
                     {paperColors.map((color) => {
                         const owned = ownsPaperColor(color.name);
@@ -617,21 +642,21 @@ export function LetterEditor() {
             </div>
         </Tabs>
 
-        {/* Send Button - AI is optional, button always enabled */}
+        {/* Send Button */}
         <Button
-            onClick={handleSend}
-            disabled={isSending}
-            className="group h-14 w-full overflow-hidden rounded-2xl border-b-4 border-r-4 border-red-900 bg-primary text-lg font-bold text-white shadow-xl transition-all hover:translate-y-1 hover:border-b-0 hover:border-r-0 hover:shadow-none disabled:opacity-50 lg:h-16 lg:rounded-[2rem] lg:text-xl"
+          onClick={handleSend}
+          disabled={isSending}
+          className="group h-14 w-full shrink-0 overflow-hidden rounded-2xl border-b-4 border-r-4 border-red-900 bg-primary text-lg font-bold text-white shadow-xl transition-all hover:translate-y-1 hover:border-b-0 hover:border-r-0 hover:shadow-none disabled:opacity-50 lg:h-16 lg:rounded-[2rem] lg:text-xl"
         >
-            <span className="flex items-center gap-2">
-                {isSending ? (
-                     t('letterEditor.sending')
-                ) : (
-                    <>
-                    {t('letterEditor.send')} <Send className="size-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 lg:size-6" />
-                    </>
-                )}
-            </span>
+          <span className="flex items-center gap-2">
+            {isSending ? (
+              t('letterEditor.sending')
+            ) : (
+              <>
+                {t('letterEditor.send')} <Send className="size-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 lg:size-6" />
+              </>
+            )}
+          </span>
         </Button>
       </div>
     </div>

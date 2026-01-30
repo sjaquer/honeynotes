@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment, arrayUnion } from 'firebase/firestore';
 import type { UserInventory, UserEconomy, ShopItem, CurrencyType } from '@/lib/types';
@@ -22,26 +22,44 @@ export function useEconomy() {
   const [economy, setEconomy] = useState<UserEconomy | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Refs to prevent duplicate operations
+  const hasLoadedRef = useRef(false);
+  const lastUserIdRef = useRef<string | null>(null);
+  const isLoadingRef = useRef(false);
 
-  // Load economy data
+  // Load economy data - only once per user
   useEffect(() => {
+    // Reset if user changes
+    if (user?.uid !== lastUserIdRef.current) {
+      hasLoadedRef.current = false;
+      lastUserIdRef.current = user?.uid || null;
+    }
+    
     if (!user) {
       setEconomy(null);
       setIsLoading(false);
       return;
     }
 
+    // Prevent duplicate loads
+    if (hasLoadedRef.current || isLoadingRef.current) {
+      return;
+    }
+
     const loadEconomy = async () => {
+      isLoadingRef.current = true;
       setIsLoading(true);
+      
       try {
         const economyRef = doc(firestore, 'userEconomy', user.uid);
         const economySnap = await getDoc(economyRef);
 
         if (economySnap.exists()) {
           const data = economySnap.data() as UserEconomy;
-          
-          // Check and update login streak
           const today = getTodayDate();
+          
+          // Only update login streak if it's a different day - do it in background
           if (data.lastLoginDate !== today) {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
@@ -51,19 +69,22 @@ export function useEconomy() {
               ? data.loginStreak + 1 
               : 1;
             
-            await updateDoc(economyRef, {
-              loginStreak: newStreak,
-              lastLoginDate: today,
-              adsWatchedToday: data.lastAdWatchDate === today ? data.adsWatchedToday : 0,
-              lastAdWatchDate: today,
-            });
-            
-            setEconomy({ 
+            // Set local state immediately
+            const updatedData = { 
               ...data, 
               loginStreak: newStreak, 
               lastLoginDate: today,
               adsWatchedToday: data.lastAdWatchDate === today ? data.adsWatchedToday : 0,
-            });
+            };
+            setEconomy(updatedData);
+            
+            // Update in background (non-blocking)
+            updateDoc(economyRef, {
+              loginStreak: newStreak,
+              lastLoginDate: today,
+              adsWatchedToday: data.lastAdWatchDate === today ? data.adsWatchedToday : 0,
+              lastAdWatchDate: today,
+            }).catch(e => console.error('Error updating login streak:', e));
           } else {
             setEconomy(data);
           }
@@ -76,19 +97,23 @@ export function useEconomy() {
             loginStreak: 1,
           };
           
-          await setDoc(economyRef, {
+          setEconomy(initialEconomy);
+          
+          // Create in background (non-blocking)
+          setDoc(economyRef, {
             ...initialEconomy,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
-          });
-          
-          setEconomy(initialEconomy);
+          }).catch(e => console.error('Error creating economy:', e));
         }
+        
+        hasLoadedRef.current = true;
       } catch (e) {
         console.error('Error loading economy:', e);
         setError('Error al cargar los datos de economía');
       } finally {
         setIsLoading(false);
+        isLoadingRef.current = false;
       }
     };
 
@@ -275,24 +300,23 @@ export function useEconomy() {
     }
   }, [user, economy, firestore]);
 
-  // Track letter sent (for tasks)
-  const trackLetterSent = useCallback(async (letterConfig: { paperColor: string; stamp: string }) => {
+  // Track letter sent (for tasks) - runs in background, doesn't block
+  const trackLetterSent = useCallback((letterConfig: { paperColor: string; stamp: string }) => {
     if (!user) return;
 
-    try {
-      const economyRef = doc(firestore, 'userEconomy', user.uid);
-      await updateDoc(economyRef, {
-        totalLettersSent: increment(1),
-        updatedAt: serverTimestamp(),
-      });
-
+    // Run in background without awaiting
+    const economyRef = doc(firestore, 'userEconomy', user.uid);
+    updateDoc(economyRef, {
+      totalLettersSent: increment(1),
+      updatedAt: serverTimestamp(),
+    }).then(() => {
       setEconomy(prev => prev ? {
         ...prev,
         totalLettersSent: prev.totalLettersSent + 1,
       } : null);
-    } catch (e) {
+    }).catch(e => {
       console.error('Error tracking letter sent:', e);
-    }
+    });
   }, [user, firestore]);
 
   // Track letter read (for tasks)

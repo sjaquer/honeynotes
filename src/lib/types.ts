@@ -20,6 +20,9 @@ export type BorderStyle =
 
 export type LetterStatus = 'draft' | 'sent' | 'opened';
 
+// Premium animated border styles
+export const ANIMATED_BORDERS: BorderStyle[] = ['floral', 'vintage', 'ornate', 'gold', 'lace'];
+
 // =====================
 // ECONOMY SYSTEM TYPES
 // =====================

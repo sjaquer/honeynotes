@@ -1,6 +1,7 @@
 'use client';
 
-import type { LetterUI } from '@/lib/types';
+import type { LetterUI, BorderStyle } from '@/lib/types';
+import { ANIMATED_BORDERS } from '@/lib/types';
 import { useState } from 'react';
 import { Heart, ArrowLeft, Mail } from 'lucide-react';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
@@ -122,6 +123,9 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
     return fontClass;
   };
 
+  // Check if border is animated (premium)
+  const isAnimatedBorder = ANIMATED_BORDERS.includes(letter.config.borderStyle as BorderStyle);
+
   if (isOpened) {
       return (
           <div className="flex min-h-screen flex-col bg-[#F0F4F8] animate-in fade-in duration-500">
@@ -137,7 +141,8 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
                       <div className={cn(
                           "relative overflow-hidden rounded-xl shadow-2xl sm:rounded-lg",
                           borderClasses[letter.config.borderStyle || 'simple'],
-                          paperColorClasses[letter.config.paperColor]
+                          paperColorClasses[letter.config.paperColor],
+                          isAnimatedBorder && "animated"
                       )}>
                           <div className="absolute left-0 right-0 top-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
                           <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
