@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { PaperColor, Stamp, AppFont, Letter, BorderStyle } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +23,21 @@ import type { UserProfile } from '@/hooks/use-partner-link';
 import { useEconomy } from '@/hooks/use-economy';
 import { SHOP_ITEMS } from '@/lib/shop-data';
 import Link from 'next/link';
+
+// Key for localStorage draft
+const DRAFT_STORAGE_KEY = 'honeynotes_letter_draft';
+
+interface LetterDraft {
+  content: string;
+  letterTitle: string;
+  senderName: string;
+  recipientName: string;
+  paperColor: PaperColor;
+  stamp: Stamp;
+  font: AppFont;
+  borderStyle: BorderStyle;
+  savedAt: number;
+}
 
 const paperColors: { name: PaperColor; class: string; labelKey: string }[] = [
   // Free colors
@@ -175,6 +190,80 @@ export function LetterEditor() {
   const [hasAskedBee, setHasAskedBee] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState('paper');
+  const [draftLoaded, setDraftLoaded] = useState(false);
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    if (draftLoaded) return;
+    
+    try {
+      const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (savedDraft) {
+        const draft: LetterDraft = JSON.parse(savedDraft);
+        // Only load if draft is less than 7 days old
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        if (Date.now() - draft.savedAt < sevenDaysMs) {
+          setContent(draft.content || '');
+          setLetterTitle(draft.letterTitle || '');
+          if (draft.senderName) setSenderName(draft.senderName);
+          if (draft.recipientName) setRecipientName(draft.recipientName);
+          setPaperColor(draft.paperColor || 'cream');
+          setStamp(draft.stamp || 'heart');
+          setFont(draft.font || 'Indie_Flower');
+          setBorderStyle(draft.borderStyle || 'simple');
+        }
+      }
+    } catch (e) {
+      console.error('Error loading draft:', e);
+    }
+    setDraftLoaded(true);
+  }, [draftLoaded]);
+
+  // Save draft to localStorage whenever content changes
+  const saveDraft = useCallback(() => {
+    // Only save if there's actual content
+    if (!content.trim() && !letterTitle.trim()) {
+      return;
+    }
+    
+    const draft: LetterDraft = {
+      content,
+      letterTitle,
+      senderName,
+      recipientName,
+      paperColor,
+      stamp,
+      font,
+      borderStyle,
+      savedAt: Date.now(),
+    };
+    
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    } catch (e) {
+      console.error('Error saving draft:', e);
+    }
+  }, [content, letterTitle, senderName, recipientName, paperColor, stamp, font, borderStyle]);
+
+  // Auto-save draft with debounce
+  useEffect(() => {
+    if (!draftLoaded) return;
+    
+    const timeoutId = setTimeout(() => {
+      saveDraft();
+    }, 500); // Save 500ms after last change
+    
+    return () => clearTimeout(timeoutId);
+  }, [saveDraft, draftLoaded]);
+
+  // Clear draft after successful send
+  const clearDraft = useCallback(() => {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (e) {
+      console.error('Error clearing draft:', e);
+    }
+  }, []);
 
   // Check if user has a linked partner
   const hasPartner = Boolean(userProfile?.partnerId);
@@ -226,6 +315,9 @@ export function LetterEditor() {
     
     addDocumentNonBlocking(lettersColRef, newLetter)
         .then(() => {
+            // Clear draft after successful send
+            clearDraft();
+            
             // Track letter sent for weekly tasks and economy
             trackLetterSent({ paperColor, stamp });
             
