@@ -35,10 +35,13 @@ export function usePartnerLink() {
       const userSnap = await getDoc(userRef);
       const userData = userSnap.data();
 
-      // Delete old code if exists
+      // Delete old code if exists (check if document exists first)
       if (userData?.partnerCode) {
         const oldCodeRef = doc(firestore, 'partnerCodes', userData.partnerCode);
-        await deleteDoc(oldCodeRef);
+        const oldCodeSnap = await getDoc(oldCodeRef);
+        if (oldCodeSnap.exists()) {
+          await deleteDoc(oldCodeRef);
+        }
       }
 
       // If regenerating, unlink partner and notify them
@@ -47,7 +50,7 @@ export function usePartnerLink() {
         await updateDoc(partnerRef, {
           partnerId: null,
           partnerName: null,
-          partnerUnlinkedAt: serverTimestamp(), // Signal that partner unlinked
+          partnerUnlinkedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
 
@@ -95,10 +98,13 @@ export function usePartnerLink() {
       const userSnap = await getDoc(userRef);
       const userData = userSnap.data();
 
-      // Delete from partnerCodes collection
+      // Delete from partnerCodes collection (check if exists first)
       if (userData?.partnerCode) {
         const codeRef = doc(firestore, 'partnerCodes', userData.partnerCode);
-        await deleteDoc(codeRef);
+        const codeSnap = await getDoc(codeRef);
+        if (codeSnap.exists()) {
+          await deleteDoc(codeRef);
+        }
       }
 
       // If linked, notify partner

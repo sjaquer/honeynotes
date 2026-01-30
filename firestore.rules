@@ -44,17 +44,25 @@ service cloud.firestore {
     }
 
     // Check if this is a valid partner unlink operation
-    // User can only clear partnerId/partnerName and set partnerUnlinkedAt on their partner
+    // User can only clear partnerId/partnerName on their partner's profile
     function isValidPartnerUnlink() {
-      let incomingData = request.resource.data;
       let existingData = resource.data;
       
       // The current authenticated user must be the existing partnerId of the target user
-      // We only check that partnerId and partnerName are being set to null
-      return isSignedIn() 
-        && existingData.partnerId == request.auth.uid
-        && incomingData.partnerId == null
-        && incomingData.partnerName == null;
+      // This means the target user's partnerId points to us (we are their partner)
+      return isSignedIn() && existingData.partnerId == request.auth.uid;
+    }
+
+    // Check if this is a valid partner link operation
+    // User can set themselves as partnerId on someone who has a partnerCode
+    function isValidPartnerLink() {
+      let existingData = resource.data;
+      
+      // The target user must have a partnerCode (they shared it for linking)
+      // and they must not already have a partner
+      return isSignedIn()
+        && existingData.partnerCode != null
+        && (existingData.partnerId == null || !('partnerId' in existingData));
     }
 
     /**
@@ -94,6 +102,9 @@ service cloud.firestore {
       
       // Partner can unlink by clearing partnerId/partnerName (for unlink notification)
       allow update: if isValidPartnerUnlink();
+      
+      // Allow partner linking - user can set themselves as partner on another user's profile
+      allow update: if isValidPartnerLink();
     }
 
     /**
