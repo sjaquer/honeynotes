@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Mail, Search, Sparkles, Loader2, Heart, Send, Inbox, Trash2, MoreVertical } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Mail, Search, Sparkles, Loader2, Heart, Send, Inbox, Trash2, MoreVertical, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -9,8 +9,8 @@ import { useTranslation } from '@/hooks/use-translation';
 import { es } from 'date-fns/locale';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
-import { useFirebase, useUser, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, where } from 'firebase/firestore';
+import { useFirebase, useUser } from '@/firebase';
+import { collection, query, orderBy, where, getDocs } from 'firebase/firestore';
 import type { Letter, PaperColor, Stamp } from '@/lib/types';
 import { useDeleteLetter } from '@/hooks/use-delete-letter';
 import { useToast } from '@/hooks/use-toast';
@@ -107,19 +107,57 @@ export default function InboxPage() {
   
   // Delete confirmation state
   const [letterToDelete, setLetterToDelete] = useState<Letter | null>(null);
+  
+  // OPTIMIZED: Use manual state instead of real-time subscription
+  const [letters, setLetters] = useState<Letter[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const lettersQuery = useMemoFirebase(() => {
-    if (!user) return null;
-    // Query from root /letters collection, filter by recipientId or senderId based on view mode
-    const filterField = viewMode === 'received' ? 'recipientId' : 'senderId';
-    return query(
-      collection(firestore, 'letters'),
-      where(filterField, '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
-  }, [firestore, user, viewMode]);
+  // Fetch letters function (single read, not subscription)
+  const fetchLetters = useCallback(async () => {
+    if (!user) {
+      setLetters(null);
+      return;
+    }
 
-  const { data: letters, isLoading, error } = useCollection<Letter>(lettersQuery);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const filterField = viewMode === 'received' ? 'recipientId' : 'senderId';
+      const q = query(
+        collection(firestore, 'letters'),
+        where(filterField, '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+
+      console.log(`📬 Fetching ${viewMode} letters (single read)...`);
+      const snapshot = await getDocs(q);
+      
+      const fetchedLetters: Letter[] = [];
+      snapshot.forEach(doc => {
+        fetchedLetters.push({ id: doc.id, ...doc.data() } as Letter);
+      });
+
+      setLetters(fetchedLetters);
+      setIsInitialLoad(false);
+      console.log(`✅ Loaded ${fetchedLetters.length} letters`);
+    } catch (err: any) {
+      console.error('Error fetching letters:', err);
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, viewMode, firestore]);
+
+  // Initial load and when user/viewMode changes
+  useEffect(() => {
+    if (user) {
+      fetchLetters();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, viewMode]); // Only re-fetch when user or view mode actually changes
 
   const getTranslatedName = (name: string) => {
     if (name === 'You' || name === 'Tú') return t('users.you');
@@ -133,6 +171,8 @@ export default function InboxPage() {
     const success = await deleteLetter(letterToDelete.id);
     if (success) {
       toast({ title: t('inbox.letterDeleted'), description: t('inbox.letterDeletedDesc') });
+      // Refresh letters after delete
+      fetchLetters();
     } else {
       toast({ variant: 'destructive', title: t('inbox.deleteError') });
     }
@@ -183,9 +223,22 @@ export default function InboxPage() {
             <p className="text-base text-gray-600">
               {isLoading ? '...' : viewMode === 'received' ? t('inbox.unread', { count: unreadCount }) : t('inbox.sentCount', { count: letters?.length ?? 0 })}
             </p>
-             <button className="rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary">
-                 <Search className="size-5" />
-             </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => fetchLetters()} 
+                disabled={isLoading}
+                className={cn(
+                  "rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary transition-all",
+                  isLoading && "opacity-50 cursor-not-allowed"
+                )}
+                title="Actualizar"
+              >
+                <RefreshCw className={cn("size-5", isLoading && "animate-spin")} />
+              </button>
+              <button className="rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary">
+                <Search className="size-5" />
+              </button>
+            </div>
         </div>
         {/* Toggle between received and sent */}
         <div className="mt-4 flex rounded-2xl bg-white p-1 shadow-sm">
