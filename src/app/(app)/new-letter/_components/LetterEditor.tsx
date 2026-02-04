@@ -24,6 +24,7 @@ import type { UserProfile } from '@/hooks/use-partner-link';
 import { useEconomy } from '@/hooks/use-economy';
 import { SHOP_ITEMS } from '@/lib/shop-data';
 import { createLetterDocument, sanitizeLetterConfig } from '@/lib/letter-validation';
+import { ensureUserProfile } from '@/lib/user-profile';
 import Link from 'next/link';
 
 // Key for localStorage draft
@@ -184,14 +185,18 @@ export function LetterEditor() {
     let active = true;
     (async () => {
       try {
+        console.log('Fetching user profile for:', user.uid);
         const ref = doc(firestore, 'users', user.uid);
         const snap = await getDoc(ref);
         if (!active) return;
         if (snap.exists()) {
           const data = snap.data() as UserProfile;
           const { id: _ignored, ...rest } = data;
-          setUserProfile({ id: snap.id, ...rest });
+          const profile = { id: snap.id, ...rest };
+          console.log('User profile loaded:', profile);
+          setUserProfile(profile);
         } else {
+          console.warn('User profile document does not exist for UID:', user.uid);
           setUserProfile(null);
         }
       } catch (e) {
@@ -323,35 +328,63 @@ export function LetterEditor() {
 
     setIsSending(true);
     
-    // If user has partner, send to partner. Otherwise self-addressed for testing.
-    const recipientId = userProfile?.partnerId || user.uid;
-
-    // Use validated/sanitized letter data
-    const newLetter = createLetterDocument(
-      user.uid,
-      recipientId,
-      content,
-      { paperColor, stamp, font, borderStyle },
-      {
-        title: letterTitle,
-        senderName: senderName || user.displayName || 'Tú',
-        recipientName: recipientName || userProfile?.partnerName || 'Tu Amor',
-      }
-    );
-
-    // Save to root /letters collection
-    const lettersColRef = collection(firestore, 'letters');
-    
     try {
+      // CRITICAL: Ensure user profile exists before sending
+      console.log('=== DEBUGGING LETTER SEND ===');
+      console.log('Step 1: Ensuring user profile exists...');
+      const ensuredProfile = await ensureUserProfile(firestore, user);
+      console.log('User profile ensured:', ensuredProfile);
+      
+      // Update local profile state if it was just created
+      if (ensuredProfile && !userProfile) {
+        setUserProfile(ensuredProfile);
+      }
+      
+      const currentProfile = ensuredProfile || userProfile;
+      
+      // If user has partner, send to partner. Otherwise self-addressed for testing.
+      const recipientId = currentProfile?.partnerId || user.uid;
+
+      // Debug logs to identify the issue
+      console.log('Step 2: Determining recipient...');
+      console.log('Current Profile:', currentProfile);
+      console.log('Has Partner:', Boolean(currentProfile?.partnerId));
+      console.log('Partner ID:', currentProfile?.partnerId);
+      console.log('Recipient ID:', recipientId);
+      console.log('User UID:', user.uid);
+      console.log('Sender Name:', senderName);
+      console.log('Recipient Name:', recipientName);
+
+      // Use validated/sanitized letter data
+      const newLetter = createLetterDocument(
+        user.uid,
+        recipientId,
+        content,
+        { paperColor, stamp, font, borderStyle },
+        {
+          title: letterTitle,
+          senderName: senderName || user.displayName || 'Tú',
+          recipientName: recipientName || currentProfile?.partnerName || 'Tu Amor',
+        }
+      );
+
+      console.log('Step 3: Letter document prepared:', newLetter);
+
+      // Save to root /letters collection
+      const lettersColRef = collection(firestore, 'letters');
+      
+      console.log('Step 4: Sending letter to Firestore...');
       // Add timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Timeout')), 15000)
       );
       
-      await Promise.race([
+      const docRef = await Promise.race([
         addDoc(lettersColRef, newLetter),
         timeoutPromise
       ]);
+      
+      console.log('Letter sent successfully! Document ID:', docRef);
       
       // Clear draft after successful send
       clearDraft();
@@ -367,12 +400,17 @@ export function LetterEditor() {
       router.push('/inbox');
     } catch (e: any) {
       console.error("Error sending letter:", e);
+      console.error("Error code:", e?.code);
+      console.error("Error message:", e?.message);
+      console.error("Full error:", JSON.stringify(e, null, 2));
       
       let errorMessage = 'No se pudo enviar la carta.';
       if (e?.message === 'Timeout') {
         errorMessage = 'La conexión tardó demasiado. Verifica tu internet.';
       } else if (e?.code === 'permission-denied') {
-        errorMessage = 'No tienes permisos para enviar cartas.';
+        errorMessage = 'No tienes permisos para enviar cartas. Verifica tu configuración de Firebase.';
+      } else if (e?.code) {
+        errorMessage = `Error: ${e.code} - ${e.message}`;
       }
       
       toast({ variant: 'destructive', title: 'Error', description: errorMessage });
