@@ -18,13 +18,14 @@ export type PaperColor =
 /**
  * Stamps available for letters
  * - Free: heart, bee, wax-seal
- * - Polen: rose-emoji, star-emoji, butterfly-emoji, flower-emoji, rainbow-emoji, kiss-emoji, sparkle-emoji, sun-emoji, fire-emoji, cupid-emoji, infinity-emoji, ring-emoji
- * - Premium: moon-emoji, crown-emoji, diamond-emoji, angel-emoji, dove-emoji, teddy-emoji, lovebirds-emoji, shooting-star-emoji
+ * - Polen: rose-emoji, star-emoji, butterfly-emoji, flower-emoji, rainbow-emoji, kiss-emoji, sparkle-emoji, sun-emoji, fire-emoji, cupid-emoji, infinity-emoji, ring-emoji, gift-emoji, clover-emoji, cherry-emoji
+ * - Premium: moon-emoji, crown-emoji, diamond-emoji, angel-emoji, dove-emoji, teddy-emoji, lovebirds-emoji, shooting-star-emoji, planet-emoji, balloon-emoji, wave-emoji
  */
 export type Stamp = 
   | 'heart' | 'bee' | 'wax-seal' | 'rose-emoji' | 'star-emoji' | 'kiss-emoji' | 'sparkle-emoji' | 'sun-emoji' | 'moon-emoji'
   | 'butterfly-emoji' | 'flower-emoji' | 'rainbow-emoji' | 'fire-emoji' | 'cupid-emoji' | 'infinity-emoji' | 'ring-emoji'
-  | 'crown-emoji' | 'diamond-emoji' | 'angel-emoji' | 'dove-emoji' | 'teddy-emoji' | 'lovebirds-emoji' | 'shooting-star-emoji';
+  | 'crown-emoji' | 'diamond-emoji' | 'angel-emoji' | 'dove-emoji' | 'teddy-emoji' | 'lovebirds-emoji' | 'shooting-star-emoji'
+  | 'planet-emoji' | 'gift-emoji' | 'clover-emoji' | 'balloon-emoji' | 'cherry-emoji' | 'wave-emoji';
 
 /**
  * Fonts available for letters
@@ -41,16 +42,27 @@ export type AppFont =
  * Border styles available for letters
  * - Free: simple
  * - Polen: dashed, airmail, hearts, stars, waves, ribbon
- * - Premium (animated): floral, vintage, ornate, gold, lace
+ * - Premium (animated): floral, vintage, ornate, gold, lace, constellation, petals, neon, honeycomb
  */
 export type BorderStyle = 
   | 'simple' | 'airmail' | 'dashed' | 'floral'
-  | 'hearts' | 'stars' | 'waves' | 'ribbon' | 'vintage' | 'ornate' | 'gold' | 'lace';
+  | 'hearts' | 'stars' | 'waves' | 'ribbon' | 'vintage' | 'ornate' | 'gold' | 'lace'
+  | 'constellation' | 'petals' | 'neon' | 'honeycomb';
 
 export type LetterStatus = 'draft' | 'sent' | 'opened';
 
 // Premium animated border styles
-export const ANIMATED_BORDERS: BorderStyle[] = ['floral', 'vintage', 'ornate', 'gold', 'lace'];
+export const ANIMATED_BORDERS: BorderStyle[] = [
+  'floral',
+  'vintage',
+  'ornate',
+  'gold',
+  'lace',
+  'constellation',
+  'petals',
+  'neon',
+  'honeycomb',
+];
 
 // =====================
 // ECONOMY SYSTEM TYPES

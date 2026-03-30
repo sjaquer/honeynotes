@@ -95,6 +95,9 @@ const stamps: { name: Stamp; icon: React.ReactNode; labelKey: string }[] = [
   { name: 'cupid-emoji', icon: <span className="text-2xl">💘</span>, labelKey: 'Cupido' },
   { name: 'infinity-emoji', icon: <span className="text-2xl">♾️</span>, labelKey: 'Infinito' },
   { name: 'ring-emoji', icon: <span className="text-2xl">💍</span>, labelKey: 'Anillo' },
+  { name: 'gift-emoji', icon: <span className="text-2xl">🎁</span>, labelKey: 'Regalo' },
+  { name: 'clover-emoji', icon: <span className="text-2xl">🍀</span>, labelKey: 'Trébol' },
+  { name: 'cherry-emoji', icon: <span className="text-2xl">🍒</span>, labelKey: 'Cereza' },
   // Premium stamps
   { name: 'moon-emoji', icon: <span className="text-2xl">🌙</span>, labelKey: 'Luna' },
   { name: 'crown-emoji', icon: <span className="text-2xl">👑</span>, labelKey: 'Corona' },
@@ -104,6 +107,9 @@ const stamps: { name: Stamp; icon: React.ReactNode; labelKey: string }[] = [
   { name: 'teddy-emoji', icon: <span className="text-2xl">🧸</span>, labelKey: 'Osito' },
   { name: 'lovebirds-emoji', icon: <span className="text-2xl">🐦</span>, labelKey: 'Tortolitos' },
   { name: 'shooting-star-emoji', icon: <span className="text-2xl">🌠</span>, labelKey: 'Fugaz' },
+  { name: 'planet-emoji', icon: <span className="text-2xl">🪐</span>, labelKey: 'Planeta' },
+  { name: 'balloon-emoji', icon: <span className="text-2xl">🎈</span>, labelKey: 'Globo' },
+  { name: 'wave-emoji', icon: <span className="text-2xl">🌊</span>, labelKey: 'Ola' },
 ];
 
 const fonts: { name: AppFont; class: string; label: string }[] = [
@@ -150,6 +156,10 @@ const borderStyles: { name: BorderStyle; label: string; preview: string }[] = [
   { name: 'ornate', label: 'Ornamentado', preview: 'border-ornate' },
   { name: 'gold', label: 'Dorado', preview: 'border-gold' },
   { name: 'lace', label: 'Encaje', preview: 'border-lace' },
+  { name: 'constellation', label: 'Constelación', preview: 'border-constellation' },
+  { name: 'petals', label: 'Pétalos', preview: 'border-petals' },
+  { name: 'neon', label: 'Neón', preview: 'border-neon' },
+  { name: 'honeycomb', label: 'Panal', preview: 'border-honeycomb' },
 ];
 
 export function LetterEditor() {

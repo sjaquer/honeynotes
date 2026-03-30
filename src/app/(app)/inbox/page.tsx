@@ -80,6 +80,12 @@ const stampIcons: Record<Stamp, React.ReactNode> = {
   'teddy-emoji': <span className="text-2xl">🧸</span>,
   'lovebirds-emoji': <span className="text-2xl">🐦</span>,
   'shooting-star-emoji': <span className="text-2xl">🌠</span>,
+  'planet-emoji': <span className="text-2xl">🪐</span>,
+  'gift-emoji': <span className="text-2xl">🎁</span>,
+  'clover-emoji': <span className="text-2xl">🍀</span>,
+  'balloon-emoji': <span className="text-2xl">🎈</span>,
+  'cherry-emoji': <span className="text-2xl">🍒</span>,
+  'wave-emoji': <span className="text-2xl">🌊</span>,
 };
 
 // Border style classes for preview
@@ -96,6 +102,10 @@ const borderClasses: Record<string, string> = {
   ornate: 'border-ornate',
   gold: 'border-gold',
   lace: 'border-lace',
+  constellation: 'border-constellation',
+  petals: 'border-petals',
+  neon: 'border-neon',
+  honeycomb: 'border-honeycomb',
 };
 
 const PAGE_SIZE = 20;

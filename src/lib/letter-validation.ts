@@ -27,8 +27,10 @@ export const VALID_STAMPS: Stamp[] = [
   // Polen
   'rose-emoji', 'star-emoji', 'butterfly-emoji', 'flower-emoji', 'rainbow-emoji',
   'kiss-emoji', 'sparkle-emoji', 'sun-emoji', 'fire-emoji', 'cupid-emoji', 'infinity-emoji', 'ring-emoji',
+  'gift-emoji', 'clover-emoji', 'cherry-emoji',
   // Premium
-  'moon-emoji', 'crown-emoji', 'diamond-emoji', 'angel-emoji', 'dove-emoji', 'teddy-emoji', 'lovebirds-emoji', 'shooting-star-emoji'
+  'moon-emoji', 'crown-emoji', 'diamond-emoji', 'angel-emoji', 'dove-emoji', 'teddy-emoji', 'lovebirds-emoji', 'shooting-star-emoji',
+  'planet-emoji', 'balloon-emoji', 'wave-emoji'
 ];
 
 export const VALID_FONTS: AppFont[] = [
@@ -47,7 +49,7 @@ export const VALID_BORDERS: BorderStyle[] = [
   // Polen
   'dashed', 'airmail', 'hearts', 'stars', 'waves', 'ribbon',
   // Premium
-  'floral', 'vintage', 'ornate', 'gold', 'lace'
+  'floral', 'vintage', 'ornate', 'gold', 'lace', 'constellation', 'petals', 'neon', 'honeycomb'
 ];
 
 // =====================

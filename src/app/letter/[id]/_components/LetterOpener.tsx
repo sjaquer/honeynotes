@@ -72,6 +72,10 @@ const borderClasses: Record<string, string> = {
   ornate: 'border-ornate',
   gold: 'border-gold',
   lace: 'border-lace',
+  constellation: 'border-constellation',
+  petals: 'border-petals',
+  neon: 'border-neon',
+  honeycomb: 'border-honeycomb',
 };
 
 const stampIcons: Record<string, React.ReactNode> = {
@@ -98,6 +102,12 @@ const stampIcons: Record<string, React.ReactNode> = {
   'teddy-emoji': <span className="text-4xl">🧸</span>,
   'lovebirds-emoji': <span className="text-4xl">🐦</span>,
   'shooting-star-emoji': <span className="text-4xl">🌠</span>,
+  'planet-emoji': <span className="text-4xl">🪐</span>,
+  'gift-emoji': <span className="text-4xl">🎁</span>,
+  'clover-emoji': <span className="text-4xl">🍀</span>,
+  'balloon-emoji': <span className="text-4xl">🎈</span>,
+  'cherry-emoji': <span className="text-4xl">🍒</span>,
+  'wave-emoji': <span className="text-4xl">🌊</span>,
 };
 
 export function LetterOpener({ letter }: { letter: LetterUI }) {

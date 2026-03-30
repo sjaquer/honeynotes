@@ -68,6 +68,9 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'stamp-cupid', category: 'stamp', itemId: 'cupid-emoji', name: 'Cupido', description: 'Flechazo de amor', price: 150, currency: 'polen', icon: '💘' },
   { id: 'stamp-infinity', category: 'stamp', itemId: 'infinity-emoji', name: 'Infinito', description: 'Amor sin fin', price: 140, currency: 'polen', icon: '♾️' },
   { id: 'stamp-ring', category: 'stamp', itemId: 'ring-emoji', name: 'Anillo', description: 'Compromiso eterno', price: 175, currency: 'polen', icon: '💍' },
+  { id: 'stamp-gift', category: 'stamp', itemId: 'gift-emoji', name: 'Regalo', description: 'Sorpresa para tu amor', price: 130, currency: 'polen', icon: '🎁' },
+  { id: 'stamp-clover', category: 'stamp', itemId: 'clover-emoji', name: 'Trébol', description: 'Suerte para la relación', price: 145, currency: 'polen', icon: '🍀' },
+  { id: 'stamp-cherry', category: 'stamp', itemId: 'cherry-emoji', name: 'Cereza', description: 'Dulce y coqueta', price: 135, currency: 'polen', icon: '🍒' },
   
   // Premium stamps - Jalea Real (50-125)
   { id: 'stamp-moon', category: 'stamp', itemId: 'moon-emoji', name: 'Luna', description: 'Para noches especiales', price: 50, currency: 'jaleaReal', isPremium: true, icon: '🌙' },
@@ -78,6 +81,9 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'stamp-teddy', category: 'stamp', itemId: 'teddy-emoji', name: 'Osito', description: 'Abrazo tierno', price: 90, currency: 'jaleaReal', isPremium: true, icon: '🧸' },
   { id: 'stamp-lovebirds', category: 'stamp', itemId: 'lovebirds-emoji', name: 'Tortolitos', description: 'Juntos para siempre', price: 100, currency: 'jaleaReal', isPremium: true, icon: '🐦' },
   { id: 'stamp-shooting-star', category: 'stamp', itemId: 'shooting-star-emoji', name: 'Estrella Fugaz', description: 'Pide un deseo', price: 125, currency: 'jaleaReal', isPremium: true, icon: '🌠' },
+  { id: 'stamp-planet', category: 'stamp', itemId: 'planet-emoji', name: 'Planeta', description: 'Amor de otro mundo', price: 95, currency: 'jaleaReal', isPremium: true, icon: '🪐' },
+  { id: 'stamp-balloon', category: 'stamp', itemId: 'balloon-emoji', name: 'Globo', description: 'Para celebrar juntos', price: 105, currency: 'jaleaReal', isPremium: true, icon: '🎈' },
+  { id: 'stamp-wave', category: 'stamp', itemId: 'wave-emoji', name: 'Ola', description: 'Un hola con cariño', price: 85, currency: 'jaleaReal', isPremium: true, icon: '🌊' },
 
   // ========================================
   // === BORDER STYLES (12 items) ===
@@ -100,6 +106,10 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'border-ornate', category: 'borderStyle', itemId: 'ornate', name: 'Ornamentado', description: 'Detalles exquisitos', price: 150, currency: 'jaleaReal', isPremium: true, icon: '🏛️' },
   { id: 'border-gold', category: 'borderStyle', itemId: 'gold', name: 'Dorado', description: 'Lujo real', price: 175, currency: 'jaleaReal', isPremium: true, icon: '✨' },
   { id: 'border-lace', category: 'borderStyle', itemId: 'lace', name: 'Encaje', description: 'Delicado y femenino', price: 150, currency: 'jaleaReal', isPremium: true, icon: '🧵' },
+  { id: 'border-constellation', category: 'borderStyle', itemId: 'constellation', name: 'Constelación', description: 'Cielo estrellado animado', price: 180, currency: 'jaleaReal', isPremium: true, icon: '🌌' },
+  { id: 'border-petals', category: 'borderStyle', itemId: 'petals', name: 'Pétalos', description: 'Pétalos con movimiento suave', price: 165, currency: 'jaleaReal', isPremium: true, icon: '🌸' },
+  { id: 'border-neon', category: 'borderStyle', itemId: 'neon', name: 'Neón', description: 'Brillo moderno animado', price: 190, currency: 'jaleaReal', isPremium: true, icon: '💜' },
+  { id: 'border-honeycomb', category: 'borderStyle', itemId: 'honeycomb', name: 'Panal', description: 'Patrón de colmena premium', price: 175, currency: 'jaleaReal', isPremium: true, icon: '🐝' },
 
   // ========================================
   // === FONTS (20 items) ===
@@ -144,6 +154,9 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'special-petals', category: 'special', itemId: 'petals', name: 'Pétalos', description: 'Lluvia de pétalos de rosa', price: 400, currency: 'polen', icon: '🌸' },
   { id: 'special-hearts-float', category: 'special', itemId: 'hearts-float', name: 'Corazones Flotantes', description: 'Corazones que flotan', price: 450, currency: 'polen', icon: '💕' },
   { id: 'special-snow', category: 'special', itemId: 'snow', name: 'Nieve', description: 'Copos de nieve suaves', price: 400, currency: 'polen', icon: '❄️' },
+  { id: 'special-stars-parallax', category: 'special', itemId: 'stars-parallax', name: 'Cielo Estelar', description: 'Fondo con estrellas en movimiento', price: 500, currency: 'polen', icon: '🌟' },
+  { id: 'special-heartbeat', category: 'special', itemId: 'heartbeat', name: 'Latido', description: 'Pulso de corazones tenue', price: 520, currency: 'polen', icon: '💓' },
+  { id: 'special-lanterns', category: 'special', itemId: 'lanterns', name: 'Faroles', description: 'Faroles románticos flotantes', price: 550, currency: 'polen', icon: '🏮' },
   
   // Premium special items
   { id: 'special-fireworks', category: 'special', itemId: 'fireworks', name: 'Fuegos Artificiales', description: 'Explosión de colores', price: 150, currency: 'jaleaReal', isPremium: true, icon: '🎆' },
@@ -151,6 +164,8 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'special-aurora-effect', category: 'special', itemId: 'aurora-effect', name: 'Efecto Aurora', description: 'Aurora boreal de fondo', price: 250, currency: 'jaleaReal', isPremium: true, icon: '🌌' },
   { id: 'special-golden-frame', category: 'special', itemId: 'golden-frame', name: 'Marco Dorado', description: 'Marco exclusivo dorado', price: 300, currency: 'jaleaReal', isPremium: true, icon: '🏆' },
   { id: 'special-animated-seal', category: 'special', itemId: 'animated-seal', name: 'Sello Animado', description: 'Sello con animación especial', price: 350, currency: 'jaleaReal', isPremium: true, icon: '💫' },
+  { id: 'special-comet-trail', category: 'special', itemId: 'comet-trail', name: 'Estela de Cometa', description: 'Brillo dinámico alrededor de la carta', price: 220, currency: 'jaleaReal', isPremium: true, icon: '☄️' },
+  { id: 'special-rose-perfume', category: 'special', itemId: 'rose-perfume', name: 'Aroma de Rosa', description: 'Efecto visual suave de pétalos', price: 260, currency: 'jaleaReal', isPremium: true, icon: '🥀' },
 ];
 
 // =====================

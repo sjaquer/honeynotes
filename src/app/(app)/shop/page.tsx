@@ -29,6 +29,7 @@ const CATEGORIES: { id: ShopCategory; label: string; icon: React.ReactNode }[] =
   { id: 'stamp', label: 'Sellos', icon: <Stamp className="size-4" /> },
   { id: 'borderStyle', label: 'Bordes', icon: <Frame className="size-4" /> },
   { id: 'font', label: 'Fuentes', icon: <Type className="size-4" /> },
+  { id: 'special', label: 'Especiales', icon: <Gift className="size-4" /> },
 ];
 
 export default function ShopPage() {
@@ -215,7 +216,7 @@ export default function ShopPage() {
 
         {/* Category Tabs */}
         <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as ShopCategory)}>
-          <TabsList className="glass-paper grid w-full grid-cols-4 bg-white/80">
+          <TabsList className="glass-paper grid w-full grid-cols-5 bg-white/80">
             {CATEGORIES.map((cat) => (
               <TabsTrigger key={cat.id} value={cat.id} className="text-xs sm:text-sm">
                 <span className="mr-1 inline-flex items-center justify-center">{cat.icon}</span>
