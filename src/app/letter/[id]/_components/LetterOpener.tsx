@@ -3,7 +3,7 @@
 import type { LetterUI, BorderStyle } from '@/lib/types';
 import { ANIMATED_BORDERS } from '@/lib/types';
 import { useState } from 'react';
-import { Heart, ArrowLeft, Mail } from 'lucide-react';
+import { Heart, ArrowLeft, Mail, Sparkles, Send, CalendarDays, UserRound } from 'lucide-react';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -128,16 +128,44 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
 
   if (isOpened) {
       return (
-          <div className="flex min-h-screen flex-col bg-[#F0F4F8] animate-in fade-in duration-500">
-              <div className="sticky top-0 z-20 bg-[#F0F4F8]/95 p-3 backdrop-blur-sm sm:p-4">
-                  <Link href="/inbox" className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm transition-all hover:shadow-md active:scale-95 sm:px-4 sm:py-2">
-                      <ArrowLeft className="size-4 text-gray-600 sm:size-5" />
-                      <span className="text-xs font-medium text-gray-700 sm:text-sm">Volver</span>
-                  </Link>
+          <div className="paper-app-bg paper-noise flex min-h-screen flex-col animate-in fade-in duration-500">
+              <div className="sticky top-0 z-20 bg-[#FFF8F0]/90 p-3 backdrop-blur-sm sm:p-4">
+                                    <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2">
+                                        <Link href="/inbox" className="glass-paper inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-all hover:shadow-md active:scale-95 sm:px-4 sm:py-2">
+                                                <ArrowLeft className="size-4 text-gray-600 sm:size-5" />
+                                                <span className="text-xs font-medium text-gray-700 sm:text-sm">Volver al buzon</span>
+                                        </Link>
+
+                                        <Link href="/new-letter" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white shadow-crimson-soft transition-all hover:shadow-crimson-hover sm:text-sm">
+                                            <Send className="size-4" />
+                                            Responder
+                                        </Link>
+                                    </div>
               </div>
 
               <div className="flex-1 p-3 pb-24 sm:p-4 lg:p-8 lg:pb-32">
-                  <div className="mx-auto max-w-2xl">
+                                    <div className="mx-auto max-w-5xl">
+                                            <div className="mb-5 grid gap-3 sm:grid-cols-3">
+                                                <div className="glass-paper rounded-2xl p-3">
+                                                    <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                                                        <UserRound className="size-3.5" /> De
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-primary sm:text-base">{getTranslatedName(letter.senderName)}</p>
+                                                </div>
+                                                <div className="glass-paper rounded-2xl p-3">
+                                                    <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                                                        <UserRound className="size-3.5" /> Para
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-primary sm:text-base">{getTranslatedName(letter.recipientName)}</p>
+                                                </div>
+                                                <div className="glass-paper rounded-2xl p-3">
+                                                    <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                                                        <CalendarDays className="size-3.5" /> Fecha
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-gray-700 sm:text-base">{format(new Date(letter.createdAt), 'd MMMM yyyy', { locale: locale === 'es' ? es : undefined })}</p>
+                                                </div>
+                                            </div>
+
                       <div className={cn(
                           "relative overflow-hidden rounded-xl shadow-2xl sm:rounded-lg",
                           borderClasses[letter.config.borderStyle || 'simple'],
@@ -151,15 +179,12 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
                               {/* Header with stamp, date, and names */}
                               <div className="mb-6 border-b border-dashed border-gray-300 pb-4 sm:mb-8 sm:pb-6">
                                   <div className="flex items-start justify-between gap-3">
-                                      <div className="flex-1 space-y-1">
-                                          <div className="text-[10px] uppercase tracking-wider text-gray-500 sm:text-xs">
-                                              {format(new Date(letter.createdAt), 'd MMMM yyyy', { locale: locale === 'es' ? es : undefined })}
-                                          </div>
-                                          <div className="text-base text-gray-800 sm:text-lg lg:text-xl">
-                                              De: <span className="font-semibold text-primary">{getTranslatedName(letter.senderName)}</span>
+                                      <div className="flex-1 space-y-1.5">
+                                          <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary sm:text-xs">
+                                              Carta abierta
                                           </div>
                                           <div className="text-sm text-gray-600 sm:text-base">
-                                              Para: <span className="font-medium">{getTranslatedName(letter.recipientName)}</span>
+                                              Un mensaje personal para ti
                                           </div>
                                       </div>
                                       
@@ -191,8 +216,8 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
                               </div>
 
                               <div className="mt-8 flex items-center justify-center gap-2 border-t border-dashed border-gray-300 pt-4 sm:mt-12 sm:pt-6">
-                                  <span className="text-xl">🐝</span>
-                                  <span className="text-xs text-gray-400 sm:text-sm">HoneyNotes</span>
+                                  <Sparkles className="size-4 text-primary/70" />
+                                  <span className="text-xs text-gray-500 sm:text-sm">Escrito con HoneyNotes</span>
                               </div>
                           </div>
                       </div>
@@ -203,16 +228,18 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#E8E8F6] to-[#F0F4F8] p-4">
+        <div className="paper-app-bg paper-noise flex min-h-screen flex-col items-center justify-center p-4">
         <div className="w-full max-w-sm text-center sm:max-w-md">
             <button
                 onClick={() => setIsOpened(true)}
                 className="group relative mx-auto mb-6 block w-full transition-transform hover:scale-105 active:scale-95 sm:mb-8"
             >
                 <div className={cn(
-                  "relative flex min-h-[200px] w-full flex-col items-center justify-center overflow-hidden rounded-lg p-4 shadow-[0_10px_40px_rgba(0,0,0,0.15)] transition-all group-hover:shadow-[0_15px_50px_rgba(220,20,60,0.2)] sm:min-h-[220px] sm:rounded-sm sm:p-6",
+                                    "glass-paper relative flex min-h-[200px] w-full flex-col items-center justify-center overflow-hidden rounded-lg p-4 transition-all group-hover:shadow-[0_15px_50px_rgba(220,20,60,0.2)] sm:min-h-[220px] sm:rounded-sm sm:p-6",
                   paperColorClasses[letter.config.paperColor] || 'bg-[#FFFEF5]'
                 )}>
+                    <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-primary/10 to-transparent" />
+
                     {/* Stamp in corner */}
                     <div className="absolute right-3 top-3 rounded-full bg-primary p-2 shadow-lg sm:right-6 sm:top-6 sm:p-3">
                         <div className="size-6 text-white sm:size-8">
@@ -239,8 +266,10 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
             </button>
 
             <div className="space-y-2">
-                <p className="text-lg text-gray-600 animate-bounce sm:text-xl">
-                    ✨ {t('letterOpener.tapToOpen')} ✨
+                <p className="text-lg text-gray-600 sm:text-xl">
+                                        <span className="inline-flex items-center gap-1">
+                                            <Sparkles className="size-4 text-primary" /> {t('letterOpener.tapToOpen')} <Sparkles className="size-4 text-primary" />
+                                        </span>
                 </p>
                 <div className="space-y-1">
                   <p className="text-sm text-gray-500 sm:text-base">

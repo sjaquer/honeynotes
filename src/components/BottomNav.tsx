@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Inbox,
-  PenSquare,
-  ListTodo,
-  Settings,
-  Store,
+  Feather,
+  ClipboardCheck,
+  SlidersHorizontal,
+  ShoppingBag,
   type LucideIcon,
-  Heart
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
@@ -22,10 +22,10 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: '/inbox', labelKey: 'nav.inbox', icon: Inbox },
-  { href: '/new-letter', labelKey: 'nav.newLetter', icon: PenSquare },
-  { href: '/shop', labelKey: 'nav.shop', icon: Store },
-  { href: '/tasks', labelKey: 'nav.tasks', icon: ListTodo },
-  { href: '/settings', labelKey: 'nav.settings', icon: Settings },
+  { href: '/new-letter', labelKey: 'nav.newLetter', icon: Feather },
+  { href: '/shop', labelKey: 'nav.shop', icon: ShoppingBag },
+  { href: '/tasks', labelKey: 'nav.tasks', icon: ClipboardCheck },
+  { href: '/settings', labelKey: 'nav.settings', icon: SlidersHorizontal },
 ];
 
 export function BottomNav() {
@@ -33,10 +33,10 @@ export function BottomNav() {
   const { t } = useTranslation();
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 w-[95%] max-w-sm -translate-x-1/2 touch-none">
-      <nav className="relative flex h-20 items-center justify-around rounded-[2rem] bg-[#FFFdf5]/95 backdrop-blur-sm px-2 shadow-crimson-card border border-primary/10">
+    <div className="fixed bottom-5 left-1/2 z-50 w-[95%] max-w-sm -translate-x-1/2 touch-none">
+      <nav className="glass-paper relative flex h-[4.75rem] items-center justify-around rounded-[2rem] px-2 border border-white/60">
          {/* Decorative Tape */}
-         <div className="absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 rotate-1 bg-primary/70 rounded-sm opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-30 pointer-events-none"></div>
+         <div className="absolute -top-2 left-1/2 h-5 w-20 -translate-x-1/2 rotate-1 rounded-sm bg-primary/65 opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-30 pointer-events-none"></div>
 
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -47,7 +47,7 @@ export function BottomNav() {
               prefetch={true}
               className={cn(
                 'group relative flex flex-1 flex-col items-center justify-center gap-1 p-2 transition-all duration-200 touch-manipulation',
-                isActive ? '-translate-y-4' : 'hover:-translate-y-1 active:scale-[0.95]'
+                isActive ? '-translate-y-3' : 'hover:-translate-y-1 active:scale-[0.97]'
               )}
             >
               {/* Active Circle Background */}
@@ -55,12 +55,11 @@ export function BottomNav() {
                 className={cn(
                   "absolute flex size-14 items-center justify-center rounded-full transition-all duration-300 pointer-events-none",
                   isActive 
-                    ? "bg-primary shadow-crimson-deep scale-100 rotate-[-3deg]" 
+                    ? "bg-primary shadow-crimson-deep scale-100" 
                     : "bg-transparent scale-0"
                 )}
               >
-                  {/* Decorative Heart for active */}
-                   {isActive && <Heart className="absolute -right-1 -top-1 size-4 fill-secondary text-secondary animate-pulse" />}
+                  {isActive && <Sparkles className="absolute -right-1 -top-1 size-4 text-amber-300" />}
               </div>
 
               {/* Icon */}
@@ -68,13 +67,13 @@ export function BottomNav() {
                   "relative z-10 transition-all duration-300 pointer-events-none",
                   isActive ? "text-white" : "text-gray-400 group-hover:text-primary group-active:scale-90"
               )}>
-                  <item.icon className={cn("size-7", isActive && "stroke-[2.5px]")} />
+                  <item.icon className={cn("size-[1.35rem]", isActive && "stroke-[2.5px]")} />
               </div>
 
               {/* Label */}
               <span className={cn(
-                  "absolute -bottom-6 text-xs font-semibold transition-all duration-300 pointer-events-none",
-                  isActive ? "opacity-100 text-primary scale-110" : "opacity-0 scale-0"
+                  "absolute -bottom-5 text-[11px] font-semibold transition-all duration-300 pointer-events-none",
+                  isActive ? "opacity-100 text-primary scale-100" : "opacity-0 scale-0"
               )}>
                   {t(item.labelKey)}
               </span>

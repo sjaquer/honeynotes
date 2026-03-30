@@ -27,12 +27,18 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
 
   // Mark as read - only once
   useEffect(() => {
-    if (letter && !letter.isRead && letterRef && user && !hasMarkedRead.current) {
+    if (
+      letter &&
+      !letter.isRead &&
+      letterRef &&
+      user &&
+      letter.recipientId === user.uid &&
+      !hasMarkedRead.current
+    ) {
       hasMarkedRead.current = true;
-      updateDocumentNonBlocking(letterRef, { isRead: true });
-      
-      // Only track if recipient is reading (not sender viewing their own letter)
-      if (letter.recipientId === user.uid && !hasTrackedRead.current) {
+      updateDocumentNonBlocking(letterRef, { isRead: true, status: 'opened' });
+
+      if (!hasTrackedRead.current) {
         hasTrackedRead.current = true;
         trackLetterRead();
       }
@@ -42,8 +48,8 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   // Show error if any
   if (error) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center p-4">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center max-w-md">
+      <div className="paper-app-bg paper-noise flex h-screen flex-col items-center justify-center p-4">
+        <div className="glass-paper max-w-md rounded-xl border border-red-200 bg-red-50/80 p-6 text-center">
           <p className="font-semibold text-red-600 mb-2">Error al cargar la carta</p>
           <p className="text-sm text-red-500">{error.message}</p>
           <p className="text-xs text-gray-500 mt-2">ID: {id}</p>
@@ -54,7 +60,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
 
   if (isLoading || isUserLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="paper-app-bg paper-noise flex h-screen items-center justify-center">
         <Loader2 className="size-12 animate-spin text-primary" />
       </div>
     );
@@ -62,8 +68,8 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
 
   if (!letter) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center p-4">
-        <div className="text-center">
+      <div className="paper-app-bg paper-noise flex h-screen flex-col items-center justify-center p-4">
+        <div className="glass-paper rounded-2xl p-8 text-center">
           <p className="text-xl font-semibold text-gray-600 mb-2">Carta no encontrada</p>
           <p className="text-sm text-gray-400">ID: {id}</p>
           <p className="text-xs text-gray-400 mt-4">Puede que no tengas permiso para verla</p>

@@ -43,6 +43,14 @@ service cloud.firestore {
       );
     }
 
+    // Recipient can only mark letter read/opened without mutating core content/ownership fields
+    function isValidLetterReadUpdate() {
+      return isSignedIn()
+        && resource.data.recipientId == request.auth.uid
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['isRead', 'status'])
+        && request.resource.data.isRead == true;
+    }
+
     // Check if this is a valid partner unlink operation
     // User can only clear partnerId/partnerName on their partner's profile
     function isValidPartnerUnlink() {
@@ -79,8 +87,8 @@ service cloud.firestore {
       // Only sender or recipient can read
       allow read: if isLetterParticipant();
       
-      // Only recipient can update (mark as read)
-      allow update: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+      // Only recipient can update read state
+      allow update: if isValidLetterReadUpdate();
       
       // Only sender can delete their letters
       allow delete: if isSignedIn() && resource.data.senderId == request.auth.uid;

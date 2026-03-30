@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Store, Lock, Sparkles, Palette, Type, Crown, Check, ShoppingCart, Loader2, PlayCircle, Gift } from 'lucide-react';
+import { Palette, Type, Crown, Check, ShoppingCart, Loader2, PlayCircle, Gift, Stamp, Frame, Coins, Gem, Store } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { cn } from '@/lib/utils';
@@ -26,8 +26,8 @@ import {
 // Category icons and labels
 const CATEGORIES: { id: ShopCategory; label: string; icon: React.ReactNode }[] = [
   { id: 'paperColor', label: 'Papeles', icon: <Palette className="size-4" /> },
-  { id: 'stamp', label: 'Sellos', icon: '🔖' },
-  { id: 'borderStyle', label: 'Bordes', icon: '🖼️' },
+  { id: 'stamp', label: 'Sellos', icon: <Stamp className="size-4" /> },
+  { id: 'borderStyle', label: 'Bordes', icon: <Frame className="size-4" /> },
   { id: 'font', label: 'Fuentes', icon: <Type className="size-4" /> },
 ];
 
@@ -140,7 +140,9 @@ export default function ShopPage() {
       <header className="sticky top-0 z-10 bg-[#FFF8F0]/90 p-4 backdrop-blur-sm lg:p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-primary lg:text-3xl">🏪 {t('shopPage.title')}</h1>
+            <h1 className="flex items-center gap-2 text-2xl font-bold text-primary lg:text-3xl">
+              <Store className="size-7" /> {t('shopPage.title')}
+            </h1>
             <p className="text-sm text-gray-500">Personaliza tus cartas</p>
           </div>
           
@@ -148,12 +150,12 @@ export default function ShopPage() {
           <div className="flex flex-col gap-1">
             <div className="glass-paper flex items-center gap-2 rounded-full bg-amber-100/70 px-3 py-1.5">
               <span className="text-sm font-bold text-amber-700">{economy?.polen ?? 0}</span>
-              <span className="text-base">🌼</span>
+              <Coins className="size-4 text-amber-700" />
               <span className="text-xs text-amber-600">Polen</span>
             </div>
             <div className="glass-paper flex items-center gap-2 rounded-full bg-purple-100/70 px-3 py-1.5">
               <span className="text-sm font-bold text-purple-700">{economy?.jaleaReal ?? 0}</span>
-              <span className="text-base">👑</span>
+              <Gem className="size-4 text-purple-700" />
               <span className="text-xs text-purple-600">Jalea</span>
             </div>
           </div>
@@ -216,7 +218,7 @@ export default function ShopPage() {
           <TabsList className="glass-paper grid w-full grid-cols-4 bg-white/80">
             {CATEGORIES.map((cat) => (
               <TabsTrigger key={cat.id} value={cat.id} className="text-xs sm:text-sm">
-                <span className="mr-1">{cat.icon}</span>
+                <span className="mr-1 inline-flex items-center justify-center">{cat.icon}</span>
                 <span className="hidden sm:inline">{cat.label}</span>
               </TabsTrigger>
             ))}
