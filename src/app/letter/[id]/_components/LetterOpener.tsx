@@ -110,11 +110,11 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
 
   const getAdaptiveFontSize = () => {
     const length = letter.content.length;
-    if (length < 100) return 'text-3xl md:text-4xl lg:text-5xl leading-[48px] md:leading-[56px] lg:leading-[64px]';
-    if (length < 250) return 'text-2xl md:text-3xl lg:text-4xl leading-[42px] md:leading-[48px] lg:leading-[56px]';
-    if (length < 500) return 'text-xl md:text-2xl lg:text-3xl leading-[38px] md:leading-[42px] lg:leading-[48px]';
-    if (length < 800) return 'text-lg md:text-xl lg:text-2xl leading-[34px] md:leading-[38px] lg:leading-[42px]';
-    return 'text-base md:text-lg lg:text-xl leading-[30px] md:leading-[34px] lg:leading-[38px]';
+        if (length < 100) return 'text-2xl md:text-4xl lg:text-5xl leading-[40px] md:leading-[56px] lg:leading-[64px]';
+        if (length < 250) return 'text-xl md:text-3xl lg:text-4xl leading-[34px] md:leading-[48px] lg:leading-[56px]';
+        if (length < 500) return 'text-lg md:text-2xl lg:text-3xl leading-[32px] md:leading-[42px] lg:leading-[48px]';
+        if (length < 800) return 'text-base md:text-xl lg:text-2xl leading-[29px] md:leading-[38px] lg:leading-[42px]';
+        return 'text-[15px] md:text-lg lg:text-xl leading-7 md:leading-[34px] lg:leading-[38px]';
   };
 
   const getFontClass = () => {
@@ -129,21 +129,21 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
   if (isOpened) {
       return (
           <div className="paper-app-bg paper-noise flex min-h-screen flex-col animate-in fade-in duration-500">
-              <div className="sticky top-0 z-20 bg-[#FFF8F0]/90 p-3 backdrop-blur-sm sm:p-4">
+              <div className="sticky top-0 z-20 bg-[#FFF8F0]/90 p-2.5 backdrop-blur-sm sm:p-4">
                                     <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2">
-                                        <Link href="/inbox" className="glass-paper inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-all hover:shadow-md active:scale-95 sm:px-4 sm:py-2">
+                                        <Link href="/inbox" className="glass-paper inline-flex touch-manipulation items-center gap-2 rounded-full px-3 py-1.5 transition-all hover:shadow-md active:scale-95 sm:px-4 sm:py-2">
                                                 <ArrowLeft className="size-4 text-gray-600 sm:size-5" />
                                                 <span className="text-xs font-medium text-gray-700 sm:text-sm">Volver al buzon</span>
                                         </Link>
 
-                                        <Link href="/new-letter" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white shadow-crimson-soft transition-all hover:shadow-crimson-hover sm:text-sm">
+                                        <Link href="/new-letter" className="inline-flex touch-manipulation items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-crimson-soft transition-all hover:shadow-crimson-hover sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
                                             <Send className="size-4" />
                                             Responder
                                         </Link>
                                     </div>
               </div>
 
-              <div className="flex-1 p-3 pb-24 sm:p-4 lg:p-8 lg:pb-32">
+              <div className="flex-1 p-2.5 pb-24 sm:p-4 lg:p-8 lg:pb-32">
                                     <div className="mx-auto max-w-5xl">
                                             <div className="mb-5 grid gap-3 sm:grid-cols-3">
                                                 <div className="glass-paper rounded-2xl p-3">
@@ -175,7 +175,7 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
                           <div className="absolute left-0 right-0 top-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
                           <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
 
-                          <div className="p-5 sm:p-8 lg:p-12">
+                          <div className="p-4 sm:p-8 lg:p-12">
                               {/* Header with stamp, date, and names */}
                               <div className="mb-6 border-b border-dashed border-gray-300 pb-4 sm:mb-8 sm:pb-6">
                                   <div className="flex items-start justify-between gap-3">
@@ -208,7 +208,7 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
 
                               {/* Letter content */}
                               <div className={cn(
-                                  "min-h-[30vh] whitespace-pre-wrap text-gray-800 transition-all sm:min-h-[40vh]",
+                                  "min-h-[28vh] break-words whitespace-pre-wrap text-gray-800 transition-all sm:min-h-[40vh]",
                                   getAdaptiveFontSize(),
                                   getFontClass()
                               )}>
@@ -232,7 +232,7 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
         <div className="w-full max-w-sm text-center sm:max-w-md">
             <button
                 onClick={() => setIsOpened(true)}
-                className="group relative mx-auto mb-6 block w-full transition-transform hover:scale-105 active:scale-95 sm:mb-8"
+                className="group relative mx-auto mb-6 block w-full touch-manipulation transition-transform hover:scale-105 active:scale-95 sm:mb-8"
             >
                 <div className={cn(
                                     "glass-paper relative flex min-h-[200px] w-full flex-col items-center justify-center overflow-hidden rounded-lg p-4 transition-all group-hover:shadow-[0_15px_50px_rgba(220,20,60,0.2)] sm:min-h-[220px] sm:rounded-sm sm:p-6",

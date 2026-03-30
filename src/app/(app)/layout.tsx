@@ -39,7 +39,7 @@ export default function AppLayout({
       <div className="pointer-events-none absolute -left-20 top-16 size-64 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 top-1/3 size-72 rounded-full bg-amber-200/40 blur-3xl" />
 
-      <main className="relative z-10 flex-1 pb-28">{children}</main>
+      <main className="relative z-10 flex-1 pb-[calc(7rem+env(safe-area-inset-bottom))]">{children}</main>
       <BottomNav />
       
       {/* Partner Connection Onboarding */}

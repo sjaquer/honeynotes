@@ -247,9 +247,9 @@ export default function InboxPage() {
       </AlertDialog>
 
       {/* Header */}
-      <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#FFF8F0]/90 p-6 backdrop-blur-sm lg:p-8">
+        <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#FFF8F0]/90 p-4 backdrop-blur-sm sm:p-6 lg:p-8">
         <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-primary lg:text-4xl">{t('inbox.title')}</h1>
+          <h1 className="text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">{t('inbox.title')}</h1>
             <div className="glass-paper rounded-full p-2">
                 <BeeIcon size="lg" />
             </div>
@@ -263,14 +263,14 @@ export default function InboxPage() {
                 onClick={() => fetchLetters(true)} 
                 disabled={isLoading}
                 className={cn(
-                  "rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary transition-all",
+                  "touch-manipulation rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 transition-all hover:border-primary hover:text-primary",
                   isLoading && "opacity-50 cursor-not-allowed"
                 )}
                 title="Actualizar"
               >
                 <RefreshCw className={cn("size-5", isLoading && "animate-spin")} />
               </button>
-              <button className="rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary">
+              <button className="touch-manipulation rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 transition-all hover:border-primary hover:text-primary">
                 <Search className="size-5" />
               </button>
             </div>
@@ -304,7 +304,7 @@ export default function InboxPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-8">
         {/* Show error if any */}
         {error && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-center">
@@ -337,10 +337,10 @@ export default function InboxPage() {
         )}
         {!isLoading && !isUserLoading && !error && user && letters && letters.length > 0 && (
           <>
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <ul className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {letters.map((letter) => (
               <li key={letter.id} className="group relative pt-4">
-                 <div className="absolute left-1/2 top-0 z-20 h-6 w-16 -translate-x-1/2 rotate-[-2deg] rounded-sm bg-[#e3d5ca] opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-20 sm:h-7 sm:w-20"></div>
+                 <div className="pointer-events-none absolute left-1/2 top-0 z-20 h-6 w-16 -translate-x-1/2 rotate-[-2deg] rounded-sm bg-[#e3d5ca] opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-20 sm:h-7 sm:w-20"></div>
                  
                  {/* Delete button for sent letters */}
                  {viewMode === 'sent' && (
@@ -349,7 +349,7 @@ export default function InboxPage() {
                        <Button
                          size="icon"
                          variant="ghost"
-                         className="absolute right-1 top-5 z-30 size-7 rounded-full bg-white/90 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 sm:size-8"
+                         className="absolute right-1 top-5 z-30 size-8 touch-manipulation rounded-full bg-white/90 opacity-100 shadow-sm transition-opacity sm:size-8 sm:opacity-0 sm:group-hover:opacity-100"
                          onClick={(e) => e.stopPropagation()}
                        >
                          <MoreVertical className="size-4 text-gray-500" />
@@ -374,7 +374,7 @@ export default function InboxPage() {
                 <Link
                   href={`/letter/${letter.id}`}
                   className={cn(
-                    'relative block overflow-hidden rounded-xl p-1 transition-all hover:-translate-y-1 hover:rotate-1 hover:shadow-xl active:scale-[0.98] sm:rounded-lg sm:p-1.5',
+                    'relative block overflow-hidden rounded-xl p-1 touch-manipulation transition-all active:scale-[0.98] hover:-translate-y-1 hover:rotate-1 hover:shadow-xl sm:rounded-lg sm:p-1.5',
                     'shadow-[0_2px_8px_rgba(0,0,0,0.08),0_4px_16px_rgba(0,0,0,0.08)]',
                     paperColorClasses[letter.config?.paperColor] || 'bg-[#FFFDF5]'
                   )}
