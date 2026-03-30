@@ -15,6 +15,7 @@ import type { Letter, PaperColor, Stamp } from '@/lib/types';
 import { useDeleteLetter } from '@/hooks/use-delete-letter';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -221,7 +222,7 @@ export default function InboxPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-[#F0F4F8]">
+    <div className="paper-app-bg paper-noise flex flex-1 flex-col">
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!letterToDelete} onOpenChange={(open) => !open && setLetterToDelete(null)}>
         <AlertDialogContent>
@@ -246,10 +247,10 @@ export default function InboxPage() {
       </AlertDialog>
 
       {/* Header */}
-      <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#F0F4F8]/95 p-6 backdrop-blur-sm lg:p-8">
+      <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#FFF8F0]/90 p-6 backdrop-blur-sm lg:p-8">
         <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-primary lg:text-4xl">{t('inbox.title')}</h1>
-            <div className="rounded-full bg-white p-2 shadow-sm">
+            <div className="glass-paper rounded-full p-2">
                 <BeeIcon size="lg" />
             </div>
         </div>
@@ -275,7 +276,7 @@ export default function InboxPage() {
             </div>
         </div>
         {/* Toggle between received and sent */}
-        <div className="mt-4 flex rounded-2xl bg-white p-1 shadow-sm">
+        <div className="glass-paper mt-4 flex rounded-2xl p-1">
           <button
             onClick={() => setViewMode('received')}
             className={cn(
@@ -322,19 +323,15 @@ export default function InboxPage() {
             </div>
           </div>
         )}
-        {(isLoading || isUserLoading) && (
-          <div className="flex h-full flex-col items-center justify-center">
-            <Loader2 className="size-12 animate-spin text-primary" />
-          </div>
-        )}
+        {(isLoading || isUserLoading) && <InboxSkeletonGrid />}
         {!isLoading && !isUserLoading && !error && user && letters?.length === 0 && (
-          <div className="flex h-full flex-col items-center justify-center space-y-4 text-center">
-             <div className="rounded-full bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                {viewMode === 'received' ? <Sparkles className="size-12 text-gray-300" /> : <Send className="size-12 text-gray-300" />}
+          <div className="glass-paper flex h-full flex-col items-center justify-center space-y-4 rounded-3xl p-8 text-center">
+             <div className="rounded-full bg-gradient-to-br from-primary/15 to-amber-200/40 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                {viewMode === 'received' ? <Sparkles className="size-12 text-primary/60" /> : <Send className="size-12 text-primary/60" />}
              </div>
-            <div className="text-xl text-gray-400">
-              <p>{viewMode === 'received' ? t('inbox.empty') : t('inbox.emptySent')}</p>
-              {viewMode === 'received' && <p className="text-base">{t('inbox.waiting')}</p>}
+            <div className="text-gray-500">
+              <p className="text-xl font-semibold text-primary/80">{viewMode === 'received' ? t('inbox.empty') : t('inbox.emptySent')}</p>
+              {viewMode === 'received' && <p className="mt-1 text-base">{t('inbox.waiting')}</p>}
             </div>
           </div>
         )}
@@ -447,6 +444,25 @@ export default function InboxPage() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function InboxSkeletonGrid() {
+  return (
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={index} className="glass-paper rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <Skeleton className="mt-5 h-5 w-3/4" />
+          <Skeleton className="mt-2 h-4 w-2/3" />
+          <Skeleton className="mt-7 h-4 w-full" />
+          <Skeleton className="mt-2 h-4 w-5/6" />
+        </div>
+      ))}
     </div>
   );
 }

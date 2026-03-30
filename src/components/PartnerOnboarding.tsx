@@ -15,14 +15,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { usePartnerLink, type UserProfile } from '@/hooks/use-partner-link';
+import { usePartnerLink, type UserProfile, type PartnerCodePreview } from '@/hooks/use-partner-link';
 import { useUser, useFirebase, useMemoFirebase, useDoc } from '@/firebase';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { useToast } from '@/hooks/use-toast';
 
 interface PartnerOnboardingProps {
-  onComplete?: () => void;
+  onComplete?: () => void | Promise<void>;
   onSkip?: () => void;
   isOpen?: boolean;
   onClose?: () => void;
@@ -34,7 +34,7 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
   const { toast } = useToast();
   const { firestore } = useFirebase();
   const { user } = useUser();
-  const { generateMyCode, linkWithPartner, formatPartnerCode, isLoading, error: partnerLinkError } = usePartnerLink();
+  const { generateMyCode, linkWithPartner, previewPartnerByCode, formatPartnerCode, isLoading, error: partnerLinkError } = usePartnerLink();
   
   const [step, setStep] = useState(1);
   const [myCode, setMyCode] = useState<string | null>(null);
@@ -44,6 +44,13 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
   const [isGenerating, setIsGenerating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isPasting, setIsPasting] = useState(false);
+  const [preview, setPreview] = useState<PartnerCodePreview | null>(null);
+
+  const handlePartnerCodeInput = (value: string) => {
+    setPartnerCodeInput(value);
+    setPreview(null);
+    setLinkError(null);
+  };
 
   const formatCodeInput = (raw: string): string => {
     const cleaned = raw.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 6);
@@ -67,11 +74,10 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
   }, [isOpen]);
 
   useEffect(() => {
-    if (profile?.partnerId) {
-      onComplete?.();
+    if (isOpen && profile?.partnerId) {
       onClose?.();
     }
-  }, [profile, onComplete, onClose]);
+  }, [isOpen, profile?.partnerId, onClose]);
 
   useEffect(() => {
     if (profile?.partnerCode) {
@@ -86,7 +92,6 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
   }, [partnerLinkError]);
 
   const handleClose = () => {
-    onComplete?.();
     onClose?.();
   };
 
@@ -122,12 +127,30 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
     }
   };
 
+  const handleVerifyPartner = async () => {
+    setLinkError(null);
+    setPreview(null);
+    const result = await previewPartnerByCode(formatCodeInput(partnerCodeInput));
+    if (!result) {
+      setLinkError(partnerLinkError || 'No pudimos verificar ese codigo');
+      return;
+    }
+
+    if (result.partnerId && result.partnerId !== user?.uid) {
+      setLinkError('Esta cuenta ya esta vinculada con otra persona');
+      return;
+    }
+
+    setPreview(result);
+  };
+
   const handlePasteCode = async () => {
     setIsPasting(true);
     try {
       const text = await navigator.clipboard.readText();
       setPartnerCodeInput(formatCodeInput(text));
       setLinkError(null);
+      setPreview(null);
     } catch {
       setLinkError('No se pudo leer el portapapeles. Pega el codigo manualmente.');
     } finally {
@@ -136,15 +159,11 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
   };
 
   const handleSkip = async () => {
-    if (user) {
-      const userRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userRef, {
-        onboardingSeen: true,
-        updatedAt: serverTimestamp(),
-      });
+    if (onComplete) {
+      await onComplete();
     }
     onSkip?.();
-    handleClose();
+    onClose?.();
   };
 
   const nextStep = () => setStep(s => Math.min(s + 1, TOTAL_STEPS));
@@ -197,13 +216,15 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
           {step === 4 && (
             <StepLinkPartner
               partnerCodeInput={partnerCodeInput}
-              setPartnerCodeInput={setPartnerCodeInput}
+              setPartnerCodeInput={handlePartnerCodeInput}
               linkError={linkError}
               isLoading={isLoading}
               isPasting={isPasting}
               onLink={handleLinkPartner}
+              onVerify={handleVerifyPartner}
               onPaste={handlePasteCode}
               formatCodeInput={formatCodeInput}
+              preview={preview}
             />
           )}
         </div>
@@ -422,11 +443,13 @@ interface StepLinkPartnerProps {
   isLoading: boolean;
   isPasting: boolean;
   onLink: () => void;
+  onVerify: () => void;
   onPaste: () => void;
   formatCodeInput: (raw: string) => string;
+  preview: PartnerCodePreview | null;
 }
 
-function StepLinkPartner({ partnerCodeInput, setPartnerCodeInput, linkError, isLoading, isPasting, onLink, onPaste, formatCodeInput }: StepLinkPartnerProps) {
+function StepLinkPartner({ partnerCodeInput, setPartnerCodeInput, linkError, isLoading, isPasting, onLink, onVerify, onPaste, formatCodeInput, preview }: StepLinkPartnerProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="text-center space-y-3">
@@ -442,7 +465,9 @@ function StepLinkPartner({ partnerCodeInput, setPartnerCodeInput, linkError, isL
         <div className="space-y-2">
           <Input
             value={partnerCodeInput}
-            onChange={(e) => setPartnerCodeInput(formatCodeInput(e.target.value))}
+            onChange={(e) => {
+              setPartnerCodeInput(formatCodeInput(e.target.value));
+            }}
             placeholder="ABC-123"
             className="text-center text-2xl font-mono tracking-widest h-16"
             maxLength={7}
@@ -460,23 +485,39 @@ function StepLinkPartner({ partnerCodeInput, setPartnerCodeInput, linkError, isL
         </div>
 
         <Button 
-          onClick={onLink}
-          disabled={partnerCodeInput.length < 7 || isLoading}
+          onClick={preview ? onLink : onVerify}
+          disabled={partnerCodeInput.length < 7 || isLoading || isPasting}
           size="lg"
           className="w-full gap-2"
         >
           {isLoading ? (
             <>
               <Loader2 className="size-5 animate-spin" />
-              Conectando...
+              {preview ? 'Conectando...' : 'Verificando...'}
             </>
           ) : (
             <>
               <Link2 className="size-5" />
-              Conectar con mi Pareja
+              {preview ? 'Confirmar y Conectar' : 'Verificar Codigo'}
             </>
           )}
         </Button>
+
+        {preview && (
+          <div className="rounded-[20px] border border-primary/20 bg-primary/5 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">Encontramos a:</p>
+            <div className="mt-2 flex items-center gap-3">
+              {preview.photoURL ? (
+                <img src={preview.photoURL} alt={preview.displayName} className="size-10 rounded-full object-cover" />
+              ) : (
+                <div className="flex size-10 items-center justify-center rounded-full bg-primary/15 text-primary font-bold">
+                  {preview.displayName.slice(0, 1).toUpperCase()}
+                </div>
+              )}
+              <p className="font-semibold text-gray-800">{preview.displayName}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-4 rounded-[20px] bg-amber-50 border border-amber-200">
@@ -508,7 +549,7 @@ export function usePartnerOnboarding() {
   }, [profile, isLoading]);
 
   const completeOnboarding = async () => {
-    if (user) {
+    if (user && !profile?.onboardingSeen) {
       const userRef = doc(firestore, 'users', user.uid);
       await updateDoc(userRef, {
         onboardingSeen: true,

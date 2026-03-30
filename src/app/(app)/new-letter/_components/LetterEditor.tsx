@@ -6,6 +6,7 @@ import { ANIMATED_BORDERS } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
@@ -148,6 +149,7 @@ export function LetterEditor() {
   const { user } = useUser();
   const { trackLetterSent, economy, ownsItem } = useEconomy();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   // Helper functions to check ownership
   const ownsPaperColor = (colorId: PaperColor) => {
@@ -179,13 +181,14 @@ export function LetterEditor() {
   useEffect(() => {
     if (!user) {
       setUserProfile(null);
+      setIsProfileLoading(false);
       return;
     }
 
+    setIsProfileLoading(true);
     let active = true;
     (async () => {
       try {
-        console.log('Fetching user profile for:', user.uid);
         const ref = doc(firestore, 'users', user.uid);
         const snap = await getDoc(ref);
         if (!active) return;
@@ -193,15 +196,15 @@ export function LetterEditor() {
           const data = snap.data() as UserProfile;
           const { id: _ignored, ...rest } = data;
           const profile = { id: snap.id, ...rest };
-          console.log('User profile loaded:', profile);
           setUserProfile(profile);
         } else {
-          console.warn('User profile document does not exist for UID:', user.uid);
           setUserProfile(null);
         }
       } catch (e) {
         console.error('Error fetching user profile:', e);
         if (active) setUserProfile(null);
+      } finally {
+        if (active) setIsProfileLoading(false);
       }
     })();
 
@@ -421,10 +424,14 @@ export function LetterEditor() {
 
   const currentUserDisplayName = t('users.you');
 
+  if (isProfileLoading) {
+    return <NewLetterSkeleton />;
+  }
+
   return (
     <div className="flex h-full flex-col gap-2 p-3 pb-28 lg:flex-row lg:gap-8 lg:p-8 lg:pb-8">
       {/* LEFT: Canvas */}
-      <div className="relative flex h-[40vh] shrink-0 flex-col rounded-2xl bg-[#F0F4F8] p-1 shadow-inner lg:h-auto lg:flex-1 lg:rounded-3xl">
+      <div className="glass-paper relative flex h-[40vh] shrink-0 flex-col rounded-2xl p-1 lg:h-auto lg:flex-1 lg:rounded-3xl">
         {/* AI Bee - Floating Button over Canvas */}
         <div className="absolute right-3 top-3 z-30 lg:right-6 lg:top-6">
           <AIFeedbackDialog
@@ -513,9 +520,19 @@ export function LetterEditor() {
 
       {/* RIGHT: Customization Panel */}
       <div className="flex flex-1 flex-col gap-2 overflow-hidden lg:w-[320px] lg:flex-none">
+        {!hasPartner && (
+          <div className="glass-paper rounded-2xl border border-primary/20 p-4">
+            <p className="text-sm font-semibold text-primary">Aun no tienes pareja vinculada</p>
+            <p className="mt-1 text-xs text-gray-600">Puedes redactar borradores y enviarte cartas a ti por ahora. Vincula tu pareja desde Ajustes para enviarle directamente.</p>
+            <Link href="/settings" className="mt-3 inline-flex text-xs font-semibold text-primary hover:underline">
+              Ir a Ajustes
+            </Link>
+          </div>
+        )}
+
         {/* Tools Tabs */}
         <Tabs defaultValue="paper" className="flex flex-1 flex-col overflow-hidden w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid h-14 w-full shrink-0 grid-cols-4 rounded-2xl bg-muted/50 p-1">
+            <TabsList className="glass-paper grid h-14 w-full shrink-0 grid-cols-4 rounded-2xl bg-white/70 p-1">
                 <TabsTrigger value="paper" className="rounded-xl data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
                     <FileText className="size-5" />
                 </TabsTrigger>
@@ -530,7 +547,7 @@ export function LetterEditor() {
                 </TabsTrigger>
             </TabsList>
 
-            <div className="mt-2 flex-1 overflow-y-auto rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-3">
+            <div className="glass-paper mt-2 flex-1 overflow-y-auto rounded-2xl border border-white/70 p-3">
                 <TabsContent value="paper" className="mt-0 grid grid-cols-2 gap-2">
                     {paperColors.map((color) => {
                         const owned = ownsPaperColor(color.name);
@@ -716,6 +733,24 @@ export function LetterEditor() {
             )}
           </span>
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function NewLetterSkeleton() {
+  return (
+    <div className="flex h-full flex-col gap-2 p-3 pb-28 lg:flex-row lg:gap-8 lg:p-8 lg:pb-8">
+      <div className="glass-paper flex h-[40vh] shrink-0 flex-col rounded-2xl p-4 lg:h-auto lg:flex-1 lg:rounded-3xl">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="mt-3 h-5 w-1/4" />
+        <Skeleton className="mt-6 h-full w-full rounded-xl" />
+      </div>
+
+      <div className="flex flex-1 flex-col gap-2 overflow-hidden lg:w-[320px] lg:flex-none">
+        <Skeleton className="h-14 w-full rounded-2xl" />
+        <Skeleton className="h-full w-full rounded-2xl" />
+        <Skeleton className="h-14 w-full rounded-2xl" />
       </div>
     </div>
   );

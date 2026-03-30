@@ -10,6 +10,7 @@ import { SHOP_ITEMS, PURCHASE_PACKAGES, AD_REWARD_CONFIG, getShopItemsByCategory
 import type { ShopItem, ShopCategory, PurchasePackage } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -108,16 +109,35 @@ export default function ShopPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="size-12 animate-spin text-primary" />
+      <div className="paper-app-bg paper-noise flex flex-1 flex-col p-4 lg:p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="mt-2 h-4 w-40" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-28 rounded-full" />
+            <Skeleton className="h-8 w-28 rounded-full" />
+          </div>
+        </div>
+        <div className="grid gap-4">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-12 rounded-xl" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-36 rounded-xl" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-[#F0F4F8]">
+    <div className="paper-app-bg paper-noise flex flex-1 flex-col">
       {/* Header with Currency Display */}
-      <header className="sticky top-0 z-10 bg-[#F0F4F8]/95 p-4 backdrop-blur-sm lg:p-6">
+      <header className="sticky top-0 z-10 bg-[#FFF8F0]/90 p-4 backdrop-blur-sm lg:p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-primary lg:text-3xl">🏪 {t('shopPage.title')}</h1>
@@ -126,12 +146,12 @@ export default function ShopPage() {
           
           {/* Currency Display */}
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 shadow-sm">
+            <div className="glass-paper flex items-center gap-2 rounded-full bg-amber-100/70 px-3 py-1.5">
               <span className="text-sm font-bold text-amber-700">{economy?.polen ?? 0}</span>
               <span className="text-base">🌼</span>
               <span className="text-xs text-amber-600">Polen</span>
             </div>
-            <div className="flex items-center gap-2 rounded-full bg-purple-100 px-3 py-1.5 shadow-sm">
+            <div className="glass-paper flex items-center gap-2 rounded-full bg-purple-100/70 px-3 py-1.5">
               <span className="text-sm font-bold text-purple-700">{economy?.jaleaReal ?? 0}</span>
               <span className="text-base">👑</span>
               <span className="text-xs text-purple-600">Jalea</span>
@@ -193,7 +213,7 @@ export default function ShopPage() {
 
         {/* Category Tabs */}
         <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as ShopCategory)}>
-          <TabsList className="grid w-full grid-cols-4 bg-white">
+          <TabsList className="glass-paper grid w-full grid-cols-4 bg-white/80">
             {CATEGORIES.map((cat) => (
               <TabsTrigger key={cat.id} value={cat.id} className="text-xs sm:text-sm">
                 <span className="mr-1">{cat.icon}</span>

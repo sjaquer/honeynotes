@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useFirebase, useUser, useAuth, useDoc, useMemoFirebase } from '@/firebase';
 import { initiateSignOut } from '@/firebase/non-blocking-login';
-import { usePartnerLink, type UserProfile } from '@/hooks/use-partner-link';
+import { usePartnerLink, type UserProfile, type PartnerCodePreview } from '@/hooks/use-partner-link';
 import { useTranslation } from '@/hooks/use-translation';
 import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { BeeIcon } from '@/components/icons/BeeIcon';
@@ -32,10 +32,11 @@ export default function SettingsPage() {
   const auth = useAuth();
   const { user } = useUser();
   
-  const { generateMyCode, deleteMyCode, linkWithPartner, unlinkPartner, clearUnlinkedNotification, formatPartnerCode, isLoading, error } = usePartnerLink();
+  const { generateMyCode, deleteMyCode, linkWithPartner, previewPartnerByCode, unlinkPartner, clearUnlinkedNotification, formatPartnerCode, isLoading, error } = usePartnerLink();
   const { redeemCode, isRedeeming } = usePromoCodes();
   
   const [partnerCodeInput, setPartnerCodeInput] = useState('');
+  const [partnerPreview, setPartnerPreview] = useState<PartnerCodePreview | null>(null);
   const [myCode, setMyCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -135,8 +136,25 @@ export default function SettingsPage() {
     const success = await linkWithPartner(formatPartnerInput(partnerCodeInput));
     if (success) {
       setPartnerCodeInput('');
+      setPartnerPreview(null);
       toast({ title: t('settingsPage.partner.linked'), description: t('settingsPage.partner.canSendLetters') });
     }
+  };
+
+  const handleVerifyPartnerCode = async () => {
+    const preview = await previewPartnerByCode(formatPartnerInput(partnerCodeInput));
+    if (!preview) {
+      setPartnerPreview(null);
+      return;
+    }
+
+    if (preview.partnerId && preview.partnerId !== user?.uid) {
+      setPartnerPreview(null);
+      toast({ variant: 'destructive', title: 'Esta cuenta ya esta vinculada' });
+      return;
+    }
+
+    setPartnerPreview(preview);
   };
 
   const formatPartnerInput = (raw: string): string => {
@@ -149,6 +167,7 @@ export default function SettingsPage() {
     try {
       const text = await navigator.clipboard.readText();
       setPartnerCodeInput(formatPartnerInput(text));
+      setPartnerPreview(null);
     } catch {
       toast({ variant: 'destructive', title: 'No se pudo pegar el codigo' });
     } finally {
@@ -462,13 +481,16 @@ export default function SettingsPage() {
                   <Input
                     placeholder={t('settingsPage.partner.codePlaceholder')}
                     value={partnerCodeInput}
-                    onChange={(e) => setPartnerCodeInput(formatPartnerInput(e.target.value))}
+                    onChange={(e) => {
+                      setPartnerCodeInput(formatPartnerInput(e.target.value));
+                      setPartnerPreview(null);
+                    }}
                     className="font-mono text-center text-lg tracking-widest"
                     maxLength={7}
                   />
-                  <Button onClick={handleLinkPartner} disabled={isLoading || partnerCodeInput.length < 7}>
+                  <Button onClick={partnerPreview ? handleLinkPartner : handleVerifyPartnerCode} disabled={isLoading || partnerCodeInput.length < 7}>
                     <Link2 className="mr-2 size-4" />
-                    {t('settingsPage.partner.link')}
+                    {partnerPreview ? t('settingsPage.partner.link') : 'Verificar'}
                   </Button>
                 </div>
                 <div className="flex justify-end">
@@ -476,6 +498,21 @@ export default function SettingsPage() {
                     {isPastingCode ? 'Pegando...' : 'Pegar codigo'}
                   </Button>
                 </div>
+                {partnerPreview && (
+                  <div className="mt-2 rounded-xl border border-primary/20 bg-primary/5 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">Persona encontrada</p>
+                    <div className="mt-2 flex items-center gap-3">
+                      {partnerPreview.photoURL ? (
+                        <img src={partnerPreview.photoURL} alt={partnerPreview.displayName} className="size-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex size-10 items-center justify-center rounded-full bg-primary/15 text-primary font-bold">
+                          {partnerPreview.displayName.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <p className="font-semibold text-gray-800">{partnerPreview.displayName}</p>
+                    </div>
+                  </div>
+                )}
                 {error && <p className="text-sm text-red-500">{error}</p>}
               </div>
             )}

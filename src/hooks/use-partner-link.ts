@@ -18,6 +18,13 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
+export interface PartnerCodePreview {
+  userId: string;
+  displayName: string;
+  photoURL?: string;
+  partnerId?: string;
+}
+
 export function usePartnerLink() {
   const { firestore } = useFirebase();
   const { user } = useUser();
@@ -251,6 +258,57 @@ export function usePartnerLink() {
     }
   };
 
+  const previewPartnerByCode = async (partnerCode: string): Promise<PartnerCodePreview | null> => {
+    if (!user) return null;
+
+    const cleaned = cleanPartnerCode(partnerCode);
+    if (!isValidPartnerCode(cleaned)) {
+      setError('Codigo invalido');
+      return null;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const codeRef = doc(firestore, 'partnerCodes', cleaned);
+      const codeSnap = await getDoc(codeRef);
+
+      if (!codeSnap.exists()) {
+        setError('Codigo no encontrado');
+        return null;
+      }
+
+      const partnerId = codeSnap.data().userId as string;
+      if (!partnerId || partnerId === user.uid) {
+        setError('No puedes vincularte contigo mismo');
+        return null;
+      }
+
+      const partnerRef = doc(firestore, 'users', partnerId);
+      const partnerSnap = await getDoc(partnerRef);
+
+      if (!partnerSnap.exists()) {
+        setError('La cuenta asociada al codigo no existe');
+        return null;
+      }
+
+      const partnerData = partnerSnap.data();
+      return {
+        userId: partnerId,
+        displayName: partnerData?.displayName || 'Tu Amor',
+        photoURL: partnerData?.photoURL,
+        partnerId: partnerData?.partnerId,
+      };
+    } catch (e) {
+      console.error('Error previewing partner by code:', e);
+      setError(toUserFriendlyError('No se pudo verificar el codigo', e));
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Unlink from partner
   const unlinkPartner = async (): Promise<boolean> => {
     if (!user) return false;
@@ -293,6 +351,7 @@ export function usePartnerLink() {
     generateMyCode,
     deleteMyCode,
     linkWithPartner,
+    previewPartnerByCode,
     unlinkPartner,
     clearUnlinkedNotification,
     formatPartnerCode,
