@@ -1,8 +1,11 @@
+// Firebase config read from environment variables.
+// In Next.js, client-safe variables must be prefixed with NEXT_PUBLIC_.
 export const firebaseConfig = {
-  "projectId": "studio-7839027177-c8158",
-  "appId": "1:1068650241459:web:a75789fecff7bdef53bfc6",
-  "apiKey": "AIzaSyBvE-rD1FOEnRAz-jOOptWjtWpK9_VZo1Q",
-  "authDomain": "studio-7839027177-c8158.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "1068650241459"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };

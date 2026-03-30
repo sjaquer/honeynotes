@@ -10,7 +10,7 @@ import { es } from 'date-fns/locale';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { WaxSealIcon } from '@/components/icons/WaxSealIcon';
 import { useFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy, where, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, where, getDocs, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 import type { Letter, PaperColor, Stamp } from '@/lib/types';
 import { useDeleteLetter } from '@/hooks/use-delete-letter';
 import { useToast } from '@/hooks/use-toast';
@@ -97,6 +97,8 @@ const borderClasses: Record<string, string> = {
   lace: 'border-lace',
 };
 
+const PAGE_SIZE = 20;
+
 export default function InboxPage() {
   const { t, locale } = useTranslation();
   const { toast } = useToast();
@@ -111,28 +113,47 @@ export default function InboxPage() {
   // OPTIMIZED: Use manual state instead of real-time subscription
   const [letters, setLetters] = useState<Letter[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [lastVisibleDoc, setLastVisibleDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMore, setHasMore] = useState(false);
 
-  // Fetch letters function (single read, not subscription)
-  const fetchLetters = useCallback(async () => {
+  // Fetch letters with pagination (single read, not subscription)
+  const fetchLetters = useCallback(async (reset: boolean = true) => {
     if (!user) {
       setLetters(null);
+      setLastVisibleDoc(null);
+      setHasMore(false);
       return;
     }
 
-    setIsLoading(true);
+    if (reset) {
+      setIsLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
     setError(null);
 
     try {
       const filterField = viewMode === 'received' ? 'recipientId' : 'senderId';
-      const q = query(
-        collection(firestore, 'letters'),
+      const constraints = [
         where(filterField, '==', user.uid),
-        orderBy('createdAt', 'desc')
-      );
+        orderBy('createdAt', 'desc'),
+        limit(PAGE_SIZE),
+      ] as const;
 
-      console.log(`📬 Fetching ${viewMode} letters (single read)...`);
+      const q = !reset && lastVisibleDoc
+        ? query(
+            collection(firestore, 'letters'),
+            ...constraints,
+            startAfter(lastVisibleDoc),
+          )
+        : query(
+        collection(firestore, 'letters'),
+            ...constraints,
+          );
+
       const snapshot = await getDocs(q);
       
       const fetchedLetters: Letter[] = [];
@@ -140,21 +161,34 @@ export default function InboxPage() {
         fetchedLetters.push({ id: doc.id, ...doc.data() } as Letter);
       });
 
-      setLetters(fetchedLetters);
+      const nextLastVisible = snapshot.docs.length > 0
+        ? snapshot.docs[snapshot.docs.length - 1]
+        : null;
+
+      setLastVisibleDoc(nextLastVisible);
+      setHasMore(snapshot.docs.length === PAGE_SIZE);
+
+      setLetters((previous) => {
+        if (reset || !previous) return fetchedLetters;
+        return [...previous, ...fetchedLetters];
+      });
       setIsInitialLoad(false);
-      console.log(`✅ Loaded ${fetchedLetters.length} letters`);
     } catch (err: any) {
       console.error('Error fetching letters:', err);
       setError(err);
     } finally {
-      setIsLoading(false);
+      if (reset) {
+        setIsLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
-  }, [user, viewMode, firestore]);
+  }, [user, viewMode, firestore, lastVisibleDoc]);
 
   // Initial load and when user/viewMode changes
   useEffect(() => {
     if (user) {
-      fetchLetters();
+      fetchLetters(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid, viewMode]); // Only re-fetch when user or view mode actually changes
@@ -172,7 +206,7 @@ export default function InboxPage() {
     if (success) {
       toast({ title: t('inbox.letterDeleted'), description: t('inbox.letterDeletedDesc') });
       // Refresh letters after delete
-      fetchLetters();
+      fetchLetters(true);
     } else {
       toast({ variant: 'destructive', title: t('inbox.deleteError') });
     }
@@ -225,7 +259,7 @@ export default function InboxPage() {
             </p>
             <div className="flex gap-2">
               <button 
-                onClick={() => fetchLetters()} 
+                onClick={() => fetchLetters(true)} 
                 disabled={isLoading}
                 className={cn(
                   "rounded-xl border-2 border-dashed border-gray-300 p-2 text-gray-400 hover:border-primary hover:text-primary transition-all",
@@ -305,8 +339,9 @@ export default function InboxPage() {
           </div>
         )}
         {!isLoading && !isUserLoading && !error && user && letters && letters.length > 0 && (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {letters.map((letter) => (
+          <>
+            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {letters.map((letter) => (
               <li key={letter.id} className="group relative pt-4">
                  <div className="absolute left-1/2 top-0 z-20 h-6 w-16 -translate-x-1/2 rotate-[-2deg] rounded-sm bg-[#e3d5ca] opacity-90 shadow-sm after:absolute after:inset-0 after:bg-[url('https://www.transparenttextures.com/patterns/washi.png')] after:opacity-20 sm:h-7 sm:w-20"></div>
                  
@@ -393,8 +428,23 @@ export default function InboxPage() {
                   </div>
                 </Link>
               </li>
-            ))}
-          </ul>
+              ))}
+            </ul>
+
+            {hasMore && (
+              <div className="mt-6 flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => fetchLetters(false)}
+                  disabled={isLoadingMore}
+                  className="min-w-40"
+                >
+                  {isLoadingMore ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                  {isLoadingMore ? 'Cargando...' : 'Cargar mas'}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

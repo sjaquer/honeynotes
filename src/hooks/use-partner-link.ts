@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useFirebase, useUser } from '@/firebase';
-import { doc, setDoc, getDoc, query, collection, where, getDocs, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { generatePartnerCode, formatPartnerCode, cleanPartnerCode, isValidPartnerCode } from '@/lib/partner-code';
 
 export interface UserProfile {
@@ -35,13 +35,10 @@ export function usePartnerLink() {
       const userSnap = await getDoc(userRef);
       const userData = userSnap.data();
 
-      // Delete old code if exists (check if document exists first)
+      // Delete old code if it exists. deleteDoc is idempotent and does not require a read.
       if (userData?.partnerCode) {
         const oldCodeRef = doc(firestore, 'partnerCodes', userData.partnerCode);
-        const oldCodeSnap = await getDoc(oldCodeRef);
-        if (oldCodeSnap.exists()) {
-          await deleteDoc(oldCodeRef);
-        }
+        await deleteDoc(oldCodeRef);
       }
 
       // If regenerating, unlink partner and notify them
@@ -98,13 +95,10 @@ export function usePartnerLink() {
       const userSnap = await getDoc(userRef);
       const userData = userSnap.data();
 
-      // Delete from partnerCodes collection (check if exists first)
+      // Delete from partnerCodes collection. deleteDoc is idempotent and does not require a read.
       if (userData?.partnerCode) {
         const codeRef = doc(firestore, 'partnerCodes', userData.partnerCode);
-        const codeSnap = await getDoc(codeRef);
-        if (codeSnap.exists()) {
-          await deleteDoc(codeRef);
-        }
+        await deleteDoc(codeRef);
       }
 
       // If linked, notify partner
