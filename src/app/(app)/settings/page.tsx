@@ -40,6 +40,7 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [isPastingCode, setIsPastingCode] = useState(false);
   
   // Edit profile states
   const [isEditingName, setIsEditingName] = useState(false);
@@ -131,10 +132,27 @@ export default function SettingsPage() {
   };
 
   const handleLinkPartner = async () => {
-    const success = await linkWithPartner(partnerCodeInput);
+    const success = await linkWithPartner(formatPartnerInput(partnerCodeInput));
     if (success) {
       setPartnerCodeInput('');
       toast({ title: t('settingsPage.partner.linked'), description: t('settingsPage.partner.canSendLetters') });
+    }
+  };
+
+  const formatPartnerInput = (raw: string): string => {
+    const cleaned = raw.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 6);
+    return cleaned.length > 3 ? `${cleaned.slice(0, 3)}-${cleaned.slice(3)}` : cleaned;
+  };
+
+  const handlePastePartnerCode = async () => {
+    setIsPastingCode(true);
+    try {
+      const text = await navigator.clipboard.readText();
+      setPartnerCodeInput(formatPartnerInput(text));
+    } catch {
+      toast({ variant: 'destructive', title: 'No se pudo pegar el codigo' });
+    } finally {
+      setIsPastingCode(false);
     }
   };
 
@@ -218,7 +236,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-[#F0F4F8]">
+    <div className="paper-app-bg paper-noise flex flex-1 flex-col">
       {/* Partner Unlinked Alert Dialog */}
       <AlertDialog open={showPartnerUnlinkedAlert} onOpenChange={setShowPartnerUnlinkedAlert}>
         <AlertDialogContent>
@@ -299,7 +317,7 @@ export default function SettingsPage() {
         </AlertDialogContent>
       </AlertDialog>
       {/* Header */}
-      <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#F0F4F8]/95 p-6 backdrop-blur-sm lg:p-8">
+      <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[#FFF8F0]/90 p-6 backdrop-blur-sm lg:p-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-primary lg:text-4xl">{t('settingsPage.title')}</h1>
           <div className="rounded-full bg-white p-2 shadow-sm">
@@ -310,7 +328,7 @@ export default function SettingsPage() {
 
       <div className="flex-1 space-y-6 p-4 lg:p-8">
         {/* Profile Card */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="glass-paper rounded-2xl p-6">
           <div className="flex items-center gap-4">
             <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
               {user?.photoURL ? (
@@ -352,7 +370,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Partner Linking Card */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="glass-paper rounded-2xl p-6">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Heart className="size-5 text-primary" />
@@ -437,19 +455,25 @@ export default function SettingsPage() {
               </>
             ) : (
               // Not linked - show input for partner's code
-              <div className="space-y-2 pt-4 border-t">
+              <div className="space-y-2 pt-4 border-t border-primary/10">
                 <p className="text-sm text-gray-600">{t('settingsPage.partner.enterCode')}</p>
+                <p className="text-xs text-gray-500">Formato recomendado: ABC-123</p>
                 <div className="flex gap-2">
                   <Input
                     placeholder={t('settingsPage.partner.codePlaceholder')}
                     value={partnerCodeInput}
-                    onChange={(e) => setPartnerCodeInput(e.target.value.toUpperCase())}
+                    onChange={(e) => setPartnerCodeInput(formatPartnerInput(e.target.value))}
                     className="font-mono text-center text-lg tracking-widest"
                     maxLength={7}
                   />
-                  <Button onClick={handleLinkPartner} disabled={isLoading || !partnerCodeInput}>
+                  <Button onClick={handleLinkPartner} disabled={isLoading || partnerCodeInput.length < 7}>
                     <Link2 className="mr-2 size-4" />
                     {t('settingsPage.partner.link')}
+                  </Button>
+                </div>
+                <div className="flex justify-end">
+                  <Button type="button" variant="ghost" size="sm" onClick={handlePastePartnerCode} disabled={isPastingCode}>
+                    {isPastingCode ? 'Pegando...' : 'Pegar codigo'}
                   </Button>
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
@@ -459,10 +483,10 @@ export default function SettingsPage() {
         </div>
 
         {/* Promo Codes Card */}
-        <div className="rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-sm">
+        <div className="rounded-2xl bg-gradient-to-br from-rose-50/90 via-amber-50/90 to-orange-50/90 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <div className="rounded-xl bg-purple-100 p-2">
-              <Ticket className="size-5 text-purple-600" />
+            <div className="rounded-xl bg-rose-100 p-2">
+              <Ticket className="size-5 text-rose-700" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-800">Códigos Promocionales</h3>
@@ -481,7 +505,7 @@ export default function SettingsPage() {
             <Button 
               onClick={handleRedeemPromoCode} 
               disabled={isRedeeming || !promoCodeInput.trim()}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-rose-600 hover:bg-rose-700"
             >
               {isRedeeming ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -496,7 +520,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Notifications Card */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="glass-paper rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Bell className="size-5 text-primary" />

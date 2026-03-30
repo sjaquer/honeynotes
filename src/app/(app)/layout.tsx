@@ -35,8 +35,11 @@ export default function AppLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F0F4F8]">
-      <main className="flex-1 pb-28">{children}</main>
+    <div className="paper-app-bg paper-noise relative flex min-h-screen flex-col overflow-hidden">
+      <div className="pointer-events-none absolute -left-20 top-16 size-64 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 top-1/3 size-72 rounded-full bg-amber-200/40 blur-3xl" />
+
+      <main className="relative z-10 flex-1 pb-28">{children}</main>
       <BottomNav />
       
       {/* Partner Connection Onboarding */}

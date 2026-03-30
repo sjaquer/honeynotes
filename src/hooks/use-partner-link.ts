@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useFirebase, useUser } from '@/firebase';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { generatePartnerCode, formatPartnerCode, cleanPartnerCode, isValidPartnerCode } from '@/lib/partner-code';
 
 export interface UserProfile {
@@ -23,6 +23,15 @@ export function usePartnerLink() {
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const toUserFriendlyError = (fallback: string, e: unknown): string => {
+    if (e && typeof e === 'object' && 'code' in e) {
+      const code = String((e as { code: string }).code);
+      if (code.includes('permission-denied')) return 'No tienes permisos para realizar esta accion';
+      if (code.includes('unavailable')) return 'El servicio no esta disponible temporalmente';
+    }
+    return fallback;
+  };
 
   // Generate a new partner code for current user (and unlink if needed)
   const generateMyCode = async (forceRegenerate: boolean = false): Promise<string | null> => {
@@ -59,8 +68,22 @@ export function usePartnerLink() {
         });
       }
 
-      // Generate new code
-      const code = generatePartnerCode();
+      // Generate a unique code (collisions are rare but possible).
+      let code: string | null = null;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const candidate = generatePartnerCode();
+        const candidateRef = doc(firestore, 'partnerCodes', candidate);
+        const candidateSnap = await getDoc(candidateRef);
+        if (!candidateSnap.exists()) {
+          code = candidate;
+          break;
+        }
+      }
+
+      if (!code) {
+        setError('No pudimos generar un codigo unico. Intenta de nuevo.');
+        return null;
+      }
       
       await setDoc(userRef, {
         partnerCode: code,
@@ -77,7 +100,7 @@ export function usePartnerLink() {
       return code;
     } catch (e) {
       console.error('Error generating partner code:', e);
-      setError('No se pudo generar el código');
+      setError(toUserFriendlyError('No se pudo generar el codigo', e));
       return null;
     } finally {
       setIsLoading(false);
@@ -123,7 +146,7 @@ export function usePartnerLink() {
       return true;
     } catch (e) {
       console.error('Error deleting partner code:', e);
-      setError('No se pudo eliminar el código');
+      setError(toUserFriendlyError('No se pudo eliminar el codigo', e));
       return false;
     } finally {
       setIsLoading(false);
@@ -158,6 +181,10 @@ export function usePartnerLink() {
     setError(null);
 
     try {
+      const myRef = doc(firestore, 'users', user.uid);
+      const mySnap = await getDoc(myRef);
+      const myData = mySnap.data();
+
       // Find partner by code
       const codeRef = doc(firestore, 'partnerCodes', cleaned);
       const codeSnap = await getDoc(codeRef);
@@ -177,27 +204,47 @@ export function usePartnerLink() {
       // Get partner's profile
       const partnerRef = doc(firestore, 'users', partnerId);
       const partnerSnap = await getDoc(partnerRef);
+      if (!partnerSnap.exists()) {
+        setError('La cuenta asociada al codigo no existe');
+        return false;
+      }
+
       const partnerData = partnerSnap.data();
 
+      if (myData?.partnerId && myData.partnerId !== partnerId) {
+        setError('Primero desvinculate de tu pareja actual para conectar otra cuenta');
+        return false;
+      }
+
+      if (partnerData?.partnerId && partnerData.partnerId !== user.uid) {
+        setError('Esa persona ya esta vinculada con otra cuenta');
+        return false;
+      }
+
+      const batch = writeBatch(firestore);
+
       // Update current user's profile
-      const myRef = doc(firestore, 'users', user.uid);
-      await updateDoc(myRef, {
+      batch.set(myRef, {
         partnerId: partnerId,
         partnerName: partnerData?.displayName || 'Tu Amor',
+        partnerUnlinkedAt: null,
         updatedAt: serverTimestamp(),
-      });
+      }, { merge: true });
 
       // Update partner's profile
-      await updateDoc(partnerRef, {
+      batch.set(partnerRef, {
         partnerId: user.uid,
         partnerName: user.displayName || 'Tu Amor',
+        partnerUnlinkedAt: null,
         updatedAt: serverTimestamp(),
-      });
+      }, { merge: true });
+
+      await batch.commit();
 
       return true;
     } catch (e) {
       console.error('Error linking with partner:', e);
-      setError('No se pudo vincular con tu pareja');
+      setError(toUserFriendlyError('No se pudo vincular con tu pareja', e));
       return false;
     } finally {
       setIsLoading(false);
@@ -235,7 +282,7 @@ export function usePartnerLink() {
       return true;
     } catch (e) {
       console.error('Error unlinking partner:', e);
-      setError('No se pudo desvincular');
+      setError(toUserFriendlyError('No se pudo desvincular', e));
       return false;
     } finally {
       setIsLoading(false);

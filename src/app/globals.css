@@ -327,4 +327,26 @@
         0 0 12px rgba(255, 192, 203, 0.3);
     }
   }
+
+  .paper-app-bg {
+    background:
+      radial-gradient(1200px 400px at 10% -10%, rgba(220, 20, 60, 0.14), transparent 60%),
+      radial-gradient(900px 360px at 90% 0%, rgba(255, 215, 0, 0.2), transparent 60%),
+      linear-gradient(180deg, #fffdf8 0%, #fff7ef 42%, #f9f2ea 100%);
+  }
+
+  .paper-noise {
+    background-image:
+      radial-gradient(rgba(120, 80, 40, 0.05) 0.6px, transparent 0.6px),
+      radial-gradient(rgba(120, 80, 40, 0.03) 0.5px, transparent 0.5px);
+    background-size: 12px 12px, 8px 8px;
+    background-position: 0 0, 3px 4px;
+  }
+
+  .glass-paper {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 14px 40px -20px rgba(102, 33, 46, 0.35);
+  }
 }

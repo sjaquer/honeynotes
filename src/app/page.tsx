@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Heart, Mail, Lock, User, Eye, EyeOff, Loader2, Sparkles } from 'lucide-react';
 import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -96,7 +96,7 @@ export default function Home() {
 
   if (isUserLoading || user) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-secondary/30 text-center">
+      <div className="paper-app-bg paper-noise flex h-screen flex-col items-center justify-center text-center">
         <Loader2 className="size-12 animate-spin text-primary" />
         <p className="mt-4 font-body text-xl text-foreground/80">
           {t('auth.loading')}
@@ -106,23 +106,42 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-secondary/30 to-secondary/50 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo & Title */}
-        <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <Heart className="size-16 text-primary" fill="currentColor" />
-          <h1 className="font-display text-5xl font-bold text-primary">
+    <main className="paper-app-bg paper-noise relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+      <div className="pointer-events-none absolute -left-24 top-10 size-80 rounded-full bg-primary/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-28 bottom-0 size-96 rounded-full bg-amber-200/50 blur-3xl" />
+
+      <div className="relative z-10 grid w-full max-w-6xl gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <section className="hidden rounded-[2rem] border border-white/70 bg-white/45 p-10 shadow-[0_25px_80px_-35px_rgba(120,40,60,0.5)] backdrop-blur-md lg:block">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+            <Sparkles className="size-4" />
+            Tu rincon de cartas con estilo
+          </div>
+          <h1 className="font-display text-6xl leading-[1.05] text-primary">
             HoneyNotes
           </h1>
-          <p className="max-w-sm font-body text-base text-foreground/70">
-            {t('landing.description')}
+          <p className="mt-5 max-w-xl text-lg text-foreground/75">
+            Una experiencia de cartas romanticas mas elegante, suave y personal. Escribe con calma, conecta con tu pareja y guarda recuerdos bonitos.
           </p>
-        </div>
+          <div className="mt-10 grid max-w-xl grid-cols-2 gap-4 text-sm">
+            <div className="glass-paper rounded-2xl p-4">
+              <p className="font-semibold text-primary">Conexion sencilla</p>
+              <p className="mt-1 text-foreground/70">Codigo en formato claro y vinculacion guiada paso a paso.</p>
+            </div>
+            <div className="glass-paper rounded-2xl p-4">
+              <p className="font-semibold text-primary">Diseno con caracter</p>
+              <p className="mt-1 text-foreground/70">Estetica papel kawai con una capa mas profesional.</p>
+            </div>
+          </div>
+        </section>
 
-        {/* Auth Card */}
-        <div className="rounded-3xl bg-white/90 p-6 shadow-xl backdrop-blur-sm">
-          {/* Tab Switcher */}
-          <div className="mb-6 flex rounded-2xl bg-gray-100 p-1">
+        <section className="glass-paper mx-auto w-full max-w-md rounded-[2rem] p-6 sm:p-7">
+          <div className="mb-6 flex flex-col items-center gap-3 text-center lg:hidden">
+            <Heart className="size-12 text-primary" fill="currentColor" />
+            <h1 className="font-display text-5xl font-bold text-primary">HoneyNotes</h1>
+            <p className="max-w-sm text-sm text-foreground/70">{t('landing.description')}</p>
+          </div>
+
+          <div className="mb-6 flex rounded-2xl bg-white/70 p-1.5">
             <button
               type="button"
               onClick={() => setMode('login')}
@@ -149,7 +168,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'register' && (
               <div className="space-y-2">
@@ -236,7 +254,7 @@ export default function Home() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-14 w-full rounded-2xl bg-primary text-lg font-bold shadow-lg transition-transform hover:scale-[1.02]"
+              className="h-14 w-full rounded-2xl bg-primary text-lg font-bold shadow-lg transition-transform hover:scale-[1.01]"
             >
               {isSubmitting ? (
                 <Loader2 className="mr-2 size-5 animate-spin" />
@@ -248,7 +266,6 @@ export default function Home() {
             </Button>
           </form>
 
-          {/* Footer */}
           <p className="mt-6 text-center text-sm text-gray-500">
             {mode === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}{' '}
             <button
@@ -259,7 +276,7 @@ export default function Home() {
               {mode === 'login' ? t('auth.registerNow') : t('auth.loginNow')}
             </button>
           </p>
-        </div>
+        </section>
       </div>
     </main>
   );

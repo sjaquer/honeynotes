@@ -34,7 +34,7 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
   const { toast } = useToast();
   const { firestore } = useFirebase();
   const { user } = useUser();
-  const { generateMyCode, linkWithPartner, formatPartnerCode, isLoading } = usePartnerLink();
+  const { generateMyCode, linkWithPartner, formatPartnerCode, isLoading, error: partnerLinkError } = usePartnerLink();
   
   const [step, setStep] = useState(1);
   const [myCode, setMyCode] = useState<string | null>(null);
@@ -43,6 +43,12 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
   const [linkError, setLinkError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isPasting, setIsPasting] = useState(false);
+
+  const formatCodeInput = (raw: string): string => {
+    const cleaned = raw.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 6);
+    return cleaned.length > 3 ? `${cleaned.slice(0, 3)}-${cleaned.slice(3)}` : cleaned;
+  };
 
   const userRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -73,6 +79,12 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (partnerLinkError) {
+      setLinkError(partnerLinkError);
+    }
+  }, [partnerLinkError]);
+
   const handleClose = () => {
     onComplete?.();
     onClose?.();
@@ -98,7 +110,7 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
 
   const handleLinkPartner = async () => {
     setLinkError(null);
-    const success = await linkWithPartner(partnerCodeInput);
+    const success = await linkWithPartner(formatCodeInput(partnerCodeInput));
     if (success) {
       toast({ 
         title: '🎉 ¡Conectados!', 
@@ -107,6 +119,19 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
       handleClose();
     } else {
       setLinkError('Código inválido o expirado');
+    }
+  };
+
+  const handlePasteCode = async () => {
+    setIsPasting(true);
+    try {
+      const text = await navigator.clipboard.readText();
+      setPartnerCodeInput(formatCodeInput(text));
+      setLinkError(null);
+    } catch {
+      setLinkError('No se pudo leer el portapapeles. Pega el codigo manualmente.');
+    } finally {
+      setIsPasting(false);
     }
   };
 
@@ -144,7 +169,7 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
         <button 
           onClick={handleSkip}
           className="absolute right-4 top-4 z-10 p-2 rounded-full hover:bg-muted transition-colors active:scale-95"
-          aria-label="Cerrar"
+          aria-label="Omitir"
         >
           <X className="size-5 text-muted-foreground" />
         </button>
@@ -175,7 +200,10 @@ export function PartnerOnboarding({ onComplete, onSkip, isOpen = true, onClose }
               setPartnerCodeInput={setPartnerCodeInput}
               linkError={linkError}
               isLoading={isLoading}
+              isPasting={isPasting}
               onLink={handleLinkPartner}
+              onPaste={handlePasteCode}
+              formatCodeInput={formatCodeInput}
             />
           )}
         </div>
@@ -392,10 +420,13 @@ interface StepLinkPartnerProps {
   setPartnerCodeInput: (value: string) => void;
   linkError: string | null;
   isLoading: boolean;
+  isPasting: boolean;
   onLink: () => void;
+  onPaste: () => void;
+  formatCodeInput: (raw: string) => string;
 }
 
-function StepLinkPartner({ partnerCodeInput, setPartnerCodeInput, linkError, isLoading, onLink }: StepLinkPartnerProps) {
+function StepLinkPartner({ partnerCodeInput, setPartnerCodeInput, linkError, isLoading, isPasting, onLink, onPaste, formatCodeInput }: StepLinkPartnerProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="text-center space-y-3">
@@ -411,17 +442,16 @@ function StepLinkPartner({ partnerCodeInput, setPartnerCodeInput, linkError, isL
         <div className="space-y-2">
           <Input
             value={partnerCodeInput}
-            onChange={(e) => {
-              const value = e.target.value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-              if (value.length <= 6) {
-                const formatted = value.length > 3 ? `${value.slice(0, 3)}-${value.slice(3)}` : value;
-                setPartnerCodeInput(formatted);
-              }
-            }}
+            onChange={(e) => setPartnerCodeInput(formatCodeInput(e.target.value))}
             placeholder="ABC-123"
             className="text-center text-2xl font-mono tracking-widest h-16"
             maxLength={7}
           />
+          <div className="flex justify-end">
+            <Button type="button" variant="ghost" size="sm" onClick={onPaste} disabled={isPasting}>
+              {isPasting ? 'Pegando...' : 'Pegar codigo'}
+            </Button>
+          </div>
           {linkError && (
             <p className="text-sm text-destructive text-center animate-in fade-in slide-in-from-top-2 duration-200">
               {linkError}
