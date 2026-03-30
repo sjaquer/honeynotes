@@ -116,6 +116,48 @@ service cloud.firestore {
     }
 
     /**
+     * User-scoped relationship memories
+     * /users/{userId}/relationshipMemories/{memoryId}
+     */
+    match /users/{userId}/relationshipMemories/{memoryId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    /**
+     * User-scoped relationship copilot sessions
+     * /users/{userId}/relationshipCopilotSessions/{sessionId}
+     */
+    match /users/{userId}/relationshipCopilotSessions/{sessionId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    /**
+     * User-scoped anniversary capsules
+     * /users/{userId}/anniversaryCapsules/{capsuleId}
+     */
+    match /users/{userId}/anniversaryCapsules/{capsuleId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    /**
+     * Shared co-writing letters
+     * /sharedLetters/{sharedLetterId}
+     */
+    match /sharedLetters/{sharedLetterId} {
+      allow create: if isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.participants is list
+        && request.resource.data.participants.size() == 2
+        && request.auth.uid in request.resource.data.participants;
+
+      allow read, delete: if isSignedIn() && request.auth.uid in resource.data.participants;
+
+      allow update: if isSignedIn()
+        && request.auth.uid in resource.data.participants
+        && request.resource.data.participants == resource.data.participants;
+    }
+
+    /**
      * Partner invitation codes
      * /partnerCodes/{code}
      * 
@@ -167,6 +209,20 @@ service cloud.firestore {
       // Only owner can read and write their task progress
       allow read: if isOwner(userId);
       allow write: if isOwner(userId);
+    }
+
+    /**
+     * Relationship AI Check-ins
+     * /relationshipCheckins/{checkinId}
+     *
+     * Fields: userId, myFeeling, whatINeed, gratitude, stressLevel, partnerName?, aiResult, createdAt
+     */
+    match /relationshipCheckins/{checkinId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
     }
 
     /**

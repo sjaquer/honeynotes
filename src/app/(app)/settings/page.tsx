@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Settings, Link2, Unlink, Copy, Check, LogOut, User, Heart, Bell, BellOff, RefreshCw, Trash2, Edit2, Save, X, AlertTriangle, Gift, Ticket, Loader2, HelpCircle } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useFirebase, useUser, useAuth, useDoc, useMemoFirebase } from '@/firebase';
@@ -346,6 +347,19 @@ export default function SettingsPage() {
       </header>
 
       <div className="flex-1 space-y-6 p-4 lg:p-8">
+        <Link href="/relationship-ai" className="glass-paper block rounded-2xl border border-primary/20 p-5 transition hover:shadow-md">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">Nuevo</p>
+              <h2 className="text-lg font-semibold text-primary">Coach IA de pareja</h2>
+              <p className="mt-1 text-sm text-gray-600">Check-in semanal, sugerencias de respuesta y plan de conexión emocional.</p>
+            </div>
+            <div className="rounded-full bg-primary/10 p-3">
+              <Heart className="size-5 text-primary" />
+            </div>
+          </div>
+        </Link>
+
         {/* Profile Card */}
         <div className="glass-paper rounded-2xl p-6">
           <div className="flex items-center gap-4">

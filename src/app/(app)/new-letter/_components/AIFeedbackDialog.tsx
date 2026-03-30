@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { getLetterFeedback, type LetterFeedbackOutput } from '@/ai/flows/letter-content-feedback';
+import {
+  rewriteLetterByIntent,
+  suggestReplyOptions,
+  translateEmotionalStyle,
+  type RewriteLetterOutput,
+  type SuggestReplyOutput,
+  type TranslateEmotionalStyleOutput,
+} from '@/ai/flows/relationship-ai-assistant';
 import { BeeIcon } from '@/components/icons/BeeIcon';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Sparkles, Heart, BrainCircuit, Feather, Wand2, BookOpen, CheckCircle2, AlertCircle, Lightbulb, Star, Smile, MessageCircle } from 'lucide-react';
@@ -27,6 +35,7 @@ import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 
 type FeedbackStyle = 'Friendly' | 'Rational' | 'Poetic' | 'Playful' | 'Wise';
 
@@ -41,9 +50,11 @@ const personalityConfig: Record<FeedbackStyle, { icon: React.ReactNode; color: s
 export function AIFeedbackDialog({
   letterContent,
   onFeedbackReceived,
+  onApplySuggestion,
 }: {
   letterContent: string;
   onFeedbackReceived: () => void;
+  onApplySuggestion?: (nextContent: string) => void;
 }) {
   const { t, locale } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -53,6 +64,21 @@ export function AIFeedbackDialog({
   const [error, setError] = useState<string | null>(null);
   const [includeGrammar, setIncludeGrammar] = useState(true);
   const [includeFormatting, setIncludeFormatting] = useState(false);
+  const [rewriteIntent, setRewriteIntent] = useState<'reconcile' | 'gratitude' | 'celebration' | 'apology' | 'support'>('gratitude');
+  const [relationshipContext, setRelationshipContext] = useState('');
+  const [rewriteResult, setRewriteResult] = useState<RewriteLetterOutput | null>(null);
+  const [replySource, setReplySource] = useState('');
+  const [replyTone, setReplyTone] = useState<'warm' | 'romantic' | 'calm' | 'playful'>('warm');
+  const [replyResult, setReplyResult] = useState<SuggestReplyOutput | null>(null);
+  const [fromStyle, setFromStyle] = useState<'direct' | 'sensitive' | 'warm' | 'romantic' | 'calm'>('direct');
+  const [toStyle, setToStyle] = useState<'direct' | 'sensitive' | 'warm' | 'romantic' | 'calm'>('sensitive');
+  const [styleResult, setStyleResult] = useState<TranslateEmotionalStyleOutput | null>(null);
+
+  useEffect(() => {
+    if (!replySource.trim() && letterContent.trim()) {
+      setReplySource(letterContent);
+    }
+  }, [letterContent, replySource]);
 
   const handleGetFeedback = async () => {
     if (!letterContent.trim()) {
@@ -75,6 +101,83 @@ export function AIFeedbackDialog({
     } catch (e) {
       console.error(e);
       setError(t('aiFeedback.error.generic'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRewrite = async () => {
+    if (!letterContent.trim()) {
+      setError('Escribe algo antes de reescribir.');
+      return;
+    }
+    setError(null);
+    setIsLoading(true);
+    setRewriteResult(null);
+    try {
+      const result = await rewriteLetterByIntent({
+        originalLetter: letterContent,
+        intent: rewriteIntent,
+        relationshipContext,
+        language: locale,
+      });
+      setRewriteResult(result);
+      onFeedbackReceived();
+    } catch (e) {
+      console.error(e);
+      setError('No se pudo reescribir la carta. Intenta de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSuggestReply = async () => {
+    if (!replySource.trim()) {
+      setError('Pega un mensaje para generar respuestas.');
+      return;
+    }
+    setError(null);
+    setIsLoading(true);
+    setReplyResult(null);
+    try {
+      const result = await suggestReplyOptions({
+        receivedMessage: replySource,
+        preferredTone: replyTone,
+        relationshipContext,
+        language: locale,
+      });
+      setReplyResult(result);
+      onFeedbackReceived();
+    } catch (e) {
+      console.error(e);
+      setError('No se pudieron generar respuestas sugeridas.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTranslateStyle = async () => {
+    if (!letterContent.trim()) {
+      setError('Escribe algo antes de traducir el estilo emocional.');
+      return;
+    }
+
+    setError(null);
+    setIsLoading(true);
+    setStyleResult(null);
+    try {
+      const result = await translateEmotionalStyle({
+        text: letterContent,
+        fromStyle,
+        toStyle,
+        preserveMeaning: true,
+        language: locale,
+      });
+      setStyleResult(result);
+      onFeedbackReceived();
+    } catch (e) {
+      console.error(e);
+      setError('No se pudo traducir el estilo emocional.');
     } finally {
       setIsLoading(false);
     }
@@ -316,6 +419,139 @@ export function AIFeedbackDialog({
                 <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-xs text-blue-700">
                   <Sparkles className="size-4 shrink-0" />
                   <span>Esta función es <strong>opcional</strong>. Puedes enviar tu carta sin usarla.</span>
+                </div>
+
+                {/* Rewrite by intent */}
+                <div className="space-y-3 rounded-xl border-2 border-rose-100 bg-rose-50/50 p-4">
+                  <h4 className="text-sm font-semibold text-rose-700">Reescribir por intención</h4>
+                  <Select onValueChange={(v: 'reconcile' | 'gratitude' | 'celebration' | 'apology' | 'support') => setRewriteIntent(v)} defaultValue={rewriteIntent}>
+                    <SelectTrigger className="h-10 rounded-xl bg-white">
+                      <SelectValue placeholder="Selecciona intención" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="reconcile">Reconciliar</SelectItem>
+                      <SelectItem value="gratitude">Agradecer</SelectItem>
+                      <SelectItem value="celebration">Celebrar</SelectItem>
+                      <SelectItem value="apology">Pedir perdón</SelectItem>
+                      <SelectItem value="support">Dar apoyo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleRewrite} disabled={isLoading || !letterContent.trim()} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Sparkles className="mr-2 size-4" />}
+                    Reescribir con IA
+                  </Button>
+                  {rewriteResult && (
+                    <div className="space-y-2 rounded-lg border border-rose-200 bg-white p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-rose-600">Resultado</p>
+                      <p className="whitespace-pre-wrap text-sm text-gray-700">{rewriteResult.rewrittenLetter}</p>
+                      <p className="text-xs text-gray-500">{rewriteResult.emotionalShift}</p>
+                      {rewriteResult.cautionNote && <p className="text-xs text-amber-700">{rewriteResult.cautionNote}</p>}
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => onApplySuggestion?.(rewriteResult.rewrittenLetter)}
+                      >
+                        Aplicar en mi carta
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Emotional style translation */}
+                <div className="space-y-3 rounded-xl border-2 border-fuchsia-100 bg-fuchsia-50/50 p-4">
+                  <h4 className="text-sm font-semibold text-fuchsia-700">Traducción emocional entre estilos</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select onValueChange={(v: 'direct' | 'sensitive' | 'warm' | 'romantic' | 'calm') => setFromStyle(v)} defaultValue={fromStyle}>
+                      <SelectTrigger className="h-10 rounded-xl bg-white">
+                        <SelectValue placeholder="Desde" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="direct">Directo</SelectItem>
+                        <SelectItem value="sensitive">Sensible</SelectItem>
+                        <SelectItem value="warm">Cálido</SelectItem>
+                        <SelectItem value="romantic">Romántico</SelectItem>
+                        <SelectItem value="calm">Calmo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select onValueChange={(v: 'direct' | 'sensitive' | 'warm' | 'romantic' | 'calm') => setToStyle(v)} defaultValue={toStyle}>
+                      <SelectTrigger className="h-10 rounded-xl bg-white">
+                        <SelectValue placeholder="Hacia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="direct">Directo</SelectItem>
+                        <SelectItem value="sensitive">Sensible</SelectItem>
+                        <SelectItem value="warm">Cálido</SelectItem>
+                        <SelectItem value="romantic">Romántico</SelectItem>
+                        <SelectItem value="calm">Calmo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleTranslateStyle} disabled={isLoading || !letterContent.trim()} className="w-full" variant="outline">
+                    {isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Sparkles className="mr-2 size-4" />}
+                    Traducir estilo
+                  </Button>
+                  {styleResult && (
+                    <div className="space-y-2 rounded-lg border border-fuchsia-200 bg-white p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">Versión adaptada</p>
+                      <p className="whitespace-pre-wrap text-sm text-gray-700">{styleResult.translatedText}</p>
+                      <p className="text-xs text-gray-500">{styleResult.changeNotes}</p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => onApplySuggestion?.(styleResult.translatedText)}
+                      >
+                        Aplicar en mi carta
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Suggested replies */}
+                <div className="space-y-3 rounded-xl border-2 border-amber-100 bg-amber-50/60 p-4">
+                  <h4 className="text-sm font-semibold text-amber-700">Sugerir respuesta</h4>
+                  <Textarea
+                    value={replySource}
+                    onChange={(e) => setReplySource(e.target.value)}
+                    placeholder="Pega aqui el mensaje recibido para que la IA sugiera respuestas"
+                    className="min-h-24 rounded-xl bg-white"
+                  />
+                  <Select onValueChange={(v: 'warm' | 'romantic' | 'calm' | 'playful') => setReplyTone(v)} defaultValue={replyTone}>
+                    <SelectTrigger className="h-10 rounded-xl bg-white">
+                      <SelectValue placeholder="Tono de respuesta" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="warm">Calido</SelectItem>
+                      <SelectItem value="romantic">Romantico</SelectItem>
+                      <SelectItem value="calm">Calmo</SelectItem>
+                      <SelectItem value="playful">Jugueton</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Textarea
+                    value={relationshipContext}
+                    onChange={(e) => setRelationshipContext(e.target.value)}
+                    placeholder="Contexto opcional: distancia, discusion reciente, aniversario, etc."
+                    className="min-h-16 rounded-xl bg-white text-sm"
+                  />
+                  <Button onClick={handleSuggestReply} disabled={isLoading || !replySource.trim()} className="w-full" variant="secondary">
+                    {isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <MessageCircle className="mr-2 size-4" />}
+                    Generar 3 respuestas
+                  </Button>
+                  {replyResult && (
+                    <div className="space-y-2 rounded-lg border border-amber-200 bg-white p-3">
+                      {replyResult.replies.map((reply, index) => (
+                        <button
+                          key={`${reply.label}-${index}`}
+                          type="button"
+                          className="w-full rounded-lg border border-amber-100 p-2 text-left transition hover:bg-amber-50"
+                          onClick={() => onApplySuggestion?.(reply.text)}
+                        >
+                          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">{reply.label}</p>
+                          <p className="text-sm text-gray-700">{reply.text}</p>
+                        </button>
+                      ))}
+                      <p className="text-xs text-gray-500">{replyResult.recommendation}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

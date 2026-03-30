@@ -27,6 +27,17 @@ import { SHOP_ITEMS } from '@/lib/shop-data';
 import { createLetterDocument, sanitizeLetterConfig } from '@/lib/letter-validation';
 import { ensureUserProfile } from '@/lib/user-profile';
 import Link from 'next/link';
+import { detectLetterToneRisk, type DetectToneRiskOutput } from '@/ai/flows/relationship-ai-assistant';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // Key for localStorage draft
 const DRAFT_STORAGE_KEY = 'honeynotes_letter_draft';
@@ -225,6 +236,8 @@ export function LetterEditor() {
   const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState('paper');
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [toneRisk, setToneRisk] = useState<DetectToneRiskOutput | null>(null);
+  const [showToneDialog, setShowToneDialog] = useState(false);
 
   // Check if border is animated (premium)
   const isAnimatedBorder = ANIMATED_BORDERS.includes(borderStyle);
@@ -315,7 +328,7 @@ export function LetterEditor() {
     }
   }, [user, userProfile, senderName, recipientName, t]);
 
-  const handleSend = async () => {
+  const handleSend = async (skipToneCheck: boolean = false) => {
     if (!user) {
         toast({ variant: 'destructive', title: 'Error', description: 'Debes iniciar sesión para enviar una carta.' });
         return;
@@ -327,6 +340,26 @@ export function LetterEditor() {
         description: t('letterEditor.toast.emptyLetterDesc'),
       });
       return;
+    }
+
+    if (!skipToneCheck) {
+      setIsSending(true);
+      try {
+        const risk = await detectLetterToneRisk({
+          letterContent: content,
+          language: 'es',
+        });
+
+        if (risk.riskLevel === 'medium' || risk.riskLevel === 'high') {
+          setToneRisk(risk);
+          setShowToneDialog(true);
+          return;
+        }
+      } catch (e) {
+        console.error('Tone check failed:', e);
+      } finally {
+        setIsSending(false);
+      }
     }
 
     setIsSending(true);
@@ -430,6 +463,58 @@ export function LetterEditor() {
 
   return (
     <div className="flex h-full flex-col gap-2 p-3 pb-28 lg:flex-row lg:gap-8 lg:p-8 lg:pb-8">
+      <AlertDialog open={showToneDialog} onOpenChange={setShowToneDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Antes de enviar: posible riesgo de tono</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toneRisk?.summary || 'Detectamos que algunas frases pueden sonar frías o ambiguas.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {toneRisk?.riskyPhrases?.length ? (
+            <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Frases a revisar</p>
+              <ul className="space-y-1">
+                {toneRisk.riskyPhrases.map((phrase, index) => (
+                  <li key={`${phrase}-${index}`} className="text-sm text-gray-700">- {phrase}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {toneRisk?.saferAlternative ? (
+            <div className="space-y-2 rounded-lg border border-green-200 bg-green-50 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-green-700">Alternativa sugerida</p>
+              <p className="whitespace-pre-wrap text-sm text-gray-700">{toneRisk.saferAlternative}</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setContent(toneRisk.saferAlternative);
+                  setShowToneDialog(false);
+                  toast({ title: 'Sugerencia aplicada', description: 'Se reemplazó el texto por una versión más empática.' });
+                }}
+              >
+                Usar alternativa y seguir editando
+              </Button>
+            </div>
+          ) : null}
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Seguir editando</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowToneDialog(false);
+                handleSend(true);
+              }}
+            >
+              Enviar de todas formas
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* LEFT: Canvas */}
       <div className="glass-paper relative flex h-[40vh] shrink-0 flex-col rounded-2xl p-1 lg:h-auto lg:flex-1 lg:rounded-3xl">
         {/* AI Bee - Floating Button over Canvas */}
@@ -437,6 +522,7 @@ export function LetterEditor() {
           <AIFeedbackDialog
             letterContent={content}
             onFeedbackReceived={() => setHasAskedBee(true)}
+            onApplySuggestion={(nextContent) => setContent(nextContent)}
           />
         </div>
 
@@ -719,7 +805,7 @@ export function LetterEditor() {
 
         {/* Send Button */}
         <Button
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={isSending}
           className="group h-14 w-full shrink-0 overflow-hidden rounded-2xl border-b-4 border-r-4 border-red-900 bg-primary text-lg font-bold text-white shadow-xl transition-all hover:translate-y-1 hover:border-b-0 hover:border-r-0 hover:shadow-none disabled:opacity-50 lg:h-16 lg:rounded-[2rem] lg:text-xl"
         >
