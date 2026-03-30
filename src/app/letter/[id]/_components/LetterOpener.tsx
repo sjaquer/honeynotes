@@ -10,6 +10,8 @@ import { format } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
+import { LetterAIAssistant } from './LetterAIAssistant';
+import { QuickReplyComposer } from './QuickReplyComposer';
 
 const paperColorClasses: Record<string, string> = {
   cream: 'bg-[#FFFDF5]',
@@ -100,6 +102,8 @@ const stampIcons: Record<string, React.ReactNode> = {
 
 export function LetterOpener({ letter }: { letter: LetterUI }) {
   const [isOpened, setIsOpened] = useState(false);
+  const [showComposer, setShowComposer] = useState(false);
+  const [replyDraft, setReplyDraft] = useState<string>('');
   const { t, locale } = useTranslation();
 
   const getTranslatedName = (name: string) => {
@@ -128,101 +132,152 @@ export function LetterOpener({ letter }: { letter: LetterUI }) {
 
   if (isOpened) {
       return (
-          <div className="paper-app-bg paper-noise flex min-h-screen flex-col animate-in fade-in duration-500">
-              <div className="sticky top-0 z-20 bg-[#FFF8F0]/90 p-2.5 backdrop-blur-sm sm:p-4">
-                                    <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2">
-                                        <Link href="/inbox" className="glass-paper inline-flex touch-manipulation items-center gap-2 rounded-full px-3 py-1.5 transition-all hover:shadow-md active:scale-95 sm:px-4 sm:py-2">
-                                                <ArrowLeft className="size-4 text-gray-600 sm:size-5" />
-                                                <span className="text-xs font-medium text-gray-700 sm:text-sm">Volver al buzon</span>
-                                        </Link>
+          <div className="paper-app-bg paper-noise flex min-h-screen flex-col animate-in fade-in duration-500 lg:flex-row lg:gap-6 lg:p-4">
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col">
+                <div className="sticky top-0 z-20 bg-[#FFF8F0]/90 p-2.5 backdrop-blur-sm sm:p-4">
+                  <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2">
+                    <Link href="/inbox" className="glass-paper inline-flex touch-manipulation items-center gap-2 rounded-full px-3 py-1.5 transition-all hover:shadow-md active:scale-95 sm:px-4 sm:py-2">
+                      <ArrowLeft className="size-4 text-gray-600 sm:size-5" />
+                      <span className="text-xs font-medium text-gray-700 sm:text-sm">Volver</span>
+                    </Link>
 
-                                        <Link href="/new-letter" className="inline-flex touch-manipulation items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-crimson-soft transition-all hover:shadow-crimson-hover sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
-                                            <Send className="size-4" />
-                                            Responder
-                                        </Link>
-                                    </div>
-              </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setShowComposer(true)}
+                        className="inline-flex touch-manipulation items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-crimson-soft transition-all hover:shadow-crimson-hover sm:gap-2 sm:px-4 sm:py-2 sm:text-sm active:scale-95"
+                      >
+                        <Send className="size-4" />
+                        <span className="hidden sm:inline">Responder</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="flex-1 p-2.5 pb-24 sm:p-4 lg:p-8 lg:pb-32">
-                                    <div className="mx-auto max-w-5xl">
-                                            <div className="mb-5 grid gap-3 sm:grid-cols-3">
-                                                <div className="glass-paper rounded-2xl p-3">
-                                                    <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                                                        <UserRound className="size-3.5" /> De
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-primary sm:text-base">{getTranslatedName(letter.senderName)}</p>
-                                                </div>
-                                                <div className="glass-paper rounded-2xl p-3">
-                                                    <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                                                        <UserRound className="size-3.5" /> Para
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-primary sm:text-base">{getTranslatedName(letter.recipientName)}</p>
-                                                </div>
-                                                <div className="glass-paper rounded-2xl p-3">
-                                                    <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                                                        <CalendarDays className="size-3.5" /> Fecha
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-gray-700 sm:text-base">{format(new Date(letter.createdAt), 'd MMMM yyyy', { locale: locale === 'es' ? es : undefined })}</p>
-                                                </div>
-                                            </div>
+                <div className="flex-1 p-2.5 pb-20 sm:p-4 lg:p-6">
+                  <div className="mx-auto max-w-5xl">
+                    {/* Metadata cards */}
+                    <div className="mb-5 grid gap-3 sm:grid-cols-3">
+                      <div className="glass-paper rounded-2xl p-3">
+                        <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          <UserRound className="size-3.5" /> De
+                        </p>
+                        <p className="text-sm font-semibold text-primary sm:text-base">{getTranslatedName(letter.senderName)}</p>
+                      </div>
+                      <div className="glass-paper rounded-2xl p-3">
+                        <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          <UserRound className="size-3.5" /> Para
+                        </p>
+                        <p className="text-sm font-semibold text-primary sm:text-base">{getTranslatedName(letter.recipientName)}</p>
+                      </div>
+                      <div className="glass-paper rounded-2xl p-3">
+                        <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          <CalendarDays className="size-3.5" /> Fecha
+                        </p>
+                        <p className="text-sm font-semibold text-gray-700 sm:text-base">{format(new Date(letter.createdAt), 'd MMMM yyyy', { locale: locale === 'es' ? es : undefined })}</p>
+                      </div>
+                    </div>
 
-                      <div className={cn(
-                          "relative overflow-hidden rounded-xl shadow-2xl sm:rounded-lg",
-                          borderClasses[letter.config.borderStyle || 'simple'],
-                          paperColorClasses[letter.config.paperColor],
-                          isAnimatedBorder && "animated"
-                      )}>
-                          <div className="absolute left-0 right-0 top-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
-                          <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
+                    {/* Letter Content */}
+                    <div className={cn(
+                        "relative overflow-hidden rounded-xl shadow-2xl sm:rounded-lg",
+                        borderClasses[letter.config.borderStyle || 'simple'],
+                        paperColorClasses[letter.config.paperColor],
+                        isAnimatedBorder && "animated"
+                    )}>
+                      <div className="absolute left-0 right-0 top-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
+                      <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-primary/30 via-transparent to-primary/30 sm:h-3"></div>
 
-                          <div className="p-4 sm:p-8 lg:p-12">
-                              {/* Header with stamp, date, and names */}
-                              <div className="mb-6 border-b border-dashed border-gray-300 pb-4 sm:mb-8 sm:pb-6">
-                                  <div className="flex items-start justify-between gap-3">
-                                      <div className="flex-1 space-y-1.5">
-                                          <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary sm:text-xs">
-                                              Carta abierta
-                                          </div>
-                                          <div className="text-sm text-gray-600 sm:text-base">
-                                              Un mensaje personal para ti
-                                          </div>
-                                      </div>
-                                      
-                                      <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-full bg-white/80 text-primary shadow-inner sm:size-16">
-                                          {stampIcons[letter.config.stamp]}
-                                      </div>
-                                  </div>
-
-                                  {/* Title if exists */}
-                                  {letter.title && (
-                                      <div className="mt-4 sm:mt-6">
-                                          <h1 className={cn(
-                                              "text-center text-2xl font-bold text-primary sm:text-3xl lg:text-4xl",
-                                              getFontClass()
-                                          )}>
-                                              {letter.title}
-                                          </h1>
-                                      </div>
-                                  )}
+                      <div className="p-4 sm:p-8 lg:p-12">
+                        {/* Header with stamp, date, and names */}
+                        <div className="mb-6 border-b border-dashed border-gray-300 pb-4 sm:mb-8 sm:pb-6">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 space-y-1.5">
+                              <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary sm:text-xs">
+                                Carta abierta
                               </div>
+                              <div className="text-sm text-gray-600 sm:text-base">
+                                Un mensaje personal para ti
+                              </div>
+                            </div>
+                            
+                            <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-full bg-white/80 text-primary shadow-inner sm:size-16">
+                              {stampIcons[letter.config.stamp]}
+                            </div>
+                          </div>
 
-                              {/* Letter content */}
-                              <div className={cn(
-                                  "min-h-[28vh] break-words whitespace-pre-wrap text-gray-800 transition-all sm:min-h-[40vh]",
-                                  getAdaptiveFontSize(),
+                          {/* Title if exists */}
+                          {letter.title && (
+                            <div className="mt-4 sm:mt-6">
+                              <h1 className={cn(
+                                  "text-center text-2xl font-bold text-primary sm:text-3xl lg:text-4xl",
                                   getFontClass()
                               )}>
-                                  {letter.content}
-                              </div>
+                                {letter.title}
+                              </h1>
+                            </div>
+                          )}
+                        </div>
 
-                              <div className="mt-8 flex items-center justify-center gap-2 border-t border-dashed border-gray-300 pt-4 sm:mt-12 sm:pt-6">
-                                  <Sparkles className="size-4 text-primary/70" />
-                                  <span className="text-xs text-gray-500 sm:text-sm">Escrito con HoneyNotes</span>
-                              </div>
-                          </div>
+                        {/* Letter content */}
+                        <div className={cn(
+                            "min-h-[28vh] break-words whitespace-pre-wrap text-gray-800 transition-all sm:min-h-[40vh]",
+                            getAdaptiveFontSize(),
+                            getFontClass()
+                        )}>
+                          {letter.content}
+                        </div>
+
+                        <div className="mt-8 flex items-center justify-center gap-2 border-t border-dashed border-gray-300 pt-4 sm:mt-12 sm:pt-6">
+                          <Sparkles className="size-4 text-primary/70" />
+                          <span className="text-xs text-gray-500 sm:text-sm">Escrito con HoneyNotes</span>
+                        </div>
                       </div>
+                    </div>
                   </div>
+                </div>
               </div>
+
+              {/* AI Assistant Panel - Desktop sticky right, Mobile hidden by default */}
+              <div className="hidden lg:flex lg:w-96 lg:flex-col sticky top-4 h-[calc(100vh-2rem)] lg:max-h-[calc(100vh-2rem)]">
+                <LetterAIAssistant 
+                  letter={letter}
+                  onReplySelect={(text) => {
+                    setReplyDraft(text);
+                    setShowComposer(true);
+                  }}
+                />
+              </div>
+
+              {/* Mobile AI - Floating button (hidden on desktop) */}
+              <div className="lg:hidden fixed bottom-24 right-4 z-40 w-80 max-h-96">
+                <LetterAIAssistant 
+                  letter={letter}
+                  onReplySelect={(text) => {
+                    setReplyDraft(text);
+                    setShowComposer(true);
+                  }}
+                />
+              </div>
+
+              {/* Quick Reply Composer */}
+              <QuickReplyComposer
+                recipientName={getTranslatedName(letter.senderName)}
+                recipientId={letter.senderId}
+                letterId={letter.id}
+                initialDraft={replyDraft}
+                isOpen={showComposer}
+                onOpenChange={(open) => {
+                  setShowComposer(open);
+                  if (!open) {
+                    setReplyDraft('');
+                  }
+                }}
+                onSuccess={() => {
+                  setShowComposer(false);
+                  setReplyDraft('');
+                }}
+              />
           </div>
       );
   }
