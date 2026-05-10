@@ -46,7 +46,7 @@ export async function ensureUserProfile(
     }
 
     // Profile doesn't exist, create it
-    console.log('Creating user profile for:', user.uid);
+
     const newProfile = {
       displayName: user.displayName || 'Usuario',
       email: user.email || undefined,

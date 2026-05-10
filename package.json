@@ -1,7 +1,8 @@
 {
-  "name": "nextn",
-  "version": "0.1.0",
-  "private": true,
+  "name": "honeynotes",
+  "version": "1.5.0",
+  "private": false,
+  "description": "Un refugio digital para parejas que buscan trascender la inmediatez de la mensajería instantánea.",
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",

@@ -3,7 +3,7 @@
 > **Un refugio digital para parejas que buscan trascender la inmediatez de la mensajería instantánea.**
 
 ![Version](https://img.shields.io/badge/version-1.5-crimson)
-![Status](https://img.shields.io/badge/status-MVP-yellow)
+![Status](https://img.shields.io/badge/status-v1.5.0-success)
 ![Next.js](https://img.shields.io/badge/Next.js-15.5-black)
 ![Firebase](https://img.shields.io/badge/Firebase-11.9-orange)
 
@@ -119,27 +119,35 @@ El diseño se basa en el concepto de **Papelería Digital de Lujo**:
 - [x] Editor de texto con personalización completa
 - [x] Integración con IA (Abeja Guía)
 - [x] Diseño responsive móvil-first
-- [ ] Almacenamiento en Firebase
+- [x] Almacenamiento en Firebase
 
 ### Fase 2: Conectividad
 
-- [ ] Firebase Auth (Google + Email)
-- [ ] Vinculación de parejas por código
+- [x] Firebase Auth (Google + Email)
+- [x] Vinculación de parejas por código
 - [ ] Notificaciones Push (FCM)
 
 ### Fase 3: Economía
 
-- [ ] Tienda de la Colmena funcional
+- [x] Tienda de la Colmena funcional (Básico)
 - [ ] Sistema de tareas semanales automatizado
 - [ ] Jalea Real (moneda premium)
 
 ## 📜 Licencia
 
-Este proyecto es privado y propietario. Todos los derechos reservados.
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+## 🤝 Contribuciones
+
+¡Las contribuciones son bienvenidas! Si tienes ideas para mejorar HoneyNotes, no dudes en:
+
+1. Abrir un **Issue** para discutir cambios.
+2. Hacer un **Fork** del repositorio.
+3. Crear una **Pull Request** con tus mejoras.
 
 ## 💛 Creado con amor
 
-HoneyNotes es un proyecto personal creado para mejorar la comunicación en las relaciones. Si tienes sugerencias o quieres contribuir, ¡contáctanos!
+HoneyNotes es un proyecto personal creado para mejorar la comunicación en las relaciones.
 
 ---
 
